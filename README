@@ -1,0 +1,7 @@
+ed is an 8-bit-clean, POSIX-compliant line editor.
+
+The file `POSIX' describes extensions to and deviations from the POSIX
+standard.
+
+For a description of the ed algorithm, see Kernighan and Plauger's book
+"Software Tools in Pascal," Addison-Wesley, 1981.

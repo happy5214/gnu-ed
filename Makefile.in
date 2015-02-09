@@ -1,0 +1,169 @@
+# Makefile for GNU ed.
+# Copyright (C) 1993 Free Software Foundation, Inc.
+# Andrew Moore <alm@netcom.com>, 1993.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+testdir = $(srcdir)/test
+VPATH = @srcdir@
+
+LN_S = @LN_S@
+CC = @CC@
+AR = ar
+RANLIB = @RANLIB@
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+MAKEINFO = makeinfo
+TEXI2DVI = texi2dvi
+
+CFLAGS = -g
+DEFS = @DEFS@
+LDFLAGS = -g
+LIBS = @LIBS@
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+infodir = $(prefix)/info
+mandir = $(prefix)/man/man1
+manext = .1
+
+CPPFLAGS = -I. -I$(srcdir) $(DEFS)
+
+.c.o:
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+
+HEADERS = ed.h
+SOURCES = buf.c glbl.c io.c main.c re.c signal.c sub.c undo.c version.c
+OBJECTS = buf.o glbl.o io.o main.o re.o signal.o sub.o undo.o version.o
+
+LIBHDRS = pathmax.h getopt.h regex.h
+LIBSRCS = alloca.c error.c getopt.c getopt1.c regex.c xmalloc.c
+LIBOBJS = @ALLOCA@ getopt.o getopt1.o regex.o @LIBOBJS@
+
+DISTFILES = $(HEADERS) $(LIBHDRS) $(LIBSRCS) $(SOURCES) ChangeLog COPYING \
+INSTALL Makefile.in NEWS POSIX README TODO THANKS \
+configure configure.in ed.1 ed.info ed.texinfo mkinstalldirs \
+install.sh texinfo.tex
+
+all: ed
+
+ed: $(OBJECTS) libed.a
+	$(CC) $(LDFLAGS) -o ed $(OBJECTS) libed.a $(LIBS)
+
+buf.o: ed.h regex.h
+ed.o: ed.h regex.h
+main.o: ed.h regex.h getopt.h pathmax.h
+re.o: ed.h regex.h
+signal.o: ed.h regex.h
+
+libed.a: $(LIBOBJS)
+	rm -f libed.a
+	$(AR) cru libed.a $(LIBOBJS)
+	$(RANLIB) libed.a
+
+getopt.o getopt1.o: getopt.h
+regex.o: regex.h
+
+check: ed
+	objdir=`pwd`; \
+	  cd $(testdir); \
+	  make check objdir=$${objdir}
+
+info: ed.info
+
+ed.info: ed.texinfo
+	$(MAKEINFO) -I$(srcdir) --no-split ed.texinfo
+
+dvi: ed.dvi
+
+ed.dvi: ed.texinfo
+	$(TEXI2DVI) $(srcdir)/ed.texinfo
+
+install: ed ed.info installdirs
+	$(INSTALL_PROGRAM) ed $(bindir)/$(binprefix)ed
+	rm -f $(bindir)/$(binprefix)red
+	cd $(bindir); \
+	  $(LN_S) $(binprefix)ed $(binprefix)red
+	$(INSTALL_DATA) $(srcdir)/ed.info $(infodir)/$(binprefix)ed.info
+	$(INSTALL_DATA) $(srcdir)/ed.1 $(mandir)/$(binprefix)ed$(manext)
+	rm -f $(mandir)/$(binprefix)red$(manext)
+	cd $(mandir); \
+	  $(LN_S) $(binprefix)ed$(manext) $(binprefix)red$(manext)
+
+# Make sure all installation directories, e.g. $(bindir) actually exist by
+# making them if necessary.
+installdirs:
+	$(SHELL) $(srcdir)/mkinstalldirs $(bindir) $(infodir) $(mandir)
+
+uninstall: all
+	rm -f $(bindir)/$(binprefix)ed $(bindir)/$(binprefix)red
+	rm -f $(infodir)/$(binprefix)ed.info
+	rm -f $(mandir)/$(binprefix)ed.1 $(mandir)/$(binprefix)red.1
+
+tags: $(HEADERS) $(SOURCES)
+	ctags $(HEADERS) $(SOURCES)
+
+TAGS: $(HEADERS) $(SOURCES)
+	etags -t $(HEADERS) $(SOURCES)
+
+texclean:
+	rm -f *.aux *.cp *.dvi *.fn *.ky *.log *.pg *.toc *.tp *.vr
+
+mostlyclean: texclean
+	rm -f *~ *.tmp core [Ee]rrs
+
+clean: mostlyclean
+	rm -f ed *.o *.a ed.0
+	cd $(testdir); \
+	  make clean
+
+distclean: clean
+	rm -f tags TAGS Makefile config.status
+
+realclean: distclean
+	rm -f ed.info
+
+dist: $(DISTFILES)
+	echo > .fname \
+	  ed-`sed -n -e '/version_/s/[^0-9.]*\([0-9.]*\).*/\1/p' version.c`
+	rm -rf `cat .fname`
+	mkdir `cat .fname`
+	chmod 777 `cat .fname`
+	ln $(DISTFILES) `cat .fname`
+#	cp -rl test `cat .fname`
+# Replacement for previous cp.
+	mkdir `cat .fname`/test
+	find test -type f -exec ln {} `cat .fname`/test \;
+# End of replacement.
+	chmod -R a+r `cat .fname`
+	chmod 777 `cat .fname`/test
+	tar chozf `cat .fname`.tar.gz `cat .fname`
+	rm -rf `cat .fname` .fname
+
+Makefile: Makefile.in config.status
+	$(SHELL) config.status
+config.status: configure
+	$(SHELL) config.status --recheck
+configure: configure.in
+	cd $(srcdir); autoconf
+
+# Tell versions [3.59,3.63) of GNU make not to export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

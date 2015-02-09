@@ -1,0 +1,15 @@
+GNU ed THANKS file - last updated on 21 December 1993.
+Copyright (C) 1993 Andrew Moore, Talke Studio
+All Rights Reserved
+Andrew Moore <alm@netcom.com>, 1993.
+
+GNU ed originated with the editor algorithm from Brian W. Kernighan & P.
+J. Plauger's wonderful book "Software Tools in Pascal," Addison-Wesley,
+1981.  GNU ed has also benefitted from the contributions of numerous people
+who reported problems, suggested various improvements or submitted actual
+code.  Among these are the following.
+
+Matt Bishop		???
+Theo Deraadt		deraadt@newt.fsa.ca
+Francois Pinard		pinard@iro.umontreal.ca
+Rodney Ruddock		rodney@snowhite.cis.uoguelph.ca

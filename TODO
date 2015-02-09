@@ -1,0 +1,11 @@
+TODO file for GNU ed - last revised Mon Mar 21 21:32:53 PST 1994
+Copyright (C) 1993 Andrew Moore, Talke Studio
+Andrew Moore <alm@netcom.com>, 1993.
+
+These are more or less in decreasing order of priority.
+
+* Speed up file i/o
+
+* DejaGNUify the test suite
+
+* Add an ex-style filter command (avoiding an intermediate file)
