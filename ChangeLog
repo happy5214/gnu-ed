@@ -1,3 +1,19 @@
+2006-11-11  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 0.3 released.
+	* Fixed symlink vulnerability using standard function `tmpfile'.
+	* Fixed signal handling for SIGINT.
+	* Fixed the `c' and `i' commands with address 0.
+	* The pause mode has been removed.
+	* Added new options `--loose-exit-status' and `--verbose'.
+	* Added new argument parser that replaces `getopt_long'.
+	* `configure' and `Makefile.in' have been replaced.
+	* Removed recursive make for testsuite.
+	* Created directory `doc'.
+	* Removed all pre ISO C89 code.
+	* Removed all global variables.
+	* Added to the manual the changes from Andrew and some mine.
+
 Sun Jun 26 22:21:59 1994    (alm@worm.talke.org)
 
 	* GNU ed 0.2 release.

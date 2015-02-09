@@ -1,17 +1,20 @@
-GNU ed NEWS - User visible changes.
-Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-All Rights Reserved
+Changes in version 0.3:
 
-GNU Version 0.2 - Fri Nov  4 17:02:50 PST 1994 by Andrew Moore
-and Francois Pinard
+The symlink vulnerability has been fixed using the "tmpfile" function.
 
-  * Added yank (`y') and paste (`x') commands (extensions to the POSIX
-    standard).
+The signal handling for SIGINT has been fixed.
 
-  * Errors in piped scripts do not force ed to exit (traditional
-    behavior).
+The `c' and `i' commands now work with address 0 as they should.
 
-GNU Version 0.1 - Fri Jan 21 17:04:04 PST 1994 by Andrew Moore
-and Francois Pinard
+The pause mode has been removed.
 
-For prior history down to 1993, see at the end of the ChangeLog.
+Two new command line options "--loose-exit-status" and "--verbose" have
+been added.
+
+A new argument parser that replaces "getopt_long" has been added.
+
+`configure' and `Makefile.in' have been replaced.
+
+The manual has been updated.
+
+An extensive code cleanup has been done.

@@ -1,6 +1,14 @@
+GNU ed is maintained by Antonio Diaz Diaz.
+
+Before version 0.3, GNU ed and its man page were written and maintained
+(sic) by Andrew L. Moore.
+
+The original info page and GNUification of the code were graciously
+provided by François Pinard.
+
+-------------------
+
 GNU ed THANKS file - last updated on 15 November 1994.
-Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-All Rights Reserved
 
 GNU ed originated with the editor algorithm from Brian W. Kernighan &
 P. J. Plauger's wonderful book "Software Tools in Pascal," Addison-Wesley,

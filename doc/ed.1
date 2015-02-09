@@ -1,10 +1,10 @@
-.TH ED 1 "10 November 1994"
+.TH ED 1 "5 October 2006"
 .SH NAME
 ed, red \- text editor
 .SH SYNOPSIS
-ed [-] [-Gs] [-p \fIstring\fR] [\fIfile\fR]
+ed [-GVhs] [-p \fIstring\fR] [\fIfile\fR]
 .LP
-red [-] [-Gs] [-p \fIstring\fR] [\fIfile\fR]
+red [-GVhs] [-p \fIstring\fR] [\fIfile\fR]
 .SH DESCRIPTION
 .B ed
 is a line-oriented text editor.
@@ -151,11 +151,10 @@ affected by a command.
 A line address is
 constructed from one of the bases in the list below, optionally followed
 by a numeric offset.  The offset may include any combination
-of digits, operators (i.e.,
-.IR + ,
-.I -
+of digits, operators (i.e.
+.IR +
 and
-.IR ^ )
+.IR - )
 and whitespace.
 Addresses are read from left to right, and their values are computed
 relative to the current address.
@@ -205,19 +204,15 @@ where
 is a number in the range
 .I [0,$].
 
-.HP
--
 .TP 8
-^
+-
 The previous line.
 This is equivalent to
 .I -1
 and may be repeated with cumulative effect.
 
-.HP
--\fIn\fR
 .TP 8
-^\fIn\fR
+-\fIn\fR
 The
 .IR n th
 previous line, where
@@ -233,9 +228,9 @@ This is equivalent to
 and may be repeated with cumulative effect.
 
 .HP
-+\fIn\fR
-.TP 8
 whitespace \fIn\fR
+.TP 8
++\fIn\fR
 The
 .IR n th
 next line, where
@@ -247,10 +242,8 @@ followed by a number
 is interpreted as
 .IR +n .
 
-.HP
-,
 .TP 8
-%
+,
 The first through last lines in the buffer.  This is equivalent to
 the address range
 .I 1,$.
@@ -992,11 +985,7 @@ Prints the addressed line, and sets the current address to
 that line.
 
 .SH FILES
-.TP 20
-/tmp/ed.*
-Buffer file
-.PD 0
-.TP 20
+.TP 8
 ed.hup
 The file to which
 .B ed

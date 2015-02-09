@@ -1,4 +1,4 @@
-1i
+0i
 hello world
 .
 2i
