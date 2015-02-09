@@ -1,18 +1,28 @@
-/*  Arg_parser - A POSIX/GNU command line argument parser. C version
-    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
+    Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
+    This library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
+    This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this library.  If not, see <http://www.gnu.org/licenses/>.
+
+    As a special exception, you may use this file as part of a free
+    software library without restriction.  Specifically, if other files
+    instantiate templates or use macros or inline functions from this
+    file, or you compile this file and link it with other files to
+    produce an executable, this file does not by itself cause the
+    resulting executable to be covered by the GNU General Public
+    License.  This exception does not however invalidate any other
+    reasons why the executable file might be covered by the GNU General
+    Public License.
 */
 
 #include <stdlib.h>
@@ -22,7 +32,7 @@
 
 
 /* assure at least a minimum size for buffer `buf' */
-void * ap_resize_buffer( void *buf, const int min_size )
+static void * ap_resize_buffer( void * buf, const int min_size )
   {
   if( buf ) buf = realloc( buf, min_size );
   else buf = malloc( min_size );
@@ -30,13 +40,14 @@ void * ap_resize_buffer( void *buf, const int min_size )
   }
 
 
-char push_back_record( Arg_parser * ap, const int code, const char * argument )
+static char push_back_record( struct Arg_parser * const ap,
+                              const int code, const char * const argument )
   {
   const int len = strlen( argument );
-  ap_Record *p;
-  void * tmp = ap_resize_buffer( ap->data, ( ap->data_size + 1 ) * sizeof( ap_Record ) );
+  struct ap_Record *p;
+  void * tmp = ap_resize_buffer( ap->data, ( ap->data_size + 1 ) * sizeof (struct ap_Record) );
   if( !tmp ) return 0;
-  ap->data = (ap_Record *)tmp;
+  ap->data = (struct ap_Record *)tmp;
   p = &(ap->data[ap->data_size]);
   p->code = code;
   p->argument = 0;
@@ -49,7 +60,7 @@ char push_back_record( Arg_parser * ap, const int code, const char * argument )
   }
 
 
-char add_error( Arg_parser * ap, const char * msg )
+static char add_error( struct Arg_parser * const ap, const char * const msg )
   {
   const int len = strlen( msg );
   void * tmp = ap_resize_buffer( ap->error, ap->error_size + len + 1 );
@@ -61,7 +72,7 @@ char add_error( Arg_parser * ap, const char * msg )
   }
 
 
-void free_data( Arg_parser * ap )
+static void free_data( struct Arg_parser * const ap )
   {
   int i;
   for( i = 0; i < ap->data_size; ++i ) free( ap->data[i].argument );
@@ -70,9 +81,10 @@ void free_data( Arg_parser * ap )
   }
 
 
-char parse_long_option( Arg_parser * ap,
-                        const char * const opt, const char * const arg,
-                        const ap_Option options[], int * argindp )
+static char parse_long_option( struct Arg_parser * const ap,
+                               const char * const opt, const char * const arg,
+                               const struct ap_Option options[],
+                               int * const argindp )
   {
   unsigned int len;
   int index = -1;
@@ -81,16 +93,16 @@ char parse_long_option( Arg_parser * ap,
 
   for( len = 0; opt[len+2] && opt[len+2] != '='; ++len ) ;
 
-  // Test all long options for either exact match or abbreviated matches.
+  /* Test all long options for either exact match or abbreviated matches. */
   for( i = 0; options[i].code != 0; ++i )
     if( options[i].name && !strncmp( options[i].name, &opt[2], len ) )
       {
-      if( strlen( options[i].name ) == len )	// Exact match found
+      if( strlen( options[i].name ) == len )	/* Exact match found */
         { index = i; exact = 1; break; }
-      else if( index < 0 ) index = i;		// First nonexact match found
+      else if( index < 0 ) index = i;		/* First nonexact match found */
       else if( options[index].code != options[i].code ||
                options[index].has_arg != options[i].has_arg )
-        ambig = 1;			// Second or later nonexact match found
+        ambig = 1;			/* Second or later nonexact match found */
       }
 
   if( ambig && !exact )
@@ -100,7 +112,7 @@ char parse_long_option( Arg_parser * ap,
     return 1;
     }
 
-  if( index < 0 )		// nothing found
+  if( index < 0 )		/* nothing found */
     {
     add_error( ap, "unrecognized option `" ); add_error( ap, opt );
     add_error( ap, "'" );
@@ -109,7 +121,7 @@ char parse_long_option( Arg_parser * ap,
 
   ++*argindp;
 
-  if( opt[len+2] )		// `--<long_option>=<argument>' syntax
+  if( opt[len+2] )		/* `--<long_option>=<argument>' syntax */
     {
     if( options[index].has_arg == ap_no )
       {
@@ -142,18 +154,20 @@ char parse_long_option( Arg_parser * ap,
   }
 
 
-char parse_short_option( Arg_parser * ap,
-                         const char * const opt, const char * const arg,
-                         const ap_Option options[], int * argindp )
+static char parse_short_option( struct Arg_parser * const ap,
+                                const char * const opt, const char * const arg,
+                                const struct ap_Option options[],
+                                int * const argindp )
   {
-  int cind = 1;			// character index in opt
+  int cind = 1;			/* character index in opt */
 
   while( cind > 0 )
     {
     int index = -1;
     int i;
     const unsigned char code = opt[cind];
-    const char code_str[2] = { code, 0 };
+    char code_str[2];
+    code_str[0] = code; code_str[1] = 0;
 
     if( code != 0 )
       for( i = 0; options[i].code; ++i )
@@ -166,7 +180,7 @@ char parse_short_option( Arg_parser * ap,
       return 1;
       }
 
-    if( opt[++cind] == 0 ) { ++*argindp; cind = 0; }	// opt finished
+    if( opt[++cind] == 0 ) { ++*argindp; cind = 0; }	/* opt finished */
 
     if( options[index].has_arg != ap_no && cind > 0 && opt[cind] )
       {
@@ -190,12 +204,13 @@ char parse_short_option( Arg_parser * ap,
   }
 
 
-char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
-              const ap_Option options[], const char in_order )
+char ap_init( struct Arg_parser * const ap,
+              const int argc, const char * const argv[],
+              const struct ap_Option options[], const char in_order )
   {
-  const char ** non_options = 0;	// skipped non-options
-  int non_options_size = 0;		// number of skipped non-options
-  int argind = 1;			// index in argv
+  const char ** non_options = 0;	/* skipped non-options */
+  int non_options_size = 0;		/* number of skipped non-options */
+  int argind = 1;			/* index in argv */
   int i;
 
   ap->data = 0;
@@ -209,13 +224,13 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
     const unsigned char ch1 = argv[argind][0];
     const unsigned char ch2 = ( ch1 ? argv[argind][1] : 0 );
 
-    if( ch1 == '-' && ch2 )		// we found an option
+    if( ch1 == '-' && ch2 )		/* we found an option */
       {
       const char * const opt = argv[argind];
       const char * const arg = (argind + 1 < argc) ? argv[argind+1] : 0;
       if( ch2 == '-' )
         {
-        if( !argv[argind][2] ) { ++argind; break; }	// we found "--"
+        if( !argv[argind][2] ) { ++argind; break; }	/* we found "--" */
         else if( !parse_long_option( ap, opt, arg, options, &argind ) ) return 0;
         }
       else if( !parse_short_option( ap, opt, arg, options, &argind ) ) return 0;
@@ -226,7 +241,7 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
       if( !in_order )
         {
         void * tmp = ap_resize_buffer( non_options,
-                       ( non_options_size + 1 ) * sizeof( *non_options ) );
+                       ( non_options_size + 1 ) * sizeof *non_options );
         if( !tmp ) return 0;
         non_options = (const char **)tmp;
         non_options[non_options_size++] = argv[argind++];
@@ -247,7 +262,7 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
   }
 
 
-void ap_free( Arg_parser * ap )
+void ap_free( struct Arg_parser * const ap )
   {
   free_data( ap );
   if( ap->error ) { free( ap->error ); ap->error = 0; }
@@ -255,20 +270,22 @@ void ap_free( Arg_parser * ap )
   }
 
 
-const char * ap_error( const Arg_parser * ap ) { return ap->error; }
+const char * ap_error( const struct Arg_parser * const ap )
+  { return ap->error; }
 
 
-int ap_arguments( const Arg_parser * ap ) { return ap->data_size; }
+int ap_arguments( const struct Arg_parser * const ap )
+  { return ap->data_size; }
 
 
-int ap_code( const Arg_parser * ap, const int i )
+int ap_code( const struct Arg_parser * const ap, const int i )
   {
   if( i >= 0 && i < ap_arguments( ap ) ) return ap->data[i].code;
   else return 0;
   }
 
 
-const char * ap_argument( const Arg_parser * ap, const int i )
+const char * ap_argument( const struct Arg_parser * const ap, const int i )
   {
   if( i >= 0 && i < ap_arguments( ap ) ) return ap->data[i].argument;
   else return "";

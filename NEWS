@@ -1,12 +1,15 @@
-Changes in version 1.4:
+Changes in version 1.5:
 
-The undo command has been fixed to restore the modified status of the
-buffer being edited.
+The "a", "c" and "i" commands have been fixed. (When used in a global
+command list, the commands following them in the list were ignored).
 
-A race condition with user interrupt has been fixed in
-search_and_replace.
+The "e" command has been fixed. (It quitted when invoked a second time
+with a modified buffer).
 
-The functions resize_line_buffer and resize_undo_buffer have been added
-to definitively fix the aliasing warnings.
+The new option "--restricted" has been added.
 
-Some minor corrections have been made to the manual.
+"red" has been converted to a script invoking "ed --restricted".
+
+Description of ed in the manual has been changed.
+
+Obsolete posix tests have been removed from testsuite.

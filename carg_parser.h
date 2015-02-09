@@ -1,18 +1,28 @@
-/*  Arg_parser - A POSIX/GNU command line argument parser. C version
-    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
+    Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
+    This library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
+    This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this library.  If not, see <http://www.gnu.org/licenses/>.
+
+    As a special exception, you may use this file as part of a free
+    software library without restriction.  Specifically, if other files
+    instantiate templates or use macros or inline functions from this
+    file, or you compile this file and link it with other files to
+    produce an executable, this file does not by itself cause the
+    resulting executable to be covered by the GNU General Public
+    License.  This exception does not however invalidate any other
+    reasons why the executable file might be covered by the GNU General
+    Public License.
 */
 
 /*  Arg_parser reads the arguments in `argv' and creates a number of
@@ -39,47 +49,53 @@
     (without whitespace), or `--<long_option>=<argument>'.
 */
 
-typedef enum { ap_no, ap_yes, ap_maybe } ap_Has_arg;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct
+enum ap_Has_arg { ap_no, ap_yes, ap_maybe };
+
+struct ap_Option
   {
-  int code;			// Short option letter or code ( code != 0 )
-  const char * name;		// Long option name (maybe null)
-  ap_Has_arg has_arg;
-  }
-ap_Option;
+  int code;			/* Short option letter or code ( code != 0 ) */
+  const char * name;		/* Long option name (maybe null) */
+  enum ap_Has_arg has_arg;
+  };
 
 
-typedef struct
+struct ap_Record
   {
   int code;
   char * argument;
-  }
-ap_Record;
+  };
 
 
-typedef struct
+struct Arg_parser
   {
-  ap_Record * data;
+  struct ap_Record * data;
   char * error;
   int data_size;
   int error_size;
-  }
-Arg_parser;
+  };
 
 
-char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
-              const ap_Option options[], const char in_order );
+char ap_init( struct Arg_parser * const ap,
+              const int argc, const char * const argv[],
+              const struct ap_Option options[], const char in_order );
 
-void ap_free( Arg_parser * ap );
+void ap_free( struct Arg_parser * const ap );
 
-const char * ap_error( const Arg_parser * ap );
+const char * ap_error( const struct Arg_parser * const ap );
 
-    // The number of arguments parsed (may be different from argc)
-int ap_arguments( const Arg_parser * ap );
+    /* The number of arguments parsed (may be different from argc) */
+int ap_arguments( const struct Arg_parser * const ap );
 
-    // If ap_code( i ) is 0, ap_argument( i ) is a non-option.
-    // Else ap_argument( i ) is the option's argument (or empty).
-int ap_code( const Arg_parser * ap, const int i );
+    /* If ap_code( i ) is 0, ap_argument( i ) is a non-option.
+       Else ap_argument( i ) is the option's argument (or empty). */
+int ap_code( const struct Arg_parser * const ap, const int i );
 
-const char * ap_argument( const Arg_parser * ap, const int i );
+const char * ap_argument( const struct Arg_parser * const ap, const int i );
+
+#ifdef __cplusplus
+}
+#endif

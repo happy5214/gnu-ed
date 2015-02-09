@@ -5,8 +5,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 10 July 2009
-@set VERSION 1.4
+@set UPDATED 30 August 2010
+@set VERSION 1.5
 
 @dircategory Basics
 @direntry
@@ -14,7 +14,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 2006, 2007, 2008, 2009
+Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -33,7 +33,9 @@ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 @insertcopying
 @end titlepage
 
+@ifnothtml
 @contents
+@end ifnothtml
 
 @ifnottex
 @node Top
@@ -42,11 +44,13 @@ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 
 @sp 1
-GNU ed is an 8-bit clean, more or less POSIX-compliant implementation of
-the standard Unix line editor. These days, full-screen editors have
-rendered @command{ed} mostly of historical interest. Nonetheless, it
-appeals to a handful of aging programmers who still believe that ``Small
-is Beautiful''.
+GNU ed is a line-oriented text editor. It is used to create, display,
+modify and otherwise manipulate text files, both interactively and via
+shell scripts. A restricted version of ed, red, can only edit files in
+the current directory and cannot execute shell commands. Ed is the
+"standard" text editor in the sense that it is the original editor for
+Unix, and thus widely available. For most purposes, however, it is
+superseded by full-screen editors such as GNU Emacs or GNU Moe.
 @end ifnottex
 
 @menu
@@ -329,9 +333,6 @@ When @command{ed} opens a file, the current line is initially set to the
 last line of that file. Similarly, the move command @samp{m} sets the
 current line to the last line moved.
 
-In summary:
-
-Structurally,
 Related programs or routines are @command{vi (1)}, @command{sed (1)},
 @command{regex (3)},  @command{sh (1)}. Relevant documents
 are:
@@ -384,6 +385,11 @@ when @command{ed} is invoked as the editor for crontab.
 @itemx -p @var{string}
 Specifies a command prompt. This may be toggled on and off with the
 @samp{P} command.
+
+@item --restricted
+@itemx -r
+Run in restricted mode. This mode disables edition of files out of the
+current directory and execution of shell commands.
 
 @item --quiet
 @itemx --silent
@@ -931,17 +937,17 @@ the printed line.
 @chapter Limitations
 
 If the terminal hangs up, @command{ed} attempts to write the buffer to
-file @file{ed.hup}.
+file @file{ed.hup} or, if this fails, to @file{$HOME/ed.hup}.
 
 @command{ed} processes @var{file} arguments for backslash escapes, i.e.,
-in a filename, any characters preceded by a backslash (@samp{\}) are
+in a filename, any character preceded by a backslash (@samp{\}) is
 interpreted literally.
 
 If a text (non-binary) file is not terminated by a newline character,
 then @command{ed} appends one on reading/writing it. In the case of a
 binary file, @command{ed} does not append a newline on reading/writing.
 
-Per line overhead: 4 @code{int}s.
+Per line overhead: 2 @code{pointer}s, 1 @code{long int}, and 1 @code{int}.
 
 
 @node Diagnostics

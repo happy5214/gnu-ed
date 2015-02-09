@@ -1,7 +1,7 @@
 /* global.c: global command routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ void clear_active_list( void )
 
 
 /* return the next global-active line node */
-const line_t *next_active_node( void )
+const line_t * next_active_node( void )
   {
   while( active_ptr < active_len && !active_list[active_ptr] )
     ++active_ptr;
@@ -53,36 +53,34 @@ const line_t *next_active_node( void )
 
 
 /* add a line node to the global-active list */
-char set_active_node( const line_t *lp )
+bool set_active_node( const line_t * const lp )
   {
   disable_interrupts();
   if( !resize_line_buffer( &active_list, &active_size,
-                           ( active_len + 1 ) * sizeof( line_t ** ) ) )
+                           ( active_len + 1 ) * sizeof (line_t **) ) )
     {
     show_strerror( 0, errno ); set_error_msg( "Memory exhausted" );
     enable_interrupts();
-    return 0;
+    return false;
     }
   enable_interrupts();
   active_list[active_len++] = lp;
-  return 1;
+  return true;
   }
 
 
 /* remove a range of lines from the global-active list */
-void unset_active_nodes( const line_t *np, const line_t *mp )
+void unset_active_nodes( const line_t * bp, const line_t * const ep )
   {
-  const line_t *lp = np;
-
-  while( lp != mp )
+  while( bp != ep )
     {
     int i;
     for( i = 0; i < active_len; ++i )
       {
       if( ++active_ndx >= active_len ) active_ndx = 0;
-      if( active_list[active_ndx] == lp )
+      if( active_list[active_ndx] == bp )
         { active_list[active_ndx] = 0; break; }
       }
-    lp = lp->q_forw;
+    bp = bp->q_forw;
     }
   }

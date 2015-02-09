@@ -3,4 +3,7 @@ g/./s/$/\
 hello world
 g/hello /s/lo/p!/\
 a\
-order
+order\
+.\
+i\
+caos

@@ -1,3 +1,25 @@
+2010-08-30  Antonio Diaz Diaz  <ant_diaz@teleline.es>
+
+	* Version 1.5 released.
+	* buffer.c (append_lines): Fixed `a', `c' and `i' commands.
+	  (When used in a global command list, the commands following
+	  them in the list were ignored).
+	* main_loop.c (exec_command): Fixed `e' command. (It quitted
+	  when invoked a second time with a modified buffer).
+	* main.c: Added new option `--restricted'.
+	* `red' has been converted to a script invoking `ed --restricted'.
+	* Description of ed in the manual has been changed.
+	* testsuite: Modified some tests and removed obsolete posix tests.
+	* main_loop.c: `ibufp' variable made local to main_loop.
+	* Defined type bool to make clear which functions and variables
+	  are Boolean.
+	* Added `const' to all pointer declarations accepting it.
+	* regex.c (replace_matching_text): Make se_max an enum.
+	* signal.c: Include termios.h
+	* Converted C99 style comments "//" to C89 style comments "/* */".
+	* ed.texinfo: Fixed an erratum.
+	* Changed copyright holder from Andrew, Antonio to the FSF.
+
 2009-07-10  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.4 released.
@@ -137,10 +159,9 @@ Dec 1993  François Pinard  <pinard@icule>
 	* GNUified ed.
 
 
-Copyright (C) 1993 François Pinard
-Copyright (C) 1994 Andrew Moore
-Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+Free Software Foundation, Inc.
 
 This file is a collection of facts, and thus it is not copyrightable,
-but just in case, I give you unlimited permission to copy, distribute
-and modify it.
+but just in case, you have unlimited permission to copy, distribute and
+modify it.

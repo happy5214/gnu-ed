@@ -1,17 +1,17 @@
 #! /bin/sh
 # configure script for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+# Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 #
 # This configure script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 #
-# Date of this version: 2009-07-10
+# Date of this version: 2010-08-30
 
-invocation_name=$0
 args=
 no_create=
+pkgname=ed
+pkgversion=1.5
 progname=ed
-progversion=1.4
 srctrigger=ed.h
 
 # clear some things potentially inherited from environment.
@@ -27,14 +27,12 @@ mandir='$(datadir)/man'
 sysconfdir='$(prefix)/etc'
 program_prefix=
 CC=
-CXX=
 CPPFLAGS=
 CFLAGS='-Wall -W -O2'
-CXXFLAGS='-Wall -W -O2'
 LDFLAGS=
 
 # Loop over all args
-while [ x"$1" != x ] ; do
+while [ -n "$1" ] ; do
 
 	# Get the first arg, and shuffle
 	option=$1
@@ -66,15 +64,13 @@ while [ x"$1" != x ] ; do
 		echo "  --sysconfdir=DIR      read-only single-machine data directory [${sysconfdir}]"
 		echo "  --program-prefix=NAME install program and documentation prefixed with NAME"
 		echo "  CC=COMPILER           C compiler to use [gcc]"
-		echo "  CXX=COMPILER          C++ compiler to use [g++]"
 		echo "  CPPFLAGS=OPTIONS      command line options for the preprocessor [${CPPFLAGS}]"
 		echo "  CFLAGS=OPTIONS        command line options for the C compiler [${CFLAGS}]"
-		echo "  CXXFLAGS=OPTIONS      command line options for the C++ compiler [${CXXFLAGS}]"
 		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
 		echo
 		exit 0 ;;
 	--version | --ve* | -V)
-		echo "Configure script for GNU ${progname} version ${progversion}"
+		echo "Configure script for GNU ${pkgname} version ${pkgversion}"
 		exit 0 ;;
 	--srcdir* | --sr*)
 		srcdir=`echo ${optarg} | sed -e 's,/$,,'` ;;
@@ -86,7 +82,7 @@ while [ x"$1" != x ] ; do
 		bindir=`echo ${optarg} | sed -e 's,/$,,'` ;;
 	--datadir* | --da*)
 		datadir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--infodir* | --in*)
+	--infodir* | --inf*)
 		infodir=`echo ${optarg} | sed -e 's,/$,,'` ;;
 	--mandir* | --ma*)
 		mandir=`echo ${optarg} | sed -e 's,/$,,'` ;;
@@ -98,10 +94,8 @@ while [ x"$1" != x ] ; do
 		no_create=yes ;;
 
 	CC=*)       CC=${optarg} ;;
-	CXX=*)      CXX=${optarg} ;;
 	CPPFLAGS=*) CPPFLAGS=${optarg} ;;
 	CFLAGS=*)   CFLAGS=${optarg} ;;
-	CXXFLAGS=*) CXXFLAGS=${optarg} ;;
 	LDFLAGS=*)  LDFLAGS=${optarg} ;;
 
 	--* | *=* | *-*-*) ;;
@@ -113,12 +107,12 @@ done
 
 # Find the source files, if location was not specified.
 srcdirtext=
-if [ x"${srcdir}" = x ] ; then
+if [ -z "${srcdir}" ] ; then
 	srcdirtext="or . or .." ; srcdir=.
 	if [ ! -r ${srcdir}/${srctrigger} ] ; then srcdir=.. ; fi
 	if [ ! -r ${srcdir}/${srctrigger} ] ; then
 		## the sed command below emulates the dirname command
-		srcdir=`echo ${invocation_name} | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
+		srcdir=`echo $0 | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 	fi
 fi
 
@@ -134,7 +128,7 @@ fi
 if [ "`pwd`" = "`cd ${srcdir} ; pwd`" ] ; then srcdir=. ; fi
 
 # checking whether we are using GNU C.
-if [ x"${CC}" = x ] ; then		# Let the user override the test.
+if [ -z "${CC}" ] ; then		# Let the user override the test.
 	if [ -x /bin/gcc ] ||
 	   [ -x /usr/bin/gcc ] ||
 	   [ -x /usr/local/bin/gcc ] ; then
@@ -144,19 +138,8 @@ if [ x"${CC}" = x ] ; then		# Let the user override the test.
 	fi
 fi
 
-# checking whether we are using GNU C++.
-if [ x"${CXX}" = x ] ; then		# Let the user override the test.
-	if [ -x /bin/g++ ] ||
-	   [ -x /usr/bin/g++ ] ||
-	   [ -x /usr/local/bin/g++ ] ; then
-		CXX="g++"
-	else
-		CXX="c++"
-	fi
-fi
-
 echo
-if [ x${no_create} = x ] ; then
+if [ -z "${no_create}" ] ; then
 	echo "creating config.status"
 	rm -f config.status
 	cat > config.status << EOF
@@ -167,7 +150,7 @@ if [ x${no_create} = x ] ; then
 # This script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 
-exec /bin/sh ${invocation_name} ${args} --no-create
+exec /bin/sh $0 ${args} --no-create
 EOF
 	chmod +x config.status
 fi
@@ -183,22 +166,21 @@ echo "mandir = ${mandir}"
 echo "sysconfdir = ${sysconfdir}"
 echo "program_prefix = ${program_prefix}"
 echo "CC = ${CC}"
-echo "CXX = ${CXX}"
 echo "CPPFLAGS = ${CPPFLAGS}"
 echo "CFLAGS = ${CFLAGS}"
-echo "CXXFLAGS = ${CXXFLAGS}"
 echo "LDFLAGS = ${LDFLAGS}"
 rm -f Makefile
 cat > Makefile << EOF
 # Makefile for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+# Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 # This file was generated automatically by configure. Do not edit.
 #
 # This Makefile is free software: you have unlimited permission
 # to copy, distribute and modify it.
 
+pkgname = ${pkgname}
+pkgversion = ${pkgversion}
 progname = ${progname}
-progversion = ${progversion}
 VPATH = ${srcdir}
 prefix = ${prefix}
 exec_prefix = ${exec_prefix}
@@ -209,10 +191,8 @@ mandir = ${mandir}
 sysconfdir = ${sysconfdir}
 program_prefix = ${program_prefix}
 CC = ${CC}
-CXX = ${CXX}
 CPPFLAGS = ${CPPFLAGS}
 CFLAGS = ${CFLAGS}
-CXXFLAGS = ${CXXFLAGS}
 LDFLAGS = ${LDFLAGS}
 EOF
 cat ${srcdir}/Makefile.in >> Makefile

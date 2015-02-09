@@ -1,10 +1,12 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+# Copyright (C) 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute and modify it.
 
+LC_ALL=C
+export LC_ALL
 objdir=`pwd`
 testdir=`cd "$1" ; pwd`
 ED="${objdir}"/ed
@@ -14,12 +16,12 @@ if [ ! -x "${ED}" ] ; then
 	exit 1
 fi
 
-if [ -d tmp ] ; then rm -r tmp ; fi
+if [ -d tmp ] ; then rm -rf tmp ; fi
 mkdir tmp
 
 # Generate ed test scripts, with extensions .ed and .red, from
 # .t and .err files, respectively.
-echo "building test scripts for ed..."
+printf "building test scripts for ed-%s...\n" "$2"
 cd "${testdir}"
 
 for i in *.t ; do
@@ -52,9 +54,9 @@ done
 
 
 # Run the .ed and .red scripts just generated
-# and compare their output against the .r files, which contain
+# and compare their output against the .r and .pr files, which contain
 # the correct output.
-echo "testing ed..."
+printf "testing ed-%s...\n" "$2"
 cd "${objdir}"/tmp
 
 # Run the *.red scripts first, since these don't generate output;
@@ -62,7 +64,7 @@ cd "${objdir}"/tmp
 for i in *.red ; do
 	echo "$i"
 	if ./"$i" ; then
-		echo "*** The script $i exited abnormally  ***"
+		echo "*** The script $i exited abnormally ***"
 	fi
 done > errs.ck 2>&1
 
@@ -70,7 +72,7 @@ done > errs.ck 2>&1
 # exit with error (>0) status.
 for i in *.red ; do
 	base=`echo "$i" | sed 's/\.red$//'`
-	if cat  ${base}.red | "${ED}" -s ; then
+	if cat ${base}.red | "${ED}" -s ; then
 		echo "*** The piped script $i exited abnormally ***"
 	else
 		if cmp -s ${base}.ro "${testdir}"/${base}.pr ; then
@@ -100,5 +102,5 @@ if grep '\*\*\*' *.ck > /dev/null ; then
 	exit 127
 else
 	echo "tests completed successfully."
-	if cd "${objdir}" ; then rm -r tmp ; fi
+	cd "${objdir}" && rm -r tmp
 fi

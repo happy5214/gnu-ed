@@ -1,7 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,25 +28,23 @@
 #include "ed.h"
 
 
-static regex_t *global_pat = 0;
-static char patlock = 0;	/* if set, pattern not freed by get_compiled_pattern */
+static regex_t * global_pat = 0;
+static bool patlock = false;	/* if set, pattern not freed by get_compiled_pattern */
 
-static char *stbuf = 0;		/* substitution template buffer */
+static char * stbuf = 0;	/* substitution template buffer */
 static int stbufsz = 0;		/* substitution template buffer size */
 static int stlen = 0;		/* substitution template length */
 
-static char *rbuf = 0;		/* replace_matching_text buffer */
+static char * rbuf = 0;		/* replace_matching_text buffer */
 static int rbufsz = 0;		/* replace_matching_text buffer size */
 
 
-char prev_pattern( void ) { return global_pat != 0; }
+bool prev_pattern( void ) { return global_pat != 0; }
 
 
 /* translate characters in a string */
-static void translit_text( char *s, int len, char from, char to )
+static void translit_text( char * p, int len, const char from, const char to )
   {
-  char *p = s;
-
   while( --len > 0 )
     {
     if( *p == from ) *p = to;
@@ -56,36 +54,36 @@ static void translit_text( char *s, int len, char from, char to )
 
 
 /* overwrite newlines with ASCII NULs */
-static void newline_to_nul( char *s, int len )
+static void newline_to_nul( char * const s, const int len )
   { translit_text( s, len, '\n', '\0' ); }
 
 /* overwrite ASCII NULs with newlines */
-static void nul_to_newline( char *s, int len )
+static void nul_to_newline( char * const s, const int len )
   { translit_text( s, len, '\0', '\n' ); }
 
 
 /* expand a POSIX character class */
-static const char *parse_char_class( const char *s )
+static const char * parse_char_class( const char * p )
   {
   char c, d;
 
-  if( *s == '^' ) ++s;
-  if( *s == ']' ) ++s;
-  for( ; *s != ']' && *s != '\n'; ++s )
-    if( *s == '[' && ( ( d = s[1] ) == '.' || d == ':' || d == '=' ) )
-      for( ++s, c = *++s; *s != ']' || c != d; ++s )
-        if( ( c = *s ) == '\n' )
+  if( *p == '^' ) ++p;
+  if( *p == ']' ) ++p;
+  for( ; *p != ']' && *p != '\n'; ++p )
+    if( *p == '[' && ( ( d = p[1] ) == '.' || d == ':' || d == '=' ) )
+      for( ++p, c = *++p; *p != ']' || c != d; ++p )
+        if( ( c = *p ) == '\n' )
           return 0;
-  return ( ( *s == ']' ) ? s : 0 );
+  return ( ( *p == ']' ) ? p : 0 );
   }
 
 
 /* copy a pattern string from the command buffer; return pointer to the copy */
-static char *extract_pattern( const char **ibufpp, const int delimiter )
+static char * extract_pattern( const char ** const ibufpp, const char delimiter )
   {
-  static char *buf = 0;
+  static char * buf = 0;
   static int bufsz = 0;
-  const char *nd = *ibufpp;
+  const char * nd = *ibufpp;
   int len;
 
   while( *nd != delimiter && *nd != '\n' )
@@ -110,35 +108,40 @@ static char *extract_pattern( const char **ibufpp, const int delimiter )
 
 
 /* return pointer to compiled pattern from command buffer */
-static regex_t *get_compiled_pattern( const char **ibufpp )
+static regex_t * get_compiled_pattern( const char ** const ibufpp )
   {
-  static regex_t *exp = 0;
-  char *exps;
+  static regex_t * exp = 0;
+  const char * exps;
   const char delimiter = **ibufpp;
   int n;
 
   if( delimiter == ' ' )
     { set_error_msg( "Invalid pattern delimiter" ); return 0; }
-  if( delimiter == '\n' || *++(*ibufpp) == '\n' || **ibufpp == delimiter )
+  if( delimiter == '\n' || *++*ibufpp == '\n' || **ibufpp == delimiter )
     {
     if( !exp ) set_error_msg( "No previous pattern" );
     return exp;
     }
-  if( !( exps = extract_pattern( ibufpp, delimiter ) ) ) return 0;
+  exps = extract_pattern( ibufpp, delimiter );
+  if( !exps ) return 0;
   /* buffer alloc'd && not reserved */
   if( exp && !patlock ) regfree( exp );
-  else if( !( exp = ( regex_t *) malloc( sizeof( regex_t ) ) ) )
+  else
     {
-    show_strerror( 0, errno );
-    set_error_msg( "Memory exhausted" );
-    return 0;
+    exp = (regex_t *) malloc( sizeof (regex_t) );
+    if( !exp )
+      {
+      show_strerror( 0, errno );
+      set_error_msg( "Memory exhausted" );
+      return 0;
+      }
     }
-  patlock = 0;
+  patlock = false;
   n = regcomp( exp, exps, 0 );
   if( n )
     {
     char buf[80];
-    regerror( n, exp, buf, sizeof( buf ) );
+    regerror( n, exp, buf, sizeof buf );
     set_error_msg( buf );
     free( exp );
     exp = 0;
@@ -148,43 +151,45 @@ static regex_t *get_compiled_pattern( const char **ibufpp )
 
 
 /* add line matching a pattern to the global-active list */
-char build_active_list( const char **ibufpp, const int first_addr,
-                        const int second_addr, const char match )
+bool build_active_list( const char ** const ibufpp, const int first_addr,
+                        const int second_addr, const bool match )
   {
-  regex_t *pat;
-  line_t *lp;
+  const regex_t * pat;
+  const line_t * lp;
   int addr;
   const char delimiter = **ibufpp;
 
   if( delimiter == ' ' || delimiter == '\n' )
-    { set_error_msg( "Invalid pattern delimiter" ); return 0; }
-  if( !( pat = get_compiled_pattern( ibufpp ) ) ) return 0;
-  if( **ibufpp == delimiter ) ++(*ibufpp);
+    { set_error_msg( "Invalid pattern delimiter" ); return false; }
+  pat = get_compiled_pattern( ibufpp );
+  if( !pat ) return false;
+  if( **ibufpp == delimiter ) ++*ibufpp;
   clear_active_list();
   lp = search_line_node( first_addr );
   for( addr = first_addr; addr <= second_addr; ++addr, lp = lp->q_forw )
     {
-    char *s = get_sbuf_line( lp );
-    if( !s ) return 0;
+    char * const s = get_sbuf_line( lp );
+    if( !s ) return false;
     if( isbinary() ) nul_to_newline( s, lp->len );
     if( !regexec( pat, s, 0, 0, 0 ) == match && !set_active_node( lp ) )
-      return 0;
+      return false;
     }
-  return 1;
+  return true;
   }
 
 
 /* return pointer to copy of substitution template in the command buffer */
-static char *extract_subst_template( const char **ibufpp, const char isglobal )
+static char * extract_subst_template( const char ** const ibufpp,
+                                      const bool isglobal )
   {
   int i = 0, n = 0;
   char c;
   const char delimiter = **ibufpp;
 
-  ++(*ibufpp);
+  ++*ibufpp;
   if( **ibufpp == '%' && (*ibufpp)[1] == delimiter )
     {
-    ++(*ibufpp);
+    ++*ibufpp;
     if( !stbuf ) set_error_msg( "No previous substitution" );
     return stbuf;
     }
@@ -192,13 +197,13 @@ static char *extract_subst_template( const char **ibufpp, const char isglobal )
     {
     if( !resize_buffer( &stbuf, &stbufsz, i + 2 ) ) return 0;
     c = stbuf[i++] = *(*ibufpp)++;
-    if( c == '\n' && **ibufpp == 0 ) { --i, --(*ibufpp); break; }
+    if( c == '\n' && **ibufpp == 0 ) { --i, --*ibufpp; break; }
     if( c == '\\' && ( stbuf[i++] = *(*ibufpp)++ ) == '\n' && !isglobal )
       {
       while( ( *ibufpp = get_tty_line( &n ) ) &&
              ( n == 0 || ( n > 0 && (*ibufpp)[n-1] != '\n' ) ) )
         clearerr( stdin );
-      if( !(*ibufpp) ) return 0;
+      if( !*ibufpp ) return 0;
       }
     }
   if( !resize_buffer( &stbuf, &stbufsz, i + 1 ) ) return 0;
@@ -208,27 +213,28 @@ static char *extract_subst_template( const char **ibufpp, const char isglobal )
 
 
 /* extract substitution tail from the command buffer */
-char extract_subst_tail( const char **ibufpp, int *gflagsp, int *snump,
-                         const char isglobal )
+bool extract_subst_tail( const char ** const ibufpp, int * const gflagsp,
+                         int * const snump, const bool isglobal )
   {
   const char delimiter = **ibufpp;
 
   *gflagsp = *snump = 0;
-  if( delimiter == '\n' ) { stlen = 0; *gflagsp = GPR; return 1; }
-  if( !extract_subst_template( ibufpp, isglobal ) ) return 0;
-  if( **ibufpp == '\n' ) { *gflagsp = GPR; return 1; }
-  if( **ibufpp == delimiter ) ++(*ibufpp);
-  if( **ibufpp >= '1' && **ibufpp <= '9' ) return parse_int( snump, *ibufpp, ibufpp );
-  if( **ibufpp == 'g' ) { ++(*ibufpp); *gflagsp = GSG; return 1; }
-  return 1;
+  if( delimiter == '\n' ) { stlen = 0; *gflagsp = GPR; return true; }
+  if( !extract_subst_template( ibufpp, isglobal ) ) return false;
+  if( **ibufpp == '\n' ) { *gflagsp = GPR; return true; }
+  if( **ibufpp == delimiter ) ++*ibufpp;
+  if( **ibufpp >= '1' && **ibufpp <= '9' )
+    return parse_int( snump, *ibufpp, ibufpp );
+  if( **ibufpp == 'g' ) { ++*ibufpp; *gflagsp = GSG; }
+  return true;
   }
 
 
 /* return the address of the next line matching a pattern in a given
    direction. wrap around begin/end of editor buffer if necessary */
-int get_matching_node_addr( const char **ibufpp, const char forward )
+int next_matching_node_addr( const char ** const ibufpp, const bool forward )
   {
-  regex_t *pat = get_compiled_pattern( ibufpp );
+  const regex_t * const pat = get_compiled_pattern( ibufpp );
   int addr = current_addr();
 
   if( !pat ) return -1;
@@ -236,8 +242,8 @@ int get_matching_node_addr( const char **ibufpp, const char forward )
     addr = ( forward ? inc_addr( addr ) : dec_addr( addr ) );
     if( addr )
       {
-      line_t *lp = search_line_node( addr );
-      char *s = get_sbuf_line( lp );
+      const line_t * const lp = search_line_node( addr );
+      char * const s = get_sbuf_line( lp );
       if( !s ) return -1;
       if( isbinary() ) nul_to_newline( s, lp->len );
       if( !regexec( pat, s, 0, 0, 0 ) ) return addr;
@@ -249,30 +255,30 @@ int get_matching_node_addr( const char **ibufpp, const char forward )
   }
 
 
-char new_compiled_pattern( const char **ibufpp )
+bool new_compiled_pattern( const char ** const ibufpp )
   {
-  regex_t *tpat = global_pat;
+  regex_t * tpat;
 
   disable_interrupts();
   tpat = get_compiled_pattern( ibufpp );
-  if( !tpat ) { enable_interrupts(); return 0; }
-  if( tpat != global_pat )
+  if( tpat && tpat != global_pat )
     {
     if( global_pat ) { regfree( global_pat ); free( global_pat ); }
     global_pat = tpat;
-    patlock = 1;		/* reserve pattern */
+    patlock = true;		/* reserve pattern */
     }
   enable_interrupts();
-  return 1;
+  return ( tpat ? true : false );
   }
 
 
 /* modify text according to a substitution template; return offset to
    end of modified text */
-static int apply_subst_template( const char *boln, const regmatch_t *rm, int off,
+static int apply_subst_template( const char * const boln,
+                                 const regmatch_t * const rm, int offset,
                                  const int re_nsub )
   {
-  const char *sub = stbuf;
+  const char * sub = stbuf;
 
   for( ; sub - stbuf < stlen; ++sub )
     {
@@ -280,39 +286,39 @@ static int apply_subst_template( const char *boln, const regmatch_t *rm, int off
     if( *sub == '&' )
       {
       int j = rm[0].rm_so; int k = rm[0].rm_eo;
-      if( !resize_buffer( &rbuf, &rbufsz, off + k - j ) ) return -1;
-      while( j < k ) rbuf[off++] = boln[j++];
+      if( !resize_buffer( &rbuf, &rbufsz, offset + k - j ) ) return -1;
+      while( j < k ) rbuf[offset++] = boln[j++];
       }
     else if( *sub == '\\' && *++sub >= '1' && *sub <= '9' &&
              ( n = *sub - '0' ) <= re_nsub )
       {
       int j = rm[n].rm_so; int k = rm[n].rm_eo;
-      if( !resize_buffer( &rbuf, &rbufsz, off + k - j ) ) return -1;
-      while( j < k ) rbuf[off++] = boln[j++];
+      if( !resize_buffer( &rbuf, &rbufsz, offset + k - j ) ) return -1;
+      while( j < k ) rbuf[offset++] = boln[j++];
       }
     else
       {
-      if( !resize_buffer( &rbuf, &rbufsz, off + 1 ) ) return -1;
-      rbuf[off++] = *sub;
+      if( !resize_buffer( &rbuf, &rbufsz, offset + 1 ) ) return -1;
+      rbuf[offset++] = *sub;
       }
     }
-  if( !resize_buffer( &rbuf, &rbufsz, off + 1 ) ) return -1;
-  rbuf[off] = 0;
-  return off;
+  if( !resize_buffer( &rbuf, &rbufsz, offset + 1 ) ) return -1;
+  rbuf[offset] = 0;
+  return offset;
   }
 
 
 /* replace text matched by a pattern according to a substitution
-   template; return pointer to the modified text */
-static int replace_matching_text( const line_t *lp, const int gflags,
+   template; return length of the modified text */
+static int replace_matching_text( const line_t * const lp, const int gflags,
                                   const int snum )
   {
-  const int se_max = 30;	/* max subexpressions in a regular expression */
+  enum { se_max = 30 };	/* max subexpressions in a regular expression */
   regmatch_t rm[se_max];
-  char *txt = get_sbuf_line( lp );
-  char *eot;
-  int i = 0, off = 0;
-  char changed = 0;
+  char * txt = get_sbuf_line( lp );
+  const char * eot;
+  int i = 0, offset = 0;
+  bool changed = false;
 
   if( !txt ) return -1;
   if( isbinary() ) nul_to_newline( txt, lp->len );
@@ -323,70 +329,74 @@ static int replace_matching_text( const line_t *lp, const int gflags,
     do {
       if( !snum || snum == ++matchno )
         {
-        changed = 1; i = rm[0].rm_so;
-        if( !resize_buffer( &rbuf, &rbufsz, off + i ) ) return -1;
+        changed = true; i = rm[0].rm_so;
+        if( !resize_buffer( &rbuf, &rbufsz, offset + i ) ) return -1;
         if( isbinary() ) newline_to_nul( txt, rm[0].rm_eo );
-        memcpy( rbuf + off, txt, i ); off += i;
-        off = apply_subst_template( txt, rm, off, global_pat->re_nsub );
-        if( off < 0 ) return -1;
+        memcpy( rbuf + offset, txt, i ); offset += i;
+        offset = apply_subst_template( txt, rm, offset, global_pat->re_nsub );
+        if( offset < 0 ) return -1;
         }
       else
         {
         i = rm[0].rm_eo;
-        if( !resize_buffer( &rbuf, &rbufsz, off + i ) ) return -1;
+        if( !resize_buffer( &rbuf, &rbufsz, offset + i ) ) return -1;
         if( isbinary() ) newline_to_nul( txt, i );
-        memcpy( rbuf + off, txt, i ); off += i;
+        memcpy( rbuf + offset, txt, i ); offset += i;
         }
       txt += rm[0].rm_eo;
       }
     while( *txt && ( !changed || ( ( gflags & GSG ) && rm[0].rm_eo ) ) &&
            !regexec( global_pat, txt, se_max, rm, REG_NOTBOL ) );
     i = eot - txt;
-    if( !resize_buffer( &rbuf, &rbufsz, off + i + 2 ) ) return -1;
+    if( !resize_buffer( &rbuf, &rbufsz, offset + i + 2 ) ) return -1;
     if( i > 0 && !rm[0].rm_eo && ( gflags & GSG ) )
       { set_error_msg( "Infinite substitution loop" ); return -1; }
     if( isbinary() ) newline_to_nul( txt, i );
-    memcpy( rbuf + off, txt, i );
-    memcpy( rbuf + off + i, "\n", 2 );
+    memcpy( rbuf + offset, txt, i );
+    memcpy( rbuf + offset + i, "\n", 2 );
     }
-  return ( changed ? off + i + 1 : 0 );
+  return ( changed ? offset + i + 1 : 0 );
   }
 
 
 /* for each line in a range, change text matching a pattern according to
    a substitution template; return false if error */
-char search_and_replace( const int first_addr, const int second_addr,
-                         const int gflags, const int snum, const char isglobal )
+bool search_and_replace( const int first_addr, const int second_addr,
+                         const int gflags, const int snum, const bool isglobal )
   {
   int lc;
-  char match_found = 0;
+  bool match_found = false;
 
   set_current_addr( first_addr - 1 );
   for( lc = 0; lc <= second_addr - first_addr; ++lc )
     {
-    line_t *lp = search_line_node( inc_current_addr() );
+    const line_t * const lp = search_line_node( inc_current_addr() );
     int len = replace_matching_text( lp, gflags, snum );
-    if( len < 0 ) return 0;
+    if( len < 0 ) return false;
     if( len )
       {
-      const char *txt = rbuf;
-      const char *eot = rbuf + len;
-      undo_t *up = 0;
+      const char * txt = rbuf;
+      const char * const eot = rbuf + len;
+      undo_t * up = 0;
       disable_interrupts();
-      if( !delete_lines( current_addr(), current_addr(), isglobal ) ) return 0;
+      if( !delete_lines( current_addr(), current_addr(), isglobal ) )
+        { enable_interrupts(); return false; }
       do {
         txt = put_sbuf_line( txt, current_addr() );
-        if( !txt ) { enable_interrupts(); return 0; }
+        if( !txt ) { enable_interrupts(); return false; }
         if( up ) up->tail = search_line_node( current_addr() );
-        else if( !( up = push_undo_atom( UADD, -1, -1 ) ) )
-          { enable_interrupts(); return 0; }
+        else
+          {
+          up = push_undo_atom( UADD, current_addr(), current_addr() );
+          if( !up ) { enable_interrupts(); return false; }
+          }
         }
       while( txt != eot );
       enable_interrupts();
-      match_found = 1;
+      match_found = true;
       }
     }
   if( !match_found && !( gflags & GLB ) )
-    { set_error_msg( "No match" ); return 0; }
-  return 1;
+    { set_error_msg( "No match" ); return false; }
+  return true;
   }

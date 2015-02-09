@@ -1,4 +1,4 @@
-.TH ED 1 "13 June 2009"
+.TH ED 1 "3 July 2010"
 .SH NAME
 ed, red \- text editor
 .SH SYNOPSIS
@@ -163,8 +163,7 @@ One exception to the rule that addresses represent line numbers is the
 address
 .I 0
 (zero).
-This means "before the first line,"
-and is legal wherever it makes sense.
+This means "before the first line", and is valid wherever it makes sense.
 
 An address range is two addresses separated either by a comma or
 semicolon. The value of the first address in a range cannot exceed the
@@ -1010,7 +1009,7 @@ Addison-Wesley, 1981.
 processes
 .I file
 arguments for backslash escapes, i.e.,  in a filename,
-any characters preceded by a backslash (\e) are
+any character preceded by a backslash (\e) is
 interpreted literally.
 
 If a text (non-binary) file is not terminated by a newline character,
@@ -1020,7 +1019,7 @@ appends one on reading/writing it.  In the case of a binary file,
 .B ed
 does not append a newline on reading/writing.
 
-per line overhead: 4 ints
+Per line overhead: 2 pointers, 1 long int, and 1 int.
 
 .SH DIAGNOSTICS
 When an error occurs,

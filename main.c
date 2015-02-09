@@ -1,5 +1,6 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
+    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,16 +46,16 @@
 static const char * invocation_name = 0;
 static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2009";
+static const char * const program_year = "2010";
 
-static char restricted_ = 0;		/* invoked as "red" */
-static char scripted_ = 0;		/* if set, suppress diagnostics */
-static char traditional_ = 0;		/* if set, be backwards compatible */
+static bool restricted_ = false;	/* if set, run in restricted mode */
+static bool scripted_ = false;		/* if set, suppress diagnostics */
+static bool traditional_ = false;	/* if set, be backwards compatible */
 
 
-char restricted( void ) { return restricted_; }
-char scripted( void ) { return scripted_; }
-char traditional( void ) { return traditional_; }
+bool restricted( void ) { return restricted_; }
+bool scripted( void ) { return scripted_; }
+bool traditional( void ) { return traditional_; }
 
 
 static void show_help( void )
@@ -67,10 +68,11 @@ static void show_help( void )
   printf( "  -G, --traditional          run in compatibility mode\n" );
   printf( "  -l, --loose-exit-status    exit with 0 status even if a command fails\n" );
   printf( "  -p, --prompt=STRING        use STRING as an interactive prompt\n" );
+  printf( "  -r, --restricted           run in restricted mode\n" );
   printf( "  -s, --quiet, --silent      suppress diagnostics\n" );
   printf( "  -v, --verbose              be verbose\n" );
-  printf( "Start edit by reading in `file' if given. Read output of shell command\n" );
-  printf( "if `file' begins with a `!'.\n" );
+  printf( "Start edit by reading in `file' if given.\n" );
+  printf( "If `file' begins with a `!', read output of shell command.\n" );
   printf( "\nReport bugs to <bug-ed@gnu.org>.\n" );
   printf( "Ed home page: http://www.gnu.org/software/ed/ed.html\n" );
   printf( "General help using GNU software: http://www.gnu.org/gethelp\n" );
@@ -80,14 +82,14 @@ static void show_help( void )
 static void show_version( void )
   {
   printf( "%s %s\n", Program_name, PROGVERSION );
-  printf( "Copyright (C) 1994 Andrew L. Moore, %s Antonio Diaz Diaz.\n", program_year );
+  printf( "Copyright (C) %s Free Software Foundation, Inc.\n", program_year );
   printf( "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n" );
   printf( "This is free software: you are free to change and redistribute it.\n" );
   printf( "There is NO WARRANTY, to the extent permitted by law.\n" );
   }
 
 
-void show_strerror( const char *filename, int errcode )
+void show_strerror( const char * const filename, const int errcode )
   {
   if( !scripted_ )
     {
@@ -98,78 +100,81 @@ void show_strerror( const char *filename, int errcode )
   }
 
 
-static void show_error( const char * msg, const int errcode, const char help )
+static void show_error( const char * const msg, const int errcode, const bool help )
   {
-  if( msg && msg[0] != 0 )
+  if( msg && msg[0] )
     {
     fprintf( stderr, "%s: %s", program_name, msg );
     if( errcode > 0 ) fprintf( stderr, ": %s", strerror( errcode ) );
     fprintf( stderr, "\n" );
     }
-  if( help && invocation_name && invocation_name[0] != 0 )
+  if( help && invocation_name && invocation_name[0] )
     fprintf( stderr, "Try `%s --help' for more information.\n", invocation_name );
   }
 
 
 /* return true if file descriptor is a regular file */
-char is_regular_file( int fd )
+bool is_regular_file( const int fd )
   {
-  struct stat sb;
-  return ( fstat( fd, &sb ) < 0 || S_ISREG( sb.st_mode ) );
+  struct stat st;
+  return ( fstat( fd, &st ) < 0 || S_ISREG( st.st_mode ) );
   }
 
 
-char may_access_filename( const char *name )
+bool may_access_filename( const char * const name )
   {
-  if( restricted_ && ( *name == '!' || !strcmp( name, ".." ) || strchr( name, '/' ) ) )
+  if( restricted_ &&
+      ( *name == '!' || !strcmp( name, ".." ) || strchr( name, '/' ) ) )
     {
     set_error_msg( "Shell access restricted" );
-    return 0;
+    return false;
     }
-  return 1;
+  return true;
   }
 
 
-int main( const int argc, const char *argv[] )
+int main( const int argc, const char * const argv[] )
   {
-  int n = strlen( argv[0] );
-  char loose = 0;
-  const ap_Option options[] =
+  int argind;
+  bool loose = false;
+  const struct ap_Option options[] =
     {
     { 'G', "traditional",       ap_no  },
     { 'h', "help",              ap_no  },
     { 'l', "loose-exit-status", ap_no  },
     { 'p', "prompt",            ap_yes },
+    { 'r', "restricted",        ap_no  },
     { 's', "quiet",             ap_no  },
     { 's', "silent",            ap_no  },
     { 'v', "verbose",           ap_no  },
     { 'V', "version",           ap_no  },
-    {   0, 0,                   ap_no } };
-  Arg_parser parser;
-  int argind;
+    {  0 ,  0,                  ap_no } };
+
+  struct Arg_parser parser;
 
   if( !ap_init( &parser, argc, argv, options, 0 ) )
-    { show_error( "Memory exhausted", 0, 0 ); return 1; }
+    { show_error( "Memory exhausted.", 0, false ); return 1; }
   if( ap_error( &parser ) )				/* bad option */
-    { show_error( ap_error( &parser ), 0, 1 ); return 1; }
+    { show_error( ap_error( &parser ), 0, true ); return 1; }
   invocation_name = argv[0];
-  restricted_ = ( n > 2 && argv[0][n-3] == 'r' );
 
   for( argind = 0; argind < ap_arguments( &parser ); ++argind )
     {
     const int code = ap_code( &parser, argind );
-    const char * arg = ap_argument( &parser, argind );
+    const char * const arg = ap_argument( &parser, argind );
     if( !code ) break;					/* no more options */
     switch( code )
       {
-      case 'G': traditional_ = 1; break;	/* backward compatibility */
+      case 'G': traditional_ = true; break;	/* backward compatibility */
       case 'h': show_help(); return 0;
-      case 'l': loose = 1; break;
+      case 'l': loose = true; break;
       case 'p': set_prompt( arg ); break;
-      case 's': scripted_ = 1; break;
+      case 'r': restricted_ = true; break;
+      case 's': scripted_ = true; break;
       case 'v': set_verbose(); break;
       case 'V': show_version(); return 0;
-      default: show_error( "internal_error: uncaught option", 0, 0 ); return 3;
+      default : show_error( "internal error: uncaught option.", 0, false );
+                return 3;
       }
     }
   setlocale( LC_ALL, "" );
@@ -177,8 +182,8 @@ int main( const int argc, const char *argv[] )
 
   while( argind < ap_arguments( &parser ) )
     {
-    const char * arg = ap_argument( &parser, argind );
-    if( !strcmp( arg, "-" ) ) { scripted_ = 1; ++argind; continue; }
+    const char * const arg = ap_argument( &parser, argind );
+    if( !strcmp( arg, "-" ) ) { scripted_ = true; ++argind; continue; }
     if( may_access_filename( arg ) )
       {
       if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )
