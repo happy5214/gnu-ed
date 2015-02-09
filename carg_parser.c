@@ -22,14 +22,11 @@
 
 
 /* assure at least a minimum size for buffer `buf' */
-char ap_resize_buffer( void **buf, const int min_size )
+void * ap_resize_buffer( void *buf, const int min_size )
   {
-  void *new_buf = 0;
-  if( *buf ) new_buf = realloc( *buf, min_size );
-  else new_buf = malloc( min_size );
-  if( !new_buf ) return 0;
-  *buf = new_buf;
-  return 1;
+  if( buf ) buf = realloc( buf, min_size );
+  else buf = malloc( min_size );
+  return buf;
   }
 
 
@@ -37,16 +34,15 @@ char push_back_record( Arg_parser * ap, const int code, const char * argument )
   {
   const int len = strlen( argument );
   ap_Record *p;
-  void * alias = ap->data;
-  if( !ap_resize_buffer( &alias, ( ap->data_size + 1 ) * sizeof( ap_Record ) ) )
-    return 0;
-  ap->data = (ap_Record *)alias;
+  void * tmp = ap_resize_buffer( ap->data, ( ap->data_size + 1 ) * sizeof( ap_Record ) );
+  if( !tmp ) return 0;
+  ap->data = (ap_Record *)tmp;
   p = &(ap->data[ap->data_size]);
   p->code = code;
   p->argument = 0;
-  alias = p->argument;
-  if( !ap_resize_buffer( &alias, len + 1 ) ) return 0;
-  p->argument = (char *)alias;
+  tmp = ap_resize_buffer( p->argument, len + 1 );
+  if( !tmp ) return 0;
+  p->argument = (char *)tmp;
   strncpy( p->argument, argument, len + 1 );
   ++ap->data_size;
   return 1;
@@ -56,9 +52,9 @@ char push_back_record( Arg_parser * ap, const int code, const char * argument )
 char add_error( Arg_parser * ap, const char * msg )
   {
   const int len = strlen( msg );
-  void * alias = ap->error;
-  if( !ap_resize_buffer( &alias, ap->error_size + len + 1 ) ) return 0;
-  ap->error = (char *)alias;
+  void * tmp = ap_resize_buffer( ap->error, ap->error_size + len + 1 );
+  if( !tmp ) return 0;
+  ap->error = (char *)tmp;
   strncpy( ap->error + ap->error_size, msg, len + 1 );
   ap->error_size += len;
   return 1;
@@ -229,11 +225,10 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
       {
       if( !in_order )
         {
-        void * alias = non_options;
-        if( !ap_resize_buffer( &alias,
-            ( non_options_size + 1 ) * sizeof( *non_options ) ) )
-          return 0;
-        non_options = (const char **)alias;
+        void * tmp = ap_resize_buffer( non_options,
+                       ( non_options_size + 1 ) * sizeof( *non_options ) );
+        if( !tmp ) return 0;
+        non_options = (const char **)tmp;
         non_options[non_options_size++] = argv[argind++];
         }
       else if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;

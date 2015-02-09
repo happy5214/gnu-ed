@@ -1,4 +1,4 @@
-.TH ED 1 "5 October 2006"
+.TH ED 1 "13 June 2009"
 .SH NAME
 ed, red \- text editor
 .SH SYNOPSIS
@@ -168,7 +168,7 @@ and is legal wherever it makes sense.
 
 An address range is two addresses separated either by a comma or
 semicolon. The value of the first address in a range cannot exceed the
-value of the the second.  If only one address is given in a range, then
+value of the second.  If only one address is given in a range, then
 the second address is set to the given address.  If an
 .IR n- tuple
 of addresses is given where
@@ -461,10 +461,10 @@ distinguish them from traditional
 syntax.
 
 .HP
-\fR\e`\fR
+\fR\e\`\fR
 .TP 8
-\fR\e'\fR
-Unconditionally matches the beginning (\e`) or ending (\e') of a line.
+\fR\e\'\fR
+Unconditionally matches the beginning (\e\`) or ending (\e\') of a line.
 
 .TP 8
 \fR\e?\fR
@@ -692,8 +692,7 @@ Moves lines in the buffer.  The addressed lines are moved to after the
 right-hand destination address, which may be the address
 .IR 0
 (zero).
-The current address is set to the
-last line moved.
+The current address is set to the new address of the last line moved.
 
 .TP 8
 (.,.)n
@@ -777,15 +776,15 @@ is a positive number, causes only the
 match to be replaced.
 It is an error if no substitutions are performed on any of the addressed
 lines.
-The current address is set the last line affected.
+The current address is set to the last line affected.
 
 .I re
 and
 .I replacement
-may be delimited by any character other than space and newline
-(see the
+may be delimited by any character other than space, newline and the
+characters used by the form of the
 .I `s'
-command below).
+command shown below.
 If one or two of the last delimiters is omitted, then the last line
 affected is printed as though the print suffix
 .I `p'
@@ -818,7 +817,7 @@ This form of the
 .I `s'
 command accepts a count suffix
 .IR `n' ,
-or any combination of the characters
+and any combination of the characters
 .IR `r' ,
 .IR `g' ,
 and

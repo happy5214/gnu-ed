@@ -43,9 +43,9 @@
 
 
 static const char * invocation_name = 0;
-static const char * const Program_name    = "GNU Ed";
-static const char * const program_name    = "ed";
-static const char * const program_year    = "2009";
+static const char * const Program_name = "GNU Ed";
+static const char * const program_name = "ed";
+static const char * const program_year = "2009";
 
 static char restricted_ = 0;		/* invoked as "red" */
 static char scripted_ = 0;		/* if set, suppress diagnostics */
@@ -57,7 +57,7 @@ char scripted( void ) { return scripted_; }
 char traditional( void ) { return traditional_; }
 
 
-void show_help( void )
+static void show_help( void )
   {
   printf( "%s - The GNU line editor.\n", Program_name );
   printf( "\nUsage: %s [options] [file]\n", invocation_name );
@@ -77,7 +77,7 @@ void show_help( void )
   }
 
 
-void show_version( void )
+static void show_version( void )
   {
   printf( "%s %s\n", Program_name, PROGVERSION );
   printf( "Copyright (C) 1994 Andrew L. Moore, %s Antonio Diaz Diaz.\n", program_year );
@@ -98,7 +98,7 @@ void show_strerror( const char *filename, int errcode )
   }
 
 
-void show_error( const char * msg, const int errcode, const char help )
+static void show_error( const char * msg, const int errcode, const char help )
   {
   if( msg && msg[0] != 0 )
     {
@@ -119,7 +119,7 @@ char is_regular_file( int fd )
   }
 
 
-char is_valid_filename( const char *name )
+char may_access_filename( const char *name )
   {
   if( restricted_ && ( *name == '!' || !strcmp( name, ".." ) || strchr( name, '/' ) ) )
     {
@@ -179,7 +179,7 @@ int main( const int argc, const char *argv[] )
     {
     const char * arg = ap_argument( &parser, argind );
     if( !strcmp( arg, "-" ) ) { scripted_ = 1; ++argind; continue; }
-    if( is_valid_filename( arg ) )
+    if( may_access_filename( arg ) )
       {
       if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )
         return 2;

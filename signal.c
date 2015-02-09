@@ -37,7 +37,7 @@ static char sighup_pending = 0;
 static char sigint_pending = 0;
 
 
-void sighup_handler( int signum )
+static void sighup_handler( int signum )
   {
   signum = 0;			/* keep compiler happy */
   if( mutex ) sighup_pending = 1;
@@ -67,7 +67,7 @@ void sighup_handler( int signum )
   }
 
 
-void sigint_handler( int signum )
+static void sigint_handler( int signum )
   {
   if( mutex ) sigint_pending = 1;
   else
@@ -82,7 +82,7 @@ void sigint_handler( int signum )
   }
 
 
-void sigwinch_handler( int signum )
+static void sigwinch_handler( int signum )
   {
 #ifdef TIOCGWINSZ
   struct winsize ws;            /* window size structure */
@@ -98,7 +98,7 @@ void sigwinch_handler( int signum )
   }
 
 
-int set_signal( int signum, void (*handler )( int ) )
+static int set_signal( int signum, void (*handler )( int ) )
   {
   struct sigaction new_action;
 
@@ -168,7 +168,7 @@ char parse_int( int *i, const char *str, const char **tail )
 
 
 /* assure at least a minimum size for buffer `buf' */
-char resize_buffer( void **buf, int *size, int min_size )
+char resize_buffer( char **buf, int *size, int min_size )
   {
   if( *size < min_size )
     {
@@ -185,35 +185,75 @@ char resize_buffer( void **buf, int *size, int min_size )
       return 0;
       }
     *size = new_size;
-    *buf = new_buf;
+    *buf = (char *)new_buf;
     enable_interrupts();
     }
   return 1;
   }
 
 
-/* scan command buffer for next non-space char */
-const char *skip_blanks( const char *s )
+/* assure at least a minimum size for buffer `buf' */
+char resize_line_buffer( const line_t ***buf, int *size, int min_size )
   {
-  while( isspace( (unsigned char)*s ) && *s != '\n' ) ++s;
-  return s;
+  if( *size < min_size )
+    {
+    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    void *new_buf = 0;
+    disable_interrupts();
+    if( *buf ) new_buf = realloc( *buf, new_size );
+    else new_buf = malloc( new_size );
+    if( !new_buf )
+      {
+      show_strerror( 0, errno );
+      set_error_msg( "Memory exhausted" );
+      enable_interrupts();
+      return 0;
+      }
+    *size = new_size;
+    *buf = (const line_t **)new_buf;
+    enable_interrupts();
+    }
+  return 1;
+  }
+
+
+/* assure at least a minimum size for buffer `buf' */
+char resize_undo_buffer( undo_t **buf, int *size, int min_size )
+  {
+  if( *size < min_size )
+    {
+    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    void *new_buf = 0;
+    disable_interrupts();
+    if( *buf ) new_buf = realloc( *buf, new_size );
+    else new_buf = malloc( new_size );
+    if( !new_buf )
+      {
+      show_strerror( 0, errno );
+      set_error_msg( "Memory exhausted" );
+      enable_interrupts();
+      return 0;
+      }
+    *size = new_size;
+    *buf = (undo_t *)new_buf;
+    enable_interrupts();
+    }
+  return 1;
   }
 
 
 /* return unescaped copy of escaped string */
 const char *strip_escapes( const char *s )
   {
-  static char *file = 0;
-  static int filesz = 0;
+  static char *buf = 0;
+  static int bufsz = 0;
   const int len = strlen( s );
 
   int i = 0;
 
-  void * alias = file;
-  if( !resize_buffer( &alias, &filesz, len + 1 ) ) return 0;
-  file = (char *)alias;
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
   /* assert: no trailing escape */
-  while( ( file[i++] = ( (*s == '\\' ) ? *++s : *s ) ) )
+  while( ( buf[i++] = ( (*s == '\\' ) ? *++s : *s ) ) )
     s++;
-  return file;
+  return buf;
   }

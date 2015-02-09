@@ -19,7 +19,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.3, 24 May 2009).
+This manual is for GNU ed (version 1.4, 10 July 2009).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -384,11 +384,11 @@ valid wherever it makes sense.
 
    An address range is two addresses separated either by a comma or
 semicolon. The value of the first address in a range cannot exceed the
-value of the the second. If only one address is given in a range, then
-the second address is set to the given address. If an N-tuple of
-addresses is given where N > 2, then the corresponding range is
-determined by the last two addresses in the N-tuple. If only one
-address is expected, then the last address is used.
+value of the second. If only one address is given in a range, then the
+second address is set to the given address. If an N-tuple of addresses
+is given where N > 2, then the corresponding range is determined by the
+last two addresses in the N-tuple. If only one address is expected,
+then the last address is used.
 
    Each address in a comma-delimited range is interpreted relative to
 the current address. In a semicolon-delimited range, the first address
@@ -712,7 +712,8 @@ specified (in parenthesis).
 `(.,.)m(.)'
      Moves lines in the buffer. The addressed lines are moved to after
      the right-hand destination address, which may be the address `0'
-     (zero). The current address is set to the last line moved.
+     (zero). The current address is set to the new address of the last
+     line moved.
 
 `(.,.)n'
      Prints the addressed lines, preceding each line by its line number
@@ -755,12 +756,13 @@ specified (in parenthesis).
      is replaced. The N suffix, where N is a postive number, causes
      only the Nth match to be replaced. It is an error if no
      substitutions are performed on any of the addressed lines. The
-     current address is set the last line affected.
+     current address is set to the last line affected.
 
      RE and REPLACEMENT may be delimited by any character other than
-     <space> and <newline> (see the `s' command below). If one or two
-     of the last delimiters is omitted, then the last line affected is
-     printed as if the print suffix `p' were specified.
+     <space>, <newline> and the characters used by the form of the `s'
+     command shown below. If one or two of the last delimiters is
+     omitted, then the last line affected is printed as if the print
+     suffix `p' were specified.
 
      An unescaped `&' in REPLACEMENT is replaced by the currently
      matched text. The character sequence `\M' where M is a number in
@@ -771,12 +773,12 @@ specified (in parenthesis).
 
 `(.,.)s'
      Repeats the last substitution. This form of the `s' command accepts
-     a count suffix N, or any combination of the characters `r', `g',
+     a count suffix N, and any combination of the characters `r', `g',
      and `p'. If a count suffix N is given, then only the Nth match is
      replaced. The `r' suffix causes the regular expression of the last
      search to be used instead of the that of the last substitution.
      The `g' suffix toggles the global suffix of the last substitution.
-     The `p' suffix toggles the print suffix of the last substitution
+     The `p' suffix toggles the print suffix of the last substitution.
      The current address is set to the last line affected.
 
 `(.,.)t(.)'
@@ -1401,15 +1403,15 @@ permit their use in free software.
 
 Tag Table:
 Node: Top544
-Node: Overview2004
-Node: Introduction to Line Editing4061
-Node: Invoking Ed11304
-Node: Line Addressing12952
-Node: Regular Expressions16059
-Node: Commands21404
-Node: Limitations32479
-Node: Diagnostics33054
-Node: Problems33758
-Node: GNU Free Documentation License34293
+Node: Overview2005
+Node: Introduction to Line Editing4062
+Node: Invoking Ed11305
+Node: Line Addressing12953
+Node: Regular Expressions16056
+Node: Commands21401
+Node: Limitations32546
+Node: Diagnostics33121
+Node: Problems33825
+Node: GNU Free Documentation License34360
 
 End Tag Table

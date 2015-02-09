@@ -5,8 +5,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 24 May 2009
-@set VERSION 1.3
+@set UPDATED 10 July 2009
+@set VERSION 1.4
 
 @dircategory Basics
 @direntry
@@ -427,8 +427,8 @@ valid wherever it makes sense.
 
 An address range is two addresses separated either by a comma or
 semicolon. The value of the first address in a range cannot exceed the
-value of the the second. If only one address is given in a range, then
-the second address is set to the given address. If an @var{n}-tuple of
+value of the second. If only one address is given in a range, then the
+second address is set to the given address. If an @var{n}-tuple of
 addresses is given where @var{n} > 2, then the corresponding range is
 determined by the last two addresses in the @var{n}-tuple. If only one
 address is expected, then the last address is used.
@@ -776,7 +776,8 @@ printed.
 @item (.,.)m(.)
 Moves lines in the buffer. The addressed lines are moved to after the
 right-hand destination address, which may be the address @samp{0}
-(zero). The current address is set to the last line moved.
+(zero). The current address is set to the new address of the last line
+moved.
 
 @item (.,.)n
 Prints the addressed lines, preceding each line by its line number and a
@@ -819,12 +820,13 @@ each line is replaced. If the @samp{g} (global) suffix is given, then
 every match is replaced. The @var{n} suffix, where @var{n} is a postive
 number, causes only the @var{n}th match to be replaced. It is an error
 if no substitutions are performed on any of the addressed lines. The
-current address is set the last line affected.
+current address is set to the last line affected.
 
 @var{re} and @var{replacement} may be delimited by any character other
-than @key{space} and @key{newline} (see the @samp{s} command below). If
-one or two of the last delimiters is omitted, then the last line
-affected is printed as if the print suffix @samp{p} were specified.
+than @key{space}, @key{newline} and the characters used by the form of
+the @samp{s} command shown below. If one or two of the last delimiters
+is omitted, then the last line affected is printed as if the print
+suffix @samp{p} were specified.
 
 An unescaped @samp{&} in @var{replacement} is replaced by the currently
 matched text. The character sequence @samp{\@var{m}} where @var{m} is a
@@ -836,13 +838,13 @@ with a backslash (@samp{\}).
 
 @item (.,.)s
 Repeats the last substitution. This form of the @samp{s} command accepts
-a count suffix @var{n}, or any combination of the characters @samp{r},
+a count suffix @var{n}, and any combination of the characters @samp{r},
 @samp{g}, and @samp{p}. If a count suffix @var{n} is given, then only
 the @var{n}th match is replaced. The @samp{r} suffix causes the regular
 expression of the last search to be used instead of the that of the last
 substitution. The @samp{g} suffix toggles the global suffix of the last
 substitution. The @samp{p} suffix toggles the print suffix of the last
-substitution The current address is set to the last line affected.
+substitution. The current address is set to the last line affected.
 
 @item (.,.)t(.)
 Copies (i.e., transfers) the addressed lines to after the right-hand

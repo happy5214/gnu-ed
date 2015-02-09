@@ -3,9 +3,11 @@ DISTNAME = $(progname)-$(progversion)
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL) -p -m 755
 INSTALL_DATA = $(INSTALL) -p -m 644
+INSTALL_DIR = $(INSTALL) -d -m 755
 SHELL = /bin/sh
 
-objs = buf.o carg_parser.o glbl.o io.o main.o main_loop.o re.o signal.o
+objs = buffer.o carg_parser.o global.o io.o \
+       main.o main_loop.o regex.o signal.o
 
 
 .PHONY : all install install-info install-man install-strip \
@@ -45,18 +47,18 @@ check : all $(VPATH)/testsuite/check.sh
 	@$(VPATH)/testsuite/check.sh $(VPATH)/testsuite
 
 install : all install-info install-man
-	if test ! -d $(DESTDIR)$(bindir) ; then $(INSTALL) -d $(DESTDIR)$(bindir) ; fi
+	if test ! -d $(DESTDIR)$(bindir) ; then $(INSTALL_DIR) $(DESTDIR)$(bindir) ; fi
 	$(INSTALL_PROGRAM) ./$(progname) $(DESTDIR)$(bindir)/$(program_prefix)$(progname)
 	-rm -f $(DESTDIR)$(bindir)/$(program_prefix)r$(progname)
 	cd $(DESTDIR)$(bindir) && ln -s $(program_prefix)$(progname) $(program_prefix)r$(progname)
 
 install-info :
-	if test ! -d $(DESTDIR)$(infodir) ; then $(INSTALL) -d $(DESTDIR)$(infodir) ; fi
+	if test ! -d $(DESTDIR)$(infodir) ; then $(INSTALL_DIR) $(DESTDIR)$(infodir) ; fi
 	$(INSTALL_DATA) $(VPATH)/doc/$(progname).info $(DESTDIR)$(infodir)/$(program_prefix)$(progname).info
 	-install-info --info-dir=$(DESTDIR)$(infodir) $(DESTDIR)$(infodir)/$(program_prefix)$(progname).info
 
 install-man :
-	if test ! -d $(DESTDIR)$(mandir)/man1 ; then $(INSTALL) -d $(DESTDIR)$(mandir)/man1 ; fi
+	if test ! -d $(DESTDIR)$(mandir)/man1 ; then $(INSTALL_DIR) $(DESTDIR)$(mandir)/man1 ; fi
 	$(INSTALL_DATA) $(VPATH)/doc/$(progname).1 $(DESTDIR)$(mandir)/man1/$(program_prefix)$(progname).1
 	-rm -f $(DESTDIR)$(mandir)/man1/$(program_prefix)r$(progname).1
 	cd $(DESTDIR)$(mandir)/man1 && ln -s $(program_prefix)$(progname).1 $(program_prefix)r$(progname).1

@@ -46,15 +46,15 @@ typedef struct
 undo_t;
 
 #ifndef max
-#define max( a,b ) (( a ) > ( b ) ? ( a ) : ( b ) )
+#define max( a,b ) ( (( a ) > ( b )) ? ( a ) : ( b ) )
 #endif
 #ifndef min
-#define min( a,b ) (( a ) < ( b ) ? ( a ) : ( b ) )
+#define min( a,b ) ( (( a ) < ( b )) ? ( a ) : ( b ) )
 #endif
 
 
-/* defined in buf.c */
-char append_lines( const char *ibufp2, const int addr, const char isglobal );
+/* defined in buffer.c */
+char append_lines( const char *ibufp, const int addr, const char isglobal );
 char close_sbuf( void );
 char copy_lines( const int first_addr, const int second_addr, const int addr );
 int current_addr( void );
@@ -62,16 +62,16 @@ int dec_addr( int addr );
 char delete_lines( const int from, const int to, const char isglobal );
 int get_line_node_addr( const line_t *lp );
 char *get_sbuf_line( const line_t *lp );
-char newline_added( void );
 int inc_addr( int addr );
 int inc_current_addr( void );
 char init_buffers( void );
 char isbinary( void );
-char modified( void );
 char join_lines( const int from, const int to, const char isglobal );
 int last_addr( void );
+char modified( void );
 char move_lines( const int first_addr, const int second_addr, const int addr,
                  const char isglobal );
+char newline_added( void );
 char open_sbuf( void );
 int path_max( const char *filename );
 char put_lines( const int addr );
@@ -83,11 +83,11 @@ void set_modified( const char m );
 void set_newline_added( void );
 char yank_lines( const int from, const int to );
 void clear_undo_stack( void );
-void disable_undo( void );
-char pop_undo_stack( const char isglobal );
-undo_t *push_undo_stack( const int type, const int from, const int to );
+undo_t *push_undo_atom( const int type, const int from, const int to );
+void reset_undo_state( void );
+char undo( const char isglobal );
 
-/* defined in glbl.c */
+/* defined in global.c */
 void clear_active_list( void );
 const line_t *next_active_node( void );
 char set_active_node( const line_t *lp );
@@ -95,15 +95,15 @@ void unset_active_nodes( const line_t *np, const line_t *mp );
 
 /* defined in io.c */
 char display_lines( int from, const int to, const int gflags );
-const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl );
+const char *get_extended_line( const char *ibufp, int *lenp, const char nonl );
 const char *get_tty_line( int *lenp );
 int read_file( const char *filename, const int addr );
-int write_file( const char *filename, const char *mode,
+int write_file( const char * const filename, const char * const mode,
                 const int from, const int to );
 
 /* defined in main.c */
 char is_regular_file( int fd );
-char is_valid_filename( const char *name );
+char may_access_filename( const char *name );
 char restricted( void );
 char scripted( void );
 void show_strerror( const char *filename, int errcode );
@@ -117,7 +117,7 @@ void set_prompt( const char *s );
 void set_verbose( void );
 void unmark_line_node( const line_t *lp );
 
-/* defined in re.c */
+/* defined in regex.c */
 char build_active_list( const char **ibufpp, const int first_addr,
                         const int second_addr, const char match );
 char extract_subst_tail( const char **ibufpp, int *gflagsp, int *snump,
@@ -129,13 +129,14 @@ char search_and_replace( const int first_addr, const int second_addr,
                          const int gflags, const int snum, const char isglobal );
 
 /* defined in signal.c */
-void enable_interrupts( void );
 void disable_interrupts( void );
+void enable_interrupts( void );
+char parse_int( int *i, const char *str, const char **tail );
+char resize_buffer( char **buf, int *size, int min_size );
+char resize_line_buffer( const line_t ***buf, int *size, int min_size );
+char resize_undo_buffer( undo_t **buf, int *size, int min_size );
 void set_signals( void );
 void set_window_lines( const int lines );
+const char *strip_escapes( const char *s );
 int window_columns( void );
 int window_lines( void );
-char parse_int( int *i, const char *str, const char **tail );
-char resize_buffer( void **buf, int *size, int min_size );
-const char *skip_blanks( const char *s );
-const char *strip_escapes( const char *s );

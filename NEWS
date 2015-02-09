@@ -1,4 +1,12 @@
-Changes in version 1.3:
+Changes in version 1.4:
 
-An aliasing related segfault that only occurs when overoptimizing with
-GCC on some architectures (alpha, sparc) has been (hopefully) fixed.
+The undo command has been fixed to restore the modified status of the
+buffer being edited.
+
+A race condition with user interrupt has been fixed in
+search_and_replace.
+
+The functions resize_line_buffer and resize_undo_buffer have been added
+to definitively fix the aliasing warnings.
+
+Some minor corrections have been made to the manual.

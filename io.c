@@ -24,13 +24,8 @@
 #include "ed.h"
 
 
-/* static buffers */
-static char *sbuf;			/* file i/o buffer */
-static int sbufsz;			/* file i/o buffer size */
-
-
 /* print text to stdout */
-char put_tty_line( const char *s, int len, const int gflags )
+static char put_tty_line( const char *s, int len, const int gflags )
   {
   const char escapes[] = "\a\b\f\n\r\t\v\\";
   const char escchars[] = "abfnrtv\\";
@@ -85,62 +80,54 @@ char display_lines( int from, const int to, const int gflags )
   }
 
 
-/* return the parity of escapes preceding a character in a string */
-char trailing_escape( const char *s, const char *t )
+/* return the parity of escapes at the end of a string */
+static char trailing_escape( const char * const s, int len )
   {
-  if( s == t || *( t - 1 ) != '\\' ) return 0;
-  return !trailing_escape( s, t - 1 );
+  char parity = 0;
+  while( --len >= 0 && s[len] == '\\' ) parity = !parity;
+  return parity;
   }
 
 
 /* get an extended line from stdin */
-const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl )
+const char *get_extended_line( const char *ibufp, int *lenp, const char nonl )
   {
-  static char *cvbuf = 0;	/* buffer */
-  static int cvbufsz = 0;	/* buffer size */
-  void * alias;
-  const char *t = ibufp2;
+  static char *buf = 0;
+  static int bufsz = 0;
   int len;
 
-  while( *t++ != '\n' ) ;
-  if( ( len = t - ibufp2 ) < 2 || !trailing_escape( ibufp2, ibufp2 + len - 1 ) )
-    { if( lenp ) *lenp = len; return ibufp2; }
-  if( lenp ) *lenp = -1;
-  alias = cvbuf;
-  if( !resize_buffer( &alias, &cvbufsz, len ) ) return 0;
-  cvbuf = (char *)alias;
-  memcpy( cvbuf, ibufp2, len );
-  --len; cvbuf[len-1] = '\n';		/* strip trailing esc */
+  for( len = 0; ibufp[len++] != '\n'; ) ;
+  if( len < 2 || !trailing_escape( ibufp, len - 1 ) )
+    { if( lenp ) *lenp = len; return ibufp; }
+  if( !resize_buffer( &buf, &bufsz, len ) ) return 0;
+  memcpy( buf, ibufp, len );
+  --len; buf[len-1] = '\n';		/* strip trailing esc */
   if( nonl ) --len;			/* strip newline */
   while( 1 )
     {
     int len2;
-    if( !( ibufp2 = get_tty_line( &len2 ) ) ) return 0;
-    if( len2 == 0 || ibufp2[len2-1] != '\n' )
+    if( !( ibufp = get_tty_line( &len2 ) ) ) return 0;
+    if( len2 == 0 || ibufp[len2-1] != '\n' )
       { set_error_msg( "Unexpected end-of-file" ); return 0; }
-    alias = cvbuf;
-    if( !resize_buffer( &alias, &cvbufsz, len + len2 ) ) return 0;
-    cvbuf = (char *)alias;
-    memcpy( cvbuf + len, ibufp2, len2 );
+    if( !resize_buffer( &buf, &bufsz, len + len2 ) ) return 0;
+    memcpy( buf + len, ibufp, len2 );
     len += len2;
-    if( len2 < 2 || !trailing_escape( cvbuf, cvbuf + len - 1 ) ) break;
-    --len; cvbuf[len-1] = '\n';		/* strip trailing esc */
+    if( len2 < 2 || !trailing_escape( buf, len - 1 ) ) break;
+    --len; buf[len-1] = '\n';		/* strip trailing esc */
     if( nonl ) --len;			/* strip newline */
     }
-  alias = cvbuf;
-  if( !resize_buffer( &alias, &cvbufsz, len + 1 ) ) return 0;
-  cvbuf = (char *)alias;
-  cvbuf[len] = 0;
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
+  buf[len] = 0;
   if( lenp ) *lenp = len;
-  return cvbuf;
+  return buf;
   }
 
 
 /* read a line of text from stdin; return pointer to buffer and line length */
 const char *get_tty_line( int *lenp )
   {
-  static char *ibuf = 0;		/* ed command-line buffer */
-  static int ibufsz = 0;		/* ed command-line buffer size */
+  static char *buf = 0;
+  static int bufsz = 0;
   int i = 0, oi = -1;
 
   while( 1 )
@@ -157,59 +144,58 @@ const char *get_tty_line( int *lenp )
       else
         {
         clearerr( stdin ); if( i != oi ) { oi = i; continue; }
-        if( i ) ibuf[i] = 0; if( lenp ) *lenp = i;
-        return ibuf;
+        if( i ) buf[i] = 0; if( lenp ) *lenp = i;
+        return buf;
         }
       }
     else
       {
-      void * alias = ibuf;
-      if( !resize_buffer( &alias, &ibufsz, i + 2 ) )
+      if( !resize_buffer( &buf, &bufsz, i + 2 ) )
         { if( lenp ) *lenp = 0; return 0; }
-      ibuf = (char *)alias;
-      ibuf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
-      ibuf[i] = 0; if( lenp ) *lenp = i;
-      return ibuf;
+      buf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
+      buf[i] = 0; if( lenp ) *lenp = i;
+      return buf;
       }
     }
   }
 
 
-/* read a line of text from a stream; return line length */
-int read_stream_line( FILE *fp, char *newline_added_now )
+/* read a line of text from a stream */
+static const char * read_stream_line( FILE *fp, int *lenp, char *newline_added_now )
   {
+  static char *buf = 0;
+  static int bufsz = 0;
   int c, i = 0;
 
   while( 1 )
     {
-    void * alias = sbuf;
-    if( !resize_buffer( &alias, &sbufsz, i + 2 ) ) return -1;
-    sbuf = (char *)alias;
+    if( !resize_buffer( &buf, &bufsz, i + 2 ) ) return 0;
     c = getc( fp ); if( c == EOF ) break;
-    sbuf[i++] = c;
+    buf[i++] = c;
     if( !c ) set_binary(); else if( c == '\n' ) break;
     }
-  sbuf[i] = 0;
+  buf[i] = 0;
   if( c == EOF )
     {
     if( ferror( fp ) )
       {
       show_strerror( 0, errno );
       set_error_msg( "Cannot read input file" );
-      return -1;
+      return 0;
       }
     else if( i )
       {
-      sbuf[i] = '\n'; sbuf[i+1] = 0; *newline_added_now = 1;
+      buf[i] = '\n'; buf[i+1] = 0; *newline_added_now = 1;
       if( !isbinary() ) ++i;
       }
     }
-  return i;
+  *lenp = i;
+  return buf;
   }
 
 
 /* read a stream into the editor buffer; return size of data read */
-long read_stream( FILE *fp, const int addr )
+static long read_stream( FILE *fp, const int addr )
   {
   line_t *lp = search_line_node( addr );
   undo_t *up = 0;
@@ -221,14 +207,16 @@ long read_stream( FILE *fp, const int addr )
   set_current_addr( addr );
   while( 1 )
     {
-    int len = read_stream_line( fp, &newline_added_now );
-    if( len > 0 ) size += len; else if( !len ) break; else return -1;
+    int len = 0;
+    const char *buf = read_stream_line( fp, &len, &newline_added_now );
+    if( !buf ) return -1;
+    if( len > 0 ) size += len; else break;
     disable_interrupts();
-    if( !put_sbuf_line( sbuf, current_addr() ) )
+    if( !put_sbuf_line( buf, current_addr() ) )
       { enable_interrupts(); return -1; }
     lp = lp->q_forw;
     if( up ) up->tail = lp;
-    else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
+    else if( !( up = push_undo_atom( UADD, -1, -1 ) ) )
       { enable_interrupts(); return -1; }
     enable_interrupts();
     }
@@ -269,22 +257,8 @@ int read_file( const char *filename, const int addr )
   }
 
 
-/* write a line of text to a stream */
-char write_stream_line( FILE *fp, const char *s, int len )
-  {
-  while( len-- )
-    if( fputc( *s++, fp ) < 0 )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( "Cannot write file" );
-      return 0;
-      }
-  return 1;
-  }
-
-
 /* write a range of lines to a stream */
-long write_stream( FILE *fp, int from, const int to )
+static long write_stream( FILE *fp, int from, const int to )
   {
   line_t *lp = search_line_node( from );
   long size = 0;
@@ -297,8 +271,14 @@ long write_stream( FILE *fp, int from, const int to )
     len = lp->len;
     if( from != last_addr() || !isbinary() || !newline_added() )
       s[len++] = '\n';
-    if( !write_stream_line( fp, s, len ) ) return -1;
     size += len;
+    while( --len >= 0 )
+      if( fputc( *s++, fp ) < 0 )
+        {
+        show_strerror( 0, errno );
+        set_error_msg( "Cannot write file" );
+        return -1;
+        }
     ++from; lp = lp->q_forw;
     }
   return size;
@@ -306,7 +286,7 @@ long write_stream( FILE *fp, int from, const int to )
 
 
 /* write a range of lines to a named file/pipe; return line count */
-int write_file( const char *filename, const char *mode,
+int write_file( const char * const filename, const char * const mode,
                 const int from, const int to )
   {
   FILE *fp;
@@ -328,5 +308,5 @@ int write_file( const char *filename, const char *mode,
     return -1;
     }
   if( !scripted() ) fprintf( stderr, "%lu\n", size );
-  return from ? to - from + 1 : 0;
+  return ( from && from <= to ) ? to - from + 1 : 0;
   }

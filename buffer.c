@@ -1,4 +1,4 @@
-/* buf.c: scratch-file buffer routines for the ed line editor. */
+/* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
     Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
@@ -29,15 +29,15 @@
 #include "ed.h"
 
 
-static int current_addr_;	/* current address in editor buffer */
-static int last_addr_;		/* last address in editor buffer */
-static char isbinary_;		/* if set, buffer contains ASCII NULs */
-static char modified_;		/* if set, buffer modified since last write */
-static char newline_added_;	/* if set, newline appended to input file */
+static int current_addr_ = 0;	/* current address in editor buffer */
+static int last_addr_ = 0;	/* last address in editor buffer */
+static char isbinary_ = 0;	/* if set, buffer contains ASCII NULs */
+static char modified_ = 0;	/* if set, buffer modified since last write */
+static char newline_added_ = 0;	/* if set, newline appended to input file */
 
-static int seek_write;		/* seek before writing */
-static FILE *sfp;		/* scratch file pointer */
-static long sfpos;		/* scratch file position */
+static int seek_write = 0;	/* seek before writing */
+static FILE *sfp = 0;		/* scratch file pointer */
+static long sfpos = 0;		/* scratch file position */
 static line_t buffer_head;	/* editor buffer ( linked list of line_t )*/
 static line_t yank_buffer_head;
 
@@ -68,12 +68,12 @@ int dec_addr( int addr )
 
 
 /* link next and previous nodes */
-void link_nodes( line_t *prev, line_t *next )
+static void link_nodes( line_t *prev, line_t *next )
   { prev->q_forw = next; next->q_back = prev; }
 
 
 /* insert node into circular queue after previous */
-void insert_node( line_t *node, line_t *prev )
+static void insert_node( line_t *node, line_t *prev )
   {
   link_nodes( node, prev->q_forw );
   link_nodes( prev, node );
@@ -81,12 +81,12 @@ void insert_node( line_t *node, line_t *prev )
 
 
 /* remove node from circular queue */
-//void remove_node( const line_t *node )
+//static void remove_node( const line_t *node )
 //  { link_nodes( node->q_back, node->q_forw ); }
 
 
 /* add a line node in the editor buffer after the given line */
-void add_line_node( line_t *lp, const int addr )
+static void add_line_node( line_t *lp, const int addr )
   {
   line_t *p = search_line_node( addr );
   insert_node( lp, p );
@@ -95,7 +95,7 @@ void add_line_node( line_t *lp, const int addr )
 
 
 /* return a pointer to a copy of a line node, or to a new node if lp == 0 */
-line_t *dup_line_node( line_t *lp )
+static line_t *dup_line_node( line_t *lp )
   {
   line_t *p = ( line_t *) malloc( sizeof( line_t ) );
   if( !p )
@@ -111,11 +111,9 @@ line_t *dup_line_node( line_t *lp )
 
 /* insert text from stdin to after line n; stop when either a single
    period is read or EOF */
-char append_lines( const char *ibufp2, const int addr, const char isglobal )
+char append_lines( const char *ibufp, const int addr, const char isglobal )
   {
   int len;
-  const char *txt = ibufp2;
-  const char *eot;
   undo_t *up = 0;
   current_addr_ = addr;
 
@@ -123,31 +121,30 @@ char append_lines( const char *ibufp2, const int addr, const char isglobal )
     {
     if( !isglobal )
       {
-      ibufp2 = get_tty_line( &len );
-      if( !ibufp2 ) return 0;
-      if( !len || ibufp2[len-1] != '\n' ) { clearerr( stdin ); return !len; }
-      txt = ibufp2;
+      ibufp = get_tty_line( &len );
+      if( !ibufp ) return 0;
+      if( !len || ibufp[len-1] != '\n' ) { clearerr( stdin ); return !len; }
       }
-    else if( !*( txt = ibufp2 ) ) return 1;
-    else { while( *ibufp2++ != '\n' ) ; len = ibufp2 - txt; }
-    if( len == 2 && txt[0] == '.' && txt[1] == '\n' ) return 1;
-    eot = txt + len;
+    else
+      {
+      if( !*ibufp ) return 1;
+      for( len = 0; ibufp[len++] != '\n'; ) ;
+      }
+    if( len == 2 && ibufp[0] == '.' ) return 1;
     disable_interrupts();
-    do {
-      txt = put_sbuf_line( txt, current_addr_ );
-      if( !txt ) { enable_interrupts(); return 0; }
-      if( up ) up->tail = search_line_node( current_addr_ );
-      else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
-        { enable_interrupts(); return 0; }
-      }
-    while( txt != eot );
-    set_modified( 1 );
+    if( !put_sbuf_line( ibufp, current_addr_ ) )
+      { enable_interrupts(); return 0; }
+    if( up ) up->tail = search_line_node( current_addr_ );
+    else if( !( up = push_undo_atom( UADD, -1, -1 ) ) )
+      { enable_interrupts(); return 0; }
+    ibufp += len;
+    modified_ = 1;
     enable_interrupts();
     }
   }
 
 
-void clear_yank_buffer( void )
+static void clear_yank_buffer( void )
   {
   line_t *lp = yank_buffer_head.q_forw;
 
@@ -205,7 +202,7 @@ char copy_lines( const int first_addr, const int second_addr, const int addr )
       if( !lp ) { enable_interrupts(); return 0; }
       add_line_node( lp, current_addr_++ );
       if( up ) up->tail = lp;
-      else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
+      else if( !( up = push_undo_atom( UADD, -1, -1 ) ) )
         { enable_interrupts(); return 0; }
       modified_ = 1;
       enable_interrupts();
@@ -221,7 +218,7 @@ char delete_lines( const int from, const int to, const char isglobal )
 
   if( !yank_lines( from, to ) ) return 0;
   disable_interrupts();
-  if( !push_undo_stack( UDEL, from, to ) )
+  if( !push_undo_atom( UDEL, from, to ) )
     { enable_interrupts(); return 0; }
   n = search_line_node( inc_addr( to ) );
   p = search_line_node( from - 1 );	/* this search_line_node last! */
@@ -251,9 +248,8 @@ int get_line_node_addr( const line_t *lp )
 /* get a line of text from the scratch file; return pointer to the text */
 char *get_sbuf_line( const line_t *lp )
   {
-  static char *sfbuf = 0;	/* buffer */
-  static int sfbufsz = 0;	/* buffer size */
-  void * alias;
+  static char *buf = 0;
+  static int bufsz = 0;
   int len, ct;
 
   if( lp == &buffer_head ) return 0;
@@ -270,10 +266,8 @@ char *get_sbuf_line( const line_t *lp )
       }
     }
   len = lp->len;
-  alias = sfbuf;
-  if( !resize_buffer( &alias, &sfbufsz, len + 1 ) ) return 0;
-  sfbuf = (char *)alias;
-  ct = fread( sfbuf, 1, len, sfp );
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
+  ct = fread( buf, 1, len, sfp );
   if( ct < 0 || ct != len )
     {
     show_strerror( 0, errno );
@@ -281,8 +275,8 @@ char *get_sbuf_line( const line_t *lp )
     return 0;
     }
   sfpos += len;		/* update file position */
-  sfbuf[len] = 0;
-  return sfbuf;
+  buf[len] = 0;
+  return buf;
   }
 
 
@@ -307,8 +301,7 @@ char init_buffers( void )
 char join_lines( const int from, const int to, const char isglobal )
   {
   static char *buf = 0;
-  static int bsize;
-  void * alias;
+  static int bufsz = 0;
   int size = 0;
   line_t *ep = search_line_node( inc_addr( to ) );
   line_t *bp = search_line_node( from );
@@ -316,23 +309,19 @@ char join_lines( const int from, const int to, const char isglobal )
   while( bp != ep )
     {
     char *s = get_sbuf_line( bp );
-    alias = buf;
-    if( !s || !resize_buffer( &alias, &bsize, size + bp->len ) ) return 0;
-    buf = (char *)alias;
+    if( !s || !resize_buffer( &buf, &bufsz, size + bp->len ) ) return 0;
     memcpy( buf + size, s, bp->len );
     size += bp->len;
     bp = bp->q_forw;
     }
-  alias = buf;
-  if( !resize_buffer( &alias, &bsize, size + 2 ) ) return 0;
-  buf = (char *)alias;
+  if( !resize_buffer( &buf, &bufsz, size + 2 ) ) return 0;
   memcpy( buf + size, "\n", 2 );
   if( !delete_lines( from, to, isglobal ) ) return 0;
   current_addr_ = from - 1;
   disable_interrupts();
   if( !put_sbuf_line( buf, current_addr_ ) ||
-      !push_undo_stack( UADD, -1, -1 ) ) { enable_interrupts(); return 0; }
-  set_modified( 1 );
+      !push_undo_atom( UADD, -1, -1 ) ) { enable_interrupts(); return 0; }
+  modified_ = 1;
   enable_interrupts();
   return 1;
   }
@@ -353,8 +342,8 @@ char move_lines( const int first_addr, const int second_addr, const int addr,
     b2 = search_line_node( p );
     current_addr_ = second_addr;
     }
-  else if( !push_undo_stack( UMOV, p, n ) ||
-           !push_undo_stack( UMOV, addr, inc_addr( addr ) ) )
+  else if( !push_undo_atom( UMOV, p, n ) ||
+           !push_undo_atom( UMOV, addr, inc_addr( addr ) ) )
     { enable_interrupts(); return 0; }
   else
     {
@@ -424,7 +413,7 @@ char put_lines( const int addr )
     if( !( cp = dup_line_node( lp ) ) ) { enable_interrupts(); return 0; }
     add_line_node( cp, current_addr_++ );
     if( up ) up->tail = cp;
-    else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
+    else if( !( up = push_undo_atom( UADD, -1, -1 ) ) )
       { enable_interrupts(); return 0; }
     modified_ = 1;
     lp = lp->q_forw;
@@ -527,8 +516,9 @@ char yank_lines( const int from, const int to )
 static undo_t *ustack = 0;		/* undo stack */
 static int usize = 0;			/* ustack size (in bytes) */
 static int u_ptr = 0;			/* undo stack pointer */
-static int u_current_addr = -1;		/* if >= 0, undo enabled */
-static int u_addr_last = -1;		/* if >= 0, undo enabled */
+static int u_current_addr = -1;		/* if < 0, undo disabled */
+static int u_addr_last = -1;		/* if < 0, undo disabled */
+static char u_modified = 0;
 
 
 void clear_undo_stack( void )
@@ -549,26 +539,55 @@ void clear_undo_stack( void )
   u_ptr = 0;
   u_current_addr = current_addr_;
   u_addr_last = last_addr_;
+  u_modified = modified_;
   }
 
 
-void disable_undo( void )
+void reset_undo_state( void )
   {
   clear_undo_stack();
   u_current_addr = u_addr_last = -1;
+  u_modified = 0;
+  }
+
+
+/* return pointer to intialized undo node */
+undo_t *push_undo_atom( const int type, const int from, const int to )
+  {
+  disable_interrupts();
+  if( !resize_undo_buffer( &ustack, &usize, ( u_ptr + 1 ) * sizeof( undo_t ) ) )
+    {
+    show_strerror( 0, errno );
+    set_error_msg( "Memory exhausted" );
+    if( ustack )
+      {
+      clear_undo_stack();
+      free( ustack );
+      ustack = 0;
+      usize = u_ptr = 0;
+      u_current_addr = u_addr_last = -1;
+      }
+    enable_interrupts();
+    return 0;
+    }
+  enable_interrupts();
+  ustack[u_ptr].type = type;
+  ustack[u_ptr].tail = search_line_node( ( to >= 0 ) ? to : current_addr_ );
+  ustack[u_ptr].head = search_line_node( ( from >= 0 ) ? from : current_addr_ );
+  return ustack + u_ptr++;
   }
 
 
 /* undo last change to the editor buffer */
-char pop_undo_stack( const char isglobal )
+char undo( const char isglobal )
   {
   int n;
-  int o_current_addr = current_addr_;
-  int o_addr_last = last_addr_;
+  const int o_current_addr = current_addr_;
+  const int o_addr_last = last_addr_;
+  const char o_modified = modified_;
 
-  if( u_current_addr < 0 || u_addr_last < 0 )
+  if( u_ptr <= 0 || u_current_addr < 0 || u_addr_last < 0 )
     { set_error_msg( "Nothing to undo" ); return 0; }
-  if( u_ptr ) set_modified( 1 );
   search_line_node( 0 );		/* reset cached value */
   disable_interrupts();
   for( n = u_ptr - 1; n >= 0; --n )
@@ -597,36 +616,7 @@ char pop_undo_stack( const char isglobal )
   if( isglobal ) clear_active_list();
   current_addr_ = u_current_addr; u_current_addr = o_current_addr;
   last_addr_ = u_addr_last; u_addr_last = o_addr_last;
+  modified_ = u_modified; u_modified = o_modified;
   enable_interrupts();
   return 1;
-  }
-
-
-/* return pointer to intialized undo node */
-undo_t *push_undo_stack( const int type, const int from, const int to )
-  {
-  void * alias;
-  disable_interrupts();
-  alias = ustack;
-  if( !resize_buffer( &alias, &usize, ( u_ptr + 1 ) * sizeof( undo_t ) ) )
-    {
-    show_strerror( 0, errno );
-    set_error_msg( "Memory exhausted" );
-    if( ustack )
-      {
-      clear_undo_stack();
-      free( ustack );
-      ustack = 0;
-      usize = u_ptr = 0;
-      u_current_addr = u_addr_last = -1;
-      }
-    enable_interrupts();
-    return 0;
-    }
-  ustack = (undo_t *)alias;
-  enable_interrupts();
-  ustack[u_ptr].type = type;
-  ustack[u_ptr].tail = search_line_node( ( to >= 0 ) ? to : current_addr_ );
-  ustack[u_ptr].head = search_line_node( ( from >= 0 ) ? from : current_addr_ );
-  return ustack + u_ptr++;
   }
