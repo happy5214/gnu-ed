@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -128,17 +128,19 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
 
 
 /* Read a line of text from stdin.
-   Return pointer to buffer and line size (uncluding trailing newline
+   Return pointer to buffer and line size (including trailing newline
    if it exists) */
 const char * get_tty_line( int * const sizep )
   {
   static char * buf = 0;
   static int bufsz = 0;
-  int i = 0, oi = -1;
+  int i = 0;
 
   while( true )
     {
     const int c = getchar();
+    if( !resize_buffer( &buf, &bufsz, i + 2 ) )
+      { if( sizep ) *sizep = 0; return 0; }
     if( c == EOF )
       {
       if( ferror( stdin ) )
@@ -147,17 +149,15 @@ const char * get_tty_line( int * const sizep )
         clearerr( stdin ); if( sizep ) *sizep = 0;
         return 0;
         }
-      else
+      if( feof( stdin ) )
         {
-        clearerr( stdin ); if( i != oi ) { oi = i; continue; }
-        if( i ) buf[i] = 0; if( sizep ) *sizep = i;
+        clearerr( stdin );
+        buf[i] = 0; if( sizep ) *sizep = i;
         return buf;
         }
       }
     else
       {
-      if( !resize_buffer( &buf, &bufsz, i + 2 ) )
-        { if( sizep ) *sizep = 0; return 0; }
       buf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
       buf[i] = 0; if( sizep ) *sizep = i;
       return buf;
@@ -167,7 +167,7 @@ const char * get_tty_line( int * const sizep )
 
 
 /* Read a line of text from a stream.
-   Return pointer to buffer and line size (uncluding trailing newline
+   Return pointer to buffer and line size (including trailing newline
    if it exists and is not added now) */
 static const char * read_stream_line( FILE * const fp, int * const sizep,
                                       bool * const newline_added_nowp )

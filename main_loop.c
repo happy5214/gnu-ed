@@ -1,6 +1,6 @@
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -198,7 +198,7 @@ static int next_addr( const char ** const ibufpp, int * const addr_cnt )
   {
   const char * const s = *ibufpp = skip_blanks( *ibufpp );
   int addr = current_addr();
-  bool first = true;			// true == addr, false == offset
+  bool first = true;			/* true == addr, false == offset */
 
   while( true )
     {

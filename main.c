@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@
 
 static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2012";
+static const char * const program_year = "2013";
 static const char * invocation_name = 0;
 
 static bool restricted_ = false;	/* if set, run in restricted mode */

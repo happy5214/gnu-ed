@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 9 October 2012
-@set VERSION 1.7
+@set UPDATED 23 April 2013
+@set VERSION 1.8
 
 @dircategory Basics
 @direntry
@@ -16,7 +16,7 @@
 
 @copying
 Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011,
-2012 Free Software Foundation, Inc.
+2012, 2013 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or

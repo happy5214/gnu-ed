@@ -1,5 +1,5 @@
 /*  Arg_parser - POSIX/GNU command line argument parser. (C version)
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
     Antonio Diaz Diaz.
 
     This library is free software: you can redistribute it and/or modify
@@ -89,15 +89,14 @@ static char parse_long_option( struct Arg_parser * const ap,
                                int * const argindp )
   {
   unsigned len;
-  int index = -1;
-  int i;
+  int index = -1, i;
   char exact = 0, ambig = 0;
 
   for( len = 0; opt[len+2] && opt[len+2] != '='; ++len ) ;
 
   /* Test all long options for either exact match or abbreviated matches. */
   for( i = 0; options[i].code != 0; ++i )
-    if( options[i].name && !strncmp( options[i].name, &opt[2], len ) )
+    if( options[i].name && strncmp( options[i].name, &opt[2], len ) == 0 )
       {
       if( strlen( options[i].name ) == len )	/* Exact match found */
         { index = i; exact = 1; break; }
@@ -165,8 +164,7 @@ static char parse_short_option( struct Arg_parser * const ap,
 
   while( cind > 0 )
     {
-    int index = -1;
-    int i;
+    int index = -1, i;
     const unsigned char code = opt[cind];
     char code_str[2];
     code_str[0] = code; code_str[1] = 0;

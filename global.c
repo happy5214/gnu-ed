@@ -1,7 +1,7 @@
 /* global.c: global command routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
