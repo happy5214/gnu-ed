@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -43,10 +43,10 @@
 #include "ed.h"
 
 
-static const char * invocation_name = 0;
 static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2010";
+static const char * const program_year = "2012";
+static const char * invocation_name = 0;
 
 static bool restricted_ = false;	/* if set, run in restricted mode */
 static bool scripted_ = false;		/* if set, suppress diagnostics */
@@ -62,30 +62,31 @@ static void show_help( void )
   {
   printf( "%s - The GNU line editor.\n", Program_name );
   printf( "\nUsage: %s [options] [file]\n", invocation_name );
-  printf( "\nOptions:\n" );
-  printf( "  -h, --help                 display this help and exit\n" );
-  printf( "  -V, --version              output version information and exit\n" );
-  printf( "  -G, --traditional          run in compatibility mode\n" );
-  printf( "  -l, --loose-exit-status    exit with 0 status even if a command fails\n" );
-  printf( "  -p, --prompt=STRING        use STRING as an interactive prompt\n" );
-  printf( "  -r, --restricted           run in restricted mode\n" );
-  printf( "  -s, --quiet, --silent      suppress diagnostics\n" );
-  printf( "  -v, --verbose              be verbose\n" );
-  printf( "Start edit by reading in `file' if given.\n" );
-  printf( "If `file' begins with a `!', read output of shell command.\n" );
-  printf( "\nReport bugs to <bug-ed@gnu.org>.\n" );
-  printf( "Ed home page: http://www.gnu.org/software/ed/ed.html\n" );
-  printf( "General help using GNU software: http://www.gnu.org/gethelp\n" );
+  printf( "\nOptions:\n"
+          "  -h, --help                 display this help and exit\n"
+          "  -V, --version              output version information and exit\n"
+          "  -G, --traditional          run in compatibility mode\n"
+          "  -l, --loose-exit-status    exit with 0 status even if a command fails\n"
+          "  -p, --prompt=STRING        use STRING as an interactive prompt\n"
+          "  -r, --restricted           run in restricted mode\n"
+          "  -s, --quiet, --silent      suppress diagnostics\n"
+          "  -v, --verbose              be verbose\n"
+          "Start edit by reading in `file' if given.\n"
+          "If `file' begins with a `!', read output of shell command.\n"
+          "\nReport bugs to <bug-ed@gnu.org>.\n"
+          "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
+          "General help using GNU software: http://www.gnu.org/gethelp\n" );
   }
 
 
 static void show_version( void )
   {
   printf( "%s %s\n", Program_name, PROGVERSION );
-  printf( "Copyright (C) %s Free Software Foundation, Inc.\n", program_year );
-  printf( "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n" );
-  printf( "This is free software: you are free to change and redistribute it.\n" );
-  printf( "There is NO WARRANTY, to the extent permitted by law.\n" );
+  printf( "Copyright (C) 1994 Andrew L. Moore.\n"
+          "Copyright (C) %s Free Software Foundation, Inc.\n", program_year );
+  printf( "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+          "This is free software: you are free to change and redistribute it.\n"
+          "There is NO WARRANTY, to the extent permitted by law.\n" );
   }
 
 
@@ -117,7 +118,7 @@ static void show_error( const char * const msg, const int errcode, const bool he
 bool is_regular_file( const int fd )
   {
   struct stat st;
-  return ( fstat( fd, &st ) < 0 || S_ISREG( st.st_mode ) );
+  return ( fstat( fd, &st ) != 0 || S_ISREG( st.st_mode ) );
   }
 
 
@@ -176,7 +177,7 @@ int main( const int argc, const char * const argv[] )
       default : show_error( "internal error: uncaught option.", 0, false );
                 return 3;
       }
-    }
+    } /* end process options */
   setlocale( LC_ALL, "" );
   if( !init_buffers() ) return 1;
 

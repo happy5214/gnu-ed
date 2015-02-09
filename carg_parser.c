@@ -1,5 +1,6 @@
-/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
-    Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
+/*  Arg_parser - POSIX/GNU command line argument parser. (C version)
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
+    Antonio Diaz Diaz.
 
     This library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +46,8 @@ static char push_back_record( struct Arg_parser * const ap,
   {
   const int len = strlen( argument );
   struct ap_Record *p;
-  void * tmp = ap_resize_buffer( ap->data, ( ap->data_size + 1 ) * sizeof (struct ap_Record) );
+  void * tmp = ap_resize_buffer( ap->data,
+                 ( ap->data_size + 1 ) * sizeof (struct ap_Record) );
   if( !tmp ) return 0;
   ap->data = (struct ap_Record *)tmp;
   p = &(ap->data[ap->data_size]);

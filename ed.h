@@ -1,6 +1,7 @@
 /*  Global declarations for the ed editor.  */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -81,7 +82,8 @@ bool newline_added( void );
 bool open_sbuf( void );
 int path_max( const char * filename );
 bool put_lines( const int addr );
-const char * put_sbuf_line( const char * const s, const int addr );
+const char * put_sbuf_line( const char * const buf, const int size,
+                            const int addr );
 line_t * search_line_node( const int addr );
 void set_binary( void );
 void set_current_addr( const int addr );
@@ -103,7 +105,7 @@ void unset_active_nodes( const line_t * bp, const line_t * const ep );
 bool display_lines( int from, const int to, const int gflags );
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines );
-const char * get_tty_line( int * const lenp );
+const char * get_tty_line( int * const sizep );
 int read_file( const char * const filename, const int addr );
 int write_file( const char * const filename, const char * const mode,
                 const int from, const int to );

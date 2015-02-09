@@ -1,5 +1,6 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -25,7 +26,7 @@
 #include "ed.h"
 
 
-enum Status { ERR = -2, EMOD = -3, FATAL = -4 };
+enum Status { QUIT = -1, ERR = -2, EMOD = -3, FATAL = -4 };
 
 static char def_filename[1024] = "";	/* default filename */
 static char errmsg[80] = "";		/* error message buffer */
@@ -163,23 +164,25 @@ static const char * get_filename( const char ** const ibufpp )
   {
   static char * buf = 0;
   static int bufsz = 0;
-  int size, n;
+  const int pmax = path_max( 0 );
+  int n;
 
   *ibufpp = skip_blanks( *ibufpp );
   if( **ibufpp != '\n' )
     {
+    int size = 0;
     if( !get_extended_line( ibufpp, &size, true ) ) return 0;
     if( **ibufpp == '!' )
       {
       ++*ibufpp;
       return get_shell_command( ibufpp );
       }
-    else if( size > path_max( 0 ) )
+    else if( size > pmax )
       { set_error_msg( "Filename too long" ); return 0; }
     }
   else if( !traditional() && !def_filename[0] )
     { set_error_msg( "No current filename" ); return 0; }
-  if( !resize_buffer( &buf, &bufsz, path_max( 0 ) + 1 ) ) return 0;
+  if( !resize_buffer( &buf, &bufsz, pmax + 1 ) ) return 0;
   for( n = 0; **ibufpp != '\n'; ++n, ++*ibufpp ) buf[n] = **ibufpp;
   buf[n] = 0;
   while( **ibufpp == '\n' ) ++*ibufpp;			/* skip newline */
@@ -532,7 +535,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( c == 'P' ) prompt_on = !prompt_on;
               else if( modified() && !scripted() && c == 'q' &&
                        prev_status != EMOD ) return EMOD;
-              else return -1;
+              else return QUIT;
               break;
     case 'r': if( unexpected_command_suffix( **ibufpp ) ) return ERR;
               if( addr_cnt == 0 ) second_addr = last_addr();
@@ -544,7 +547,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                 { set_error_msg( "No current filename" ); return ERR; }
               addr = read_file( fnp[0] ? fnp : def_filename, second_addr );
               if( addr < 0 ) return ERR;
-              if( addr && addr != last_addr() ) set_modified( true );
+              if( addr ) set_modified( true );
               break;
     case 's': if( !command_s( ibufpp, &gflags, addr_cnt, isglobal ) )
                 return ERR;
@@ -565,7 +568,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( unexpected_command_suffix( **ibufpp ) ) return ERR;
               fnp = get_filename( ibufpp );
               if( !fnp ) return ERR;
-              if( addr_cnt == 0 && !last_addr() ) first_addr = second_addr = 0;
+              if( addr_cnt == 0 && last_addr() == 0 )
+                first_addr = second_addr = 0;
               else if( !check_addr_range( 1, last_addr(), addr_cnt ) )
                 return ERR;
               if( !def_filename[0] && fnp[0] != '!' ) set_def_filename( fnp );
@@ -577,7 +581,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( addr == last_addr() ) set_modified( false );
               else if( modified() && !scripted() && n == 'q' &&
                        prev_status != EMOD ) return EMOD;
-              if( n == 'q' || n == 'Q' ) return -1;
+              if( n == 'q' || n == 'Q' ) return QUIT;
               break;
     case 'x': if( second_addr < 0 || last_addr() < second_addr )
                 { invalid_address(); return ERR; }
@@ -608,7 +612,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
     case '!': if( unexpected_address( addr_cnt ) ) return ERR;
               fnp = get_shell_command( ibufpp );
               if( !fnp ) return ERR;
-              system( fnp + 1 );
+              if( system( fnp + 1 ) < 0 )
+                { set_error_msg( "Can't create shell process" ); return ERR; }
               if( !scripted() ) printf( "!\n" );
               break;
     case '\n': first_addr = 1;
@@ -698,7 +703,9 @@ int main_loop( const bool loose )
 
   while( true )
     {
-    if( status < 0 && verbose ) fprintf( stderr, "%s\n", errmsg );
+    fflush( stdout );
+    if( status < 0 && verbose )
+      { fprintf( stderr, "%s\n", errmsg ); fflush( stderr ); }
     if( prompt_on ) { printf( "%s", prompt_str ); fflush( stdout ); }
     ibufp = get_tty_line( &len );
     if( !ibufp ) return err_status;
@@ -718,7 +725,7 @@ int main_loop( const bool loose )
     else ++linenum;
     status = exec_command( &ibufp, status, false );
     if( status == 0 ) continue;
-    if( status == -1 ) return err_status;
+    if( status == QUIT ) return err_status;
     if( status == EMOD )
       {
       fputs( "?\n", stderr );				/* give warning */

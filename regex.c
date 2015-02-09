@@ -1,6 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -45,7 +46,7 @@ bool prev_pattern( void ) { return global_pat != 0; }
 /* translate characters in a string */
 static void translit_text( char * p, int len, const char from, const char to )
   {
-  while( --len > 0 )
+  while( --len >= 0 )
     {
     if( *p == from ) *p = to;
     ++p;
@@ -309,7 +310,7 @@ static int apply_subst_template( const char * const boln,
 
 
 /* replace text matched by a pattern according to a substitution
-   template; return length of the modified text */
+   template; return size of the modified text */
 static int replace_matching_text( const line_t * const lp, const int gflags,
                                   const int snum )
   {
@@ -371,18 +372,18 @@ bool search_and_replace( const int first_addr, const int second_addr,
   for( lc = 0; lc <= second_addr - first_addr; ++lc )
     {
     const line_t * const lp = search_line_node( inc_current_addr() );
-    int len = replace_matching_text( lp, gflags, snum );
-    if( len < 0 ) return false;
-    if( len )
+    const int size = replace_matching_text( lp, gflags, snum );
+    if( size < 0 ) return false;
+    if( size )
       {
       const char * txt = rbuf;
-      const char * const eot = rbuf + len;
+      const char * const eot = rbuf + size;
       undo_t * up = 0;
       disable_interrupts();
       if( !delete_lines( current_addr(), current_addr(), isglobal ) )
         { enable_interrupts(); return false; }
       do {
-        txt = put_sbuf_line( txt, current_addr() );
+        txt = put_sbuf_line( txt, size, current_addr() );
         if( !txt ) { enable_interrupts(); return false; }
         if( up ) up->tail = search_line_node( current_addr() );
         else

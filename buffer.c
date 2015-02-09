@@ -1,6 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -110,7 +111,7 @@ static line_t * dup_line_node( line_t * const lp )
 bool append_lines( const char ** const ibufpp, const int addr,
                    const bool isglobal )
   {
-  int len;
+  int size = 0;
   undo_t * up = 0;
   current_addr_ = addr;
 
@@ -118,19 +119,19 @@ bool append_lines( const char ** const ibufpp, const int addr,
     {
     if( !isglobal )
       {
-      *ibufpp = get_tty_line( &len );
+      *ibufpp = get_tty_line( &size );
       if( !*ibufpp ) return false;
-      if( !len || (*ibufpp)[len-1] != '\n' )
-        { clearerr( stdin ); return !len; }
+      if( size == 0 || (*ibufpp)[size-1] != '\n' )
+        { clearerr( stdin ); return ( size == 0 ); }
       }
     else
       {
       if( !**ibufpp ) return true;
-      for( len = 0; (*ibufpp)[len++] != '\n'; ) ;
+      for( size = 0; (*ibufpp)[size++] != '\n'; ) ;
       }
-    if( len == 2 && **ibufpp == '.' ) { *ibufpp += len; return true; }
+    if( size == 2 && **ibufpp == '.' ) { *ibufpp += size; return true; }
     disable_interrupts();
-    if( !put_sbuf_line( *ibufpp, current_addr_ ) )
+    if( !put_sbuf_line( *ibufpp, size, current_addr_ ) )
       { enable_interrupts(); return false; }
     if( up ) up->tail = search_line_node( current_addr_ );
     else
@@ -138,7 +139,7 @@ bool append_lines( const char ** const ibufpp, const int addr,
       up = push_undo_atom( UADD, current_addr_, current_addr_ );
       if( !up ) { enable_interrupts(); return false; }
       }
-    *ibufpp += len;
+    *ibufpp += size;
     modified_ = true;
     enable_interrupts();
     }
@@ -168,7 +169,7 @@ bool close_sbuf( void )
   clear_undo_stack();
   if( sfp )
     {
-    if( fclose( sfp ) < 0 )
+    if( fclose( sfp ) != 0 )
       {
       show_strerror( 0, errno );
       set_error_msg( "Cannot close temp file" );
@@ -255,7 +256,7 @@ char * get_sbuf_line( const line_t * const lp )
   {
   static char * buf = 0;
   static int bufsz = 0;
-  int len, rd;
+  int len;
 
   if( lp == &buffer_head ) return 0;
   seek_write = true;			/* force seek on write */
@@ -263,7 +264,7 @@ char * get_sbuf_line( const line_t * const lp )
   if( sfpos != lp->pos )
     {
     sfpos = lp->pos;
-    if( fseek( sfp, sfpos, SEEK_SET ) < 0 )
+    if( fseek( sfp, sfpos, SEEK_SET ) != 0 )
       {
       show_strerror( 0, errno );
       set_error_msg( "Cannot seek temp file" );
@@ -272,8 +273,7 @@ char * get_sbuf_line( const line_t * const lp )
     }
   len = lp->len;
   if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
-  rd = fread( buf, 1, len, sfp );
-  if( rd < 0 || rd != len )
+  if( (int)fread( buf, 1, len, sfp ) != len )
     {
     show_strerror( 0, errno );
     set_error_msg( "Cannot read temp file" );
@@ -321,10 +321,11 @@ bool join_lines( const int from, const int to, const bool isglobal )
     }
   if( !resize_buffer( &buf, &bufsz, size + 2 ) ) return false;
   memcpy( buf + size, "\n", 2 );
+  size += 2;
   if( !delete_lines( from, to, isglobal ) ) return false;
   current_addr_ = from - 1;
   disable_interrupts();
-  if( !put_sbuf_line( buf, current_addr_ ) ||
+  if( !put_sbuf_line( buf, size, current_addr_ ) ||
       !push_undo_atom( UADD, current_addr_, current_addr_ ) )
     { enable_interrupts(); return false; }
   modified_ = true;
@@ -436,19 +437,20 @@ bool put_lines( const int addr )
 
 /* write a line of text to the scratch file and add a line node to the
    editor buffer; return a pointer to the end of the text */
-const char * put_sbuf_line( const char * const s, const int addr )
+const char * put_sbuf_line( const char * const buf, const int size,
+                            const int addr )
   {
   line_t * const lp = dup_line_node( 0 );
-  const char * const p = (const char *) memchr( s, '\n', INT_MAX - 1 );
-  int len, wr;
+  const char * const p = (const char *) memchr( buf, '\n', size );
+  int len;
 
   if( !lp ) return 0;
   if( !p ) { set_error_msg( "Line too long" ); return 0; }
-  len = p - s;
+  len = p - buf;
   /* out of position */
   if( seek_write )
     {
-    if( fseek( sfp, 0L, SEEK_END ) < 0 )
+    if( fseek( sfp, 0L, SEEK_END ) != 0 )
       {
       show_strerror( 0, errno );
       set_error_msg( "Cannot seek temp file" );
@@ -457,8 +459,7 @@ const char * put_sbuf_line( const char * const s, const int addr )
     sfpos = ftell( sfp );
     seek_write = false;
     }
-  wr = fwrite( s, 1, len, sfp );	/* assert: interrupts disabled */
-  if( wr < 0 || wr != len )
+  if( (int)fwrite( buf, 1, len, sfp ) != len )	/* assert: interrupts disabled */
     {
     sfpos = -1;
     show_strerror( 0, errno );

@@ -1,6 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -44,7 +45,7 @@ static void put_tty_line( const char * p, int len, const int gflags )
         {
         char * const p = strchr( escapes, ch );
         ++col; putchar('\\');
-        if( p ) putchar( escchars[p-escapes] );
+        if( ch && p ) putchar( escchars[p-escapes] );
         else
           {
           col += 2;
@@ -126,8 +127,10 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
   }
 
 
-/* read a line of text from stdin; return pointer to buffer and line length */
-const char * get_tty_line( int * const lenp )
+/* Read a line of text from stdin.
+   Return pointer to buffer and line size (uncluding trailing newline
+   if it exists) */
+const char * get_tty_line( int * const sizep )
   {
   static char * buf = 0;
   static int bufsz = 0;
@@ -141,31 +144,33 @@ const char * get_tty_line( int * const lenp )
       if( ferror( stdin ) )
         {
         show_strerror( "stdin", errno ); set_error_msg( "Cannot read stdin" );
-        clearerr( stdin ); if( lenp ) *lenp = 0;
+        clearerr( stdin ); if( sizep ) *sizep = 0;
         return 0;
         }
       else
         {
         clearerr( stdin ); if( i != oi ) { oi = i; continue; }
-        if( i ) buf[i] = 0; if( lenp ) *lenp = i;
+        if( i ) buf[i] = 0; if( sizep ) *sizep = i;
         return buf;
         }
       }
     else
       {
       if( !resize_buffer( &buf, &bufsz, i + 2 ) )
-        { if( lenp ) *lenp = 0; return 0; }
+        { if( sizep ) *sizep = 0; return 0; }
       buf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
-      buf[i] = 0; if( lenp ) *lenp = i;
+      buf[i] = 0; if( sizep ) *sizep = i;
       return buf;
       }
     }
   }
 
 
-/* read a line of text from a stream */
-static const char * read_stream_line( FILE * const fp, int * const lenp,
-                                      bool * const newline_added_now )
+/* Read a line of text from a stream.
+   Return pointer to buffer and line size (uncluding trailing newline
+   if it exists and is not added now) */
+static const char * read_stream_line( FILE * const fp, int * const sizep,
+                                      bool * const newline_added_nowp )
   {
   static char * buf = 0;
   static int bufsz = 0;
@@ -189,21 +194,21 @@ static const char * read_stream_line( FILE * const fp, int * const lenp,
       }
     else if( i )
       {
-      buf[i] = '\n'; buf[i+1] = 0; *newline_added_now = true;
+      buf[i] = '\n'; buf[i+1] = 0; *newline_added_nowp = true;
       if( !isbinary() ) ++i;
       }
     }
-  *lenp = i;
+  *sizep = i;
   return buf;
   }
 
 
-/* read a stream into the editor buffer; return size of data read */
+/* read a stream into the editor buffer; return total size of data read */
 static long read_stream( FILE * const fp, const int addr )
   {
   line_t * lp = search_line_node( addr );
   undo_t * up = 0;
-  long size = 0;
+  long total_size = 0;
   const bool o_isbinary = isbinary();
   const bool appended = ( addr == last_addr() );
   bool newline_added_now = false;
@@ -211,12 +216,13 @@ static long read_stream( FILE * const fp, const int addr )
   set_current_addr( addr );
   while( true )
     {
-    int len = 0;
-    const char * const s = read_stream_line( fp, &len, &newline_added_now );
+    int size = 0;
+    const char * const s = read_stream_line( fp, &size, &newline_added_now );
     if( !s ) return -1;
-    if( len > 0 ) size += len; else break;
+    if( size > 0 ) total_size += size;
+    else break;
     disable_interrupts();
-    if( !put_sbuf_line( s, current_addr() ) )
+    if( !put_sbuf_line( s, size + newline_added_now, current_addr() ) )
       { enable_interrupts(); return -1; }
     lp = lp->q_forw;
     if( up ) up->tail = lp;
@@ -227,14 +233,15 @@ static long read_stream( FILE * const fp, const int addr )
       }
     enable_interrupts();
     }
-  if( addr && appended && size && o_isbinary && newline_added() )
+  if( addr && appended && total_size && o_isbinary && newline_added() )
     fputs( "Newline inserted\n", stderr );
-  else if( newline_added_now && appended )
+  else if( newline_added_now && ( !appended || !isbinary() ) )
     fputs( "Newline appended\n", stderr );
-  if( isbinary() && !o_isbinary && newline_added_now && !appended ) ++size;
-  if( !size ) newline_added_now = true;
+  if( isbinary() && !o_isbinary && newline_added_now && !appended )
+    ++total_size;
+  if( !total_size ) newline_added_now = true;
   if( appended && newline_added_now ) set_newline_added();
-  return size;
+  return total_size;
   }
 
 
@@ -243,6 +250,7 @@ int read_file( const char * const filename, const int addr )
   {
   FILE * fp;
   long size;
+  int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "r" );
   else fp = fopen( strip_escapes( filename ), "r" );
@@ -254,7 +262,8 @@ int read_file( const char * const filename, const int addr )
     }
   size = read_stream( fp, addr );
   if( size < 0 ) return -1;
-  if( ( (*filename == '!' ) ? pclose( fp ) : fclose( fp ) ) < 0 )
+  if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  if( ret != 0 )
     {
     show_strerror( filename, errno );
     set_error_msg( "Cannot close input file" );
@@ -281,7 +290,7 @@ static long write_stream( FILE * const fp, int from, const int to )
       p[len++] = '\n';
     size += len;
     while( --len >= 0 )
-      if( fputc( *p++, fp ) < 0 )
+      if( fputc( *p++, fp ) == EOF )
         {
         show_strerror( 0, errno );
         set_error_msg( "Cannot write file" );
@@ -299,6 +308,7 @@ int write_file( const char * const filename, const char * const mode,
   {
   FILE * fp;
   long size;
+  int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "w" );
   else fp = fopen( strip_escapes( filename ), mode );
@@ -310,7 +320,8 @@ int write_file( const char * const filename, const char * const mode,
     }
   size = write_stream( fp, from, to );
   if( size < 0 ) return -1;
-  if( ( (*filename == '!' ) ? pclose( fp ) : fclose( fp ) ) < 0 )
+  if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  if( ret != 0 )
     {
     show_strerror( filename, errno );
     set_error_msg( "Cannot close output file" );

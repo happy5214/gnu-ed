@@ -1,3 +1,24 @@
+2012-01-01  Antonio Diaz Diaz  <ant_diaz@teleline.es>
+
+	* Version 1.6 released.
+	* io.c (put_tty_line): Null characters where incorrectly
+	  shown by the `l' command. (Reported by Martin Guy).
+	* io.c (read_stream): Corrected the condition deciding when to
+	  show the message "Newline appended".
+	* main_loop.c (exec_command): The `modified' flag is now set
+	  when reading a non-empty file into an empty buffer.
+	* regex.c (translit_text): Fixed typo that prevented using NUL
+	  characters in regular expressions.
+	* main_loop.c (exec_command): Return ERR if `system' can't
+	  create a shell process.
+	* main_loop.c (main_loop): Flush stdout/stderr before reading a
+	  new command.
+	* buffer.c (put_sbuf_line): Added size parameter.
+	* ed.1: Man page is now generated with `help2man'.
+	* ed.1: All command-line options are now documented in the man page.
+	* Restored copyright notices of Andrew L. Moore. It seems Andrew
+	  granted some permissions but never assigned copyright to the FSF.
+
 2010-08-30  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.5 released.
@@ -16,7 +37,7 @@
 	* Added `const' to all pointer declarations accepting it.
 	* regex.c (replace_matching_text): Make se_max an enum.
 	* signal.c: Include termios.h
-	* Converted C99 style comments "//" to C89 style comments "/* */".
+	* Converted C99 style comments `//' to C89 style comments `/* */'.
 	* ed.texinfo: Fixed an erratum.
 	* Changed copyright holder from Andrew, Antonio to the FSF.
 
@@ -41,9 +62,9 @@
 2009-01-31  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.2 released.
-	* configure: Locale has been fixed to "C".
+	* configure: Locale has been fixed to `C'.
 	* Makefile.in: Man page is now installed by default.
-	* "make install-info" should now work on Debian and OS X.
+	* `make install-info' should now work on Debian and OS X.
 	* ed.texinfo: License updated to GFDL version 1.3 or later.
 
 2008-10-14  Antonio Diaz Diaz  <ant_diaz@teleline.es>
@@ -159,7 +180,9 @@ Dec 1993  François Pinard  <pinard@icule>
 	* GNUified ed.
 
 
-Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010
+Copyright (C) 1993 François Pinard
+Copyright (C) 1994 Andrew Moore
+Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012
 Free Software Foundation, Inc.
 
 This file is a collection of facts, and thus it is not copyrightable,

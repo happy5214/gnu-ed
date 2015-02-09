@@ -1,15 +1,20 @@
-Changes in version 1.5:
+Changes in version 1.6:
 
-The "a", "c" and "i" commands have been fixed. (When used in a global
-command list, the commands following them in the list were ignored).
+Displaying of null characters by the "l" command has been fixed.
 
-The "e" command has been fixed. (It quitted when invoked a second time
-with a modified buffer).
+The condition deciding when to show the message "Newline appended" has
+been corrected.
 
-The new option "--restricted" has been added.
+The "modified" flag is now set when reading a non-empty file into an
+empty buffer.
 
-"red" has been converted to a script invoking "ed --restricted".
+An error that prevented using NUL characters in regular expressions has
+been fixed.
 
-Description of ed in the manual has been changed.
+Ed now signals an error if it can't create a shell process when
+executing a shell command.
 
-Obsolete posix tests have been removed from testsuite.
+Ed now flushes stdout/stderr before reading a new command.
+
+Man page is now generated with "help2man". All command-line options are
+now documented in the man page.

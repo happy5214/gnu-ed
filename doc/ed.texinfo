@@ -1,12 +1,13 @@
 \input texinfo @c -*-texinfo-*-
 @c %**start of header
 @setfilename ed.info
+@documentencoding ISO-8859-15
 @settitle GNU @command{ed} Manual
 @finalout
 @c %**end of header
 
-@set UPDATED 30 August 2010
-@set VERSION 1.5
+@set UPDATED 1 January 2012
+@set VERSION 1.6
 
 @dircategory Basics
 @direntry
@@ -14,8 +15,8 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010
-Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011,
+2012 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -23,17 +24,18 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 @end copying
 
+@ifnothtml
 @titlepage
 @title GNU ed
 @subtitle The GNU line editor
 @subtitle for GNU ed version @value{VERSION}, @value{UPDATED}
-@author by Andrew L. Moore and Antonio Diaz Diaz
+@author by Andrew L. Moore, François Pinard, and Antonio Diaz Diaz
+
 @page
 @vskip 0pt plus 1filll
 @insertcopying
 @end titlepage
 
-@ifnothtml
 @contents
 @end ifnothtml
 
@@ -367,45 +369,45 @@ to @var{file} only if it is not prefixed with a bang.
 @command{ed} supports the following options:
 
 @table @code
-@item --help
-@itemx -h
+@item -h
+@itemx --help
 Print an informative help message describing the options and exit.
 
-@item --version
-@itemx -V
+@item -V
+@itemx --version
 Print the version number of @command{ed} on the standard output and exit.
 
-@item --loose-exit-status
-@itemx -l
-Do not exit with bad status if a command happens to "fail" (for example
-if a substitution command finds nothing to replace). This can be useful
-when @command{ed} is invoked as the editor for crontab.
-
-@item --prompt=@var{string}
-@itemx -p @var{string}
-Specifies a command prompt. This may be toggled on and off with the
-@samp{P} command.
-
-@item --restricted
-@itemx -r
-Run in restricted mode. This mode disables edition of files out of the
-current directory and execution of shell commands.
-
-@item --quiet
-@itemx --silent
-@itemx -s
-Suppresses diagnostics. This should be used if @command{ed}'s standard
-input is from a script.
-
-@item --traditional
-@itemx -G
+@item -G
+@itemx --traditional
 Forces backwards compatibility. This affects the behavior of the
 @command{ed} commands @samp{G}, @samp{V}, @samp{f}, @samp{l}, @samp{m},
 @samp{t} and @samp{!!}. If the default behavior of these commands does
 not seem familiar, then try invoking @command{ed} with this switch.
 
-@item --verbose
-@itemx -v
+@item -l
+@itemx --loose-exit-status
+Do not exit with bad status if a command happens to "fail" (for example
+if a substitution command finds nothing to replace). This can be useful
+when @command{ed} is invoked as the editor for crontab.
+
+@item -p @var{string}
+@itemx --prompt=@var{string}
+Specifies a command prompt. This may be toggled on and off with the
+@samp{P} command.
+
+@item -r
+@itemx --restricted
+Run in restricted mode. This mode disables edition of files out of the
+current directory and execution of shell commands.
+
+@item -s
+@itemx --quiet
+@itemx --silent
+Suppresses diagnostics. This should be used if @command{ed}'s standard
+input is from a script.
+
+@item -v
+@itemx --verbose
 Verbose mode. This may be toggled on and off with the @samp{H} command.
 
 @end table

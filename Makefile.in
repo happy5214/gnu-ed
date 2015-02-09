@@ -18,14 +18,14 @@ objs = buffer.o carg_parser.o global.o io.o \
 all : $(progname) r$(progname)
 
 $(progname) : $(objs)
-	$(CC) $(LDFLAGS) -o $(progname) $(objs)
+	$(CC) $(LDFLAGS) -o $@ $(objs)
 
 $(progname)_profiled : $(objs)
-	$(CC) $(LDFLAGS) -pg -o $(progname)_profiled $(objs)
+	$(CC) $(LDFLAGS) -pg -o $@ $(objs)
 
 r$(progname) : r$(progname).in
-	cat $(VPATH)/r$(progname).in > r$(progname)
-	chmod a+x r$(progname)
+	cat $(VPATH)/r$(progname).in > $@
+	chmod a+x $@
 
 main.o : main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DPROGVERSION=\"$(pkgversion)\" -c -o $@ $<
@@ -38,12 +38,18 @@ carg_parser.o : carg_parser.h
 main.o        : carg_parser.h
 
 
-doc : info
+doc : info man
 
 info : $(VPATH)/doc/$(pkgname).info
 
 $(VPATH)/doc/$(pkgname).info : $(VPATH)/doc/$(pkgname).texinfo
 	cd $(VPATH)/doc && makeinfo $(pkgname).texinfo
+
+man : $(VPATH)/doc/$(progname).1
+
+$(VPATH)/doc/$(progname).1 : $(progname)
+	help2man -n 'line-oriented text editor' \
+	  -o $@ ./$(progname)
 
 Makefile : $(VPATH)/configure $(VPATH)/Makefile.in
 	./config.status
