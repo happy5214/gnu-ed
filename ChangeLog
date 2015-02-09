@@ -1,19 +1,28 @@
+2007-08-18  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 0.8 released.
+	* check.sh: Testsuite exits unsuccesfully in case of error.
+	* ed.1: Fixed some minor problems in the manual page.
+	* ed.texinfo: Added 21kB of legalese (fdl.texinfo).
+
 2007-07-18  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.7 released.
-	* Fixed a bug in `dec_addr'.
+	* buf.c (dec_addr): Now returns correct address when wrapping.
 
 2007-06-29  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.6 released.
 	* License updated to GPL version 3 or later.
-	* Fixed two minor compatibility problems in signal.c.
-	* Fixed an infinite loop when reading an empty script.
+	* signal.c (sigwinch_handler, set_signal):
+	  Fixed two minor compatibility problems.
+	* main_loop.c (main_loop):
+	  Fixed an infinite loop when reading an empty script.
 
 2007-03-09  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.5 released.
-	* '%' reimplemented as it was in ed 0.2.
+	* main_loop.c (next_addr): '%' reimplemented as it was in ed 0.2.
 
 2007-01-15  Antonio Diaz  <ant_diaz@teleline.es>
 
@@ -23,18 +32,19 @@
 2006-11-11  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.3 released.
-	* Fixed symlink vulnerability using standard function `tmpfile'.
-	* Fixed signal handling for SIGINT.
-	* Fixed the `c' and `i' commands with address 0.
+	* buf.c (open_sbuf):
+	  Fixed symlink vulnerability using standard function `tmpfile'.
+	* signal.c: Fixed signal handling for SIGINT.
+	* main_loop.c (exec_command): Fixed `c' and `i' commands with address 0.
 	* The pause mode has been removed.
-	* Added new options `--loose-exit-status' and `--verbose'.
-	* Added new argument parser that replaces `getopt_long'.
+	* main.c: Added new options `--loose-exit-status' and `--verbose'.
+	* carg_parser.c: New argument parser that replaces `getopt_long'.
 	* `configure' and `Makefile.in' have been replaced.
 	* Removed recursive make for testsuite.
 	* Created directory `doc'.
 	* Removed all pre ISO C89 code.
 	* Removed all global variables.
-	* Added to the manual the changes from Andrew and some mine.
+	* ed.texinfo: Added to the manual the changes from Andrew and some mine.
 
 Sun Jun 26 22:21:59 1994    (alm@worm.talke.org)
 

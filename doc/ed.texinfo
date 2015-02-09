@@ -5,8 +5,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 18 July 2007
-@set VERSION 0.7
+@set UPDATED 18 August 2007
+@set VERSION 0.8
 
 @dircategory Basics
 @direntry
@@ -49,14 +49,15 @@ is Beautiful''.
 @end ifnottex
 
 @menu
-* Overview::                      Overview of the @command{ed} command
-* Introduction to Line Editing::  Getting started with GNU @command{ed}
-* Invoking Ed::                   Command line interface
-* Line Addressing::               Specifying lines/ranges in the buffer
-* Regular Expressions::           Patterns for selecting text
-* Commands::                      Commands recognized by GNU @command{ed}
-* Limitations::                   Intrinsic limits of GNU @command{ed}
-* Diagnostics::                   GNU @command{ed} error handling
+* Overview::                       Overview of the @command{ed} command
+* Introduction to Line Editing::   Getting started with GNU @command{ed}
+* Invoking Ed::                    Command line interface
+* Line Addressing::                Specifying lines/ranges in the buffer
+* Regular Expressions::            Patterns for selecting text
+* Commands::                       Commands recognized by GNU @command{ed}
+* Limitations::                    Intrinsic limits of GNU @command{ed}
+* Diagnostics::                    GNU @command{ed} error handling
+* GNU Free Documentation License:: How you can copy and share this manual
 
 @end menu
 
@@ -955,5 +956,10 @@ modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
 
 @command{ed} exits with 0 if no errors occurred; otherwise >0.
+
+
+@node GNU Free Documentation License
+@chapter GNU Free Documentation License
+@include fdl.texinfo
 
 @bye

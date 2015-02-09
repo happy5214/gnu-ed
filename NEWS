@@ -1,3 +1,7 @@
-Changes in version 0.7:
+Changes in version 0.8:
 
-An infinite loop that occurred when searching backwards has been fixed.
+Testsuite now exits unsuccesfully in case of error.
+
+Some minor problems in the manual page have been fixed.
+
+21kB of legalese have been added to the info file (gfdl).

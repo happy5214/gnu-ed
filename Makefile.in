@@ -91,6 +91,7 @@ dist :
 	  $(DISTNAME)/doc/$(progname).1 \
 	  $(DISTNAME)/doc/$(progname).info \
 	  $(DISTNAME)/doc/$(progname).texinfo \
+	  $(DISTNAME)/doc/fdl.texinfo \
 	  $(DISTNAME)/testsuite/check.sh \
 	  $(DISTNAME)/testsuite/*.t \
 	  $(DISTNAME)/testsuite/*.d \

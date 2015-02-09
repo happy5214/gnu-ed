@@ -97,7 +97,7 @@ done > scripts.ck 2>&1
 
 grep '\*\*\*' *.ck | sed 's/^[^*]*//'
 if grep '\*\*\*' *.ck > /dev/null ; then
-	true
+	exit 127
 else
 	echo "tests completed successfully."
 	if cd ${objdir} ; then rm -r tmp ; fi
