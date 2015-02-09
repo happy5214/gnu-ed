@@ -1,6 +1,5 @@
-Changes in version 0.9:
+Changes in version 1.0:
 
-Return 0 exit status after receiving SIGHUP if the file is not modified
-or is saved without error.
+The option "--program-prefix" has been added to the configure script.
 
-Arg_parser has been updated to 1.1.
+A buffer overflow has been fixed.

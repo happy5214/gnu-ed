@@ -22,17 +22,13 @@
 
 
 /* assure at least a minimum size for buffer `buf' */
-char ap_resize_buffer( char **buf, int *size, const int min_size )
+char ap_resize_buffer( void *buf, const int min_size )
   {
-  if( !size || *size < min_size )
-    {
-    char *new_buf = 0;
-    if( *buf ) new_buf = realloc( *buf, min_size );
-    else new_buf = malloc( min_size );
-    if( !new_buf ) return 0;
-    if( size ) *size = min_size;
-    *buf = new_buf;
-    }
+  void *new_buf = 0;
+  if( *(void **)buf ) new_buf = realloc( *(void **)buf, min_size );
+  else new_buf = malloc( min_size );
+  if( !new_buf ) return 0;
+  *(void **)buf = new_buf;
   return 1;
   }
 
@@ -41,13 +37,13 @@ char push_back_record( Arg_parser * ap, const int code, const char * argument )
   {
   const int len = strlen( argument );
   ap_Record *p;
-  if( !ap_resize_buffer( (char **)(void *)&(ap->data), 0,
+  if( !ap_resize_buffer( (void *)&(ap->data),
                          ( ap->data_size + 1 ) * sizeof( ap_Record ) ) )
     return 0;
   p = &(ap->data[ap->data_size]);
   p->code = code;
   p->argument = 0;
-  if( !ap_resize_buffer( &(p->argument), 0, len + 1 ) ) return 0;
+  if( !ap_resize_buffer( (void *)&(p->argument), len + 1 ) ) return 0;
   strncpy( p->argument, argument, len + 1 );
   ++ap->data_size;
   return 1;
@@ -57,7 +53,7 @@ char push_back_record( Arg_parser * ap, const int code, const char * argument )
 char add_error( Arg_parser * ap, const char * msg )
   {
   const int len = strlen( msg );
-  if( !ap_resize_buffer( &(ap->error), 0, ap->error_size + len + 1 ) )
+  if( !ap_resize_buffer( (void *)&(ap->error), ap->error_size + len + 1 ) )
     return 0;
   strncpy( ap->error + ap->error_size, msg, len + 1 );
   ap->error_size += len;
@@ -229,8 +225,8 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
       {
       if( !in_order )
         {
-        if( !ap_resize_buffer( (char **)(void *)&non_options, 0,
-            ( non_options_size + 1 ) * sizeof( char * ) ) )
+        if( !ap_resize_buffer( (void *)&non_options,
+            ( non_options_size + 1 ) * sizeof( *non_options ) ) )
           return 0;
         non_options[non_options_size++] = argv[argind++];
         }
@@ -243,7 +239,7 @@ char ap_init( Arg_parser * ap, const int argc, const char * const argv[],
     for( i = 0; i < non_options_size; ++i )
       if( !push_back_record( ap, 0, non_options[i] ) ) return 0;
     while( argind < argc )
-      if( push_back_record( ap, 0, argv[argind++] ) ) return 0;
+      if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;
     }
   if( non_options ) free( non_options );
   return 1;

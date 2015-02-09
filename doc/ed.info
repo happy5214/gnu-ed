@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 0.9, 24 February 2008).
+This manual is for GNU ed (version 1.0, 21 August 2008).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -1329,14 +1329,14 @@ permit their use in free software.
 
 Tag Table:
 Node: Top538
-Node: Overview1947
-Node: Introduction to Line Editing4004
-Node: Invoking Ed11247
-Node: Line Addressing12895
-Node: Regular Expressions16002
-Node: Commands21347
-Node: Limitations32422
-Node: Diagnostics32997
-Node: GNU Free Documentation License33723
+Node: Overview1945
+Node: Introduction to Line Editing4002
+Node: Invoking Ed11245
+Node: Line Addressing12893
+Node: Regular Expressions16000
+Node: Commands21345
+Node: Limitations32420
+Node: Diagnostics32995
+Node: GNU Free Documentation License33721
 
 End Tag Table

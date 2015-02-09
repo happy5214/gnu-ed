@@ -105,7 +105,7 @@ const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl )
   if( ( len = t - ibufp2 ) < 2 || !trailing_escape( ibufp2, ibufp2 + len - 1 ) )
     { if( lenp ) *lenp = len; return ibufp2; }
   if( lenp ) *lenp = -1;
-  if( !resize_buffer( &cvbuf, &cvbufsz, len ) ) return 0;
+  if( !resize_buffer( (void *)&cvbuf, &cvbufsz, len ) ) return 0;
   memcpy( cvbuf, ibufp2, len );
   --len; cvbuf[len-1] = '\n';		/* strip trailing esc */
   if( nonl ) --len;			/* strip newline */
@@ -115,14 +115,14 @@ const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl )
     if( !( ibufp2 = get_tty_line( &len2 ) ) ) return 0;
     if( len2 == 0 || ibufp2[len2-1] != '\n' )
       { set_error_msg( "Unexpected end-of-file" ); return 0; }
-    if( !resize_buffer( &cvbuf, &cvbufsz, len + len2 ) ) return 0;
+    if( !resize_buffer( (void *)&cvbuf, &cvbufsz, len + len2 ) ) return 0;
     memcpy( cvbuf + len, ibufp2, len2 );
     len += len2;
     if( len2 < 2 || !trailing_escape( cvbuf, cvbuf + len - 1 ) ) break;
     --len; cvbuf[len-1] = '\n';		/* strip trailing esc */
     if( nonl ) --len;			/* strip newline */
     }
-  if( !resize_buffer( &cvbuf, &cvbufsz, len + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&cvbuf, &cvbufsz, len + 1 ) ) return 0;
   cvbuf[len] = 0;
   if( lenp ) *lenp = len;
   return cvbuf;
@@ -156,7 +156,7 @@ const char *get_tty_line( int *lenp )
       }
     else
       {
-      if( !resize_buffer( &ibuf, &ibufsz, i + 2 ) )
+      if( !resize_buffer( (void *)&ibuf, &ibufsz, i + 2 ) )
         { if( lenp ) *lenp = 0; return 0; }
       ibuf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
       ibuf[i] = 0; if( lenp ) *lenp = i;
@@ -173,7 +173,7 @@ int read_stream_line( FILE *fp, char *newline_added_now )
 
   while( 1 )
     {
-    if( !resize_buffer( &sbuf, &sbufsz, i + 2 ) ) return -1;
+    if( !resize_buffer( (void *)&sbuf, &sbufsz, i + 2 ) ) return -1;
     c = getc( fp ); if( c == EOF ) break;
     sbuf[i++] = c;
     if( !c ) set_binary(); else if( c == '\n' ) break;

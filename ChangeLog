@@ -1,3 +1,10 @@
+2008-08-21  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 1.0 released.
+	* configure: Added option `--program-prefix'.
+	* signal.c (strip_escapes): Buffer overflow fixed.
+	* signal.c (resize_buffer): Pointer aliasing warning fixed.
+
 2008-02-24  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.9 released.

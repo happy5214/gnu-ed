@@ -1,7 +1,7 @@
 Requirements
 ------------
 You'll need a C compiler and a C library compatible with GNU libc. I
-use gcc 3.3.6, but the code should compile with any standards compliant
+use gcc 4.3.1, but the code should compile with any standards compliant
 compiler. Gcc is available at http://gcc.gnu.org.
 
 

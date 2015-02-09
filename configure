@@ -5,13 +5,13 @@
 # This configure script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 #
-# Date of this version: 2008-02-24
+# Date of this version: 2008-08-21
 
 invocation_name=$0
 args=$*
 no_create=
 progname=ed
-progversion=0.9
+progversion=1.0
 srctrigger=ed.h
 
 # clear some things potentially inherited from environment.
@@ -23,6 +23,7 @@ datadir='$(prefix)/share'
 infodir='$(datadir)/info'
 mandir='$(datadir)/man'
 sysconfdir='$(prefix)/etc'
+program_prefix=
 CC=
 CXX=
 CPPFLAGS=
@@ -48,22 +49,23 @@ while [ x"$1" != x ] ; do
 		echo "Usage: configure [options]"
 		echo
 		echo "Options: [defaults in brackets]"
-		echo "  --help              display this help and exit"
-		echo "  --version           output version information and exit"
-		echo "  --srcdir=DIR        find the sources in DIR [. or ..]"
-		echo "  --prefix=DIR        install into DIR [${prefix}]"
-		echo "  --exec-prefix=DIR   base directory for arch-dependent files [${exec_prefix}]"
-		echo "  --bindir=DIR        user executables directory [${bindir}]"
-		echo "  --datadir=DIR       base directory for doc and data [${datadir}]"
-		echo "  --infodir=DIR       info files directory [${infodir}]"
-		echo "  --mandir=DIR        man pages directory [${mandir}]"
-		echo "  --sysconfdir=DIR    read-only single-machine data directory [${sysconfdir}]"
-		echo "  CC=COMPILER         C compiler to use [gcc]"
-		echo "  CXX=COMPILER        C++ compiler to use [g++]"
-		echo "  CPPFLAGS=OPTIONS    command line options for the preprocessor [${CPPFLAGS}]"
-		echo "  CFLAGS=OPTIONS      command line options for the C compiler [${CFLAGS}]"
-		echo "  CXXFLAGS=OPTIONS    command line options for the C++ compiler [${CXXFLAGS}]"
-		echo "  LDFLAGS=OPTIONS     command line options for the linker [${LDFLAGS}]"
+		echo "  --help                display this help and exit"
+		echo "  --version             output version information and exit"
+		echo "  --srcdir=DIR          find the sources in DIR [. or ..]"
+		echo "  --prefix=DIR          install into DIR [${prefix}]"
+		echo "  --exec-prefix=DIR     base directory for arch-dependent files [${exec_prefix}]"
+		echo "  --bindir=DIR          user executables directory [${bindir}]"
+		echo "  --datadir=DIR         base directory for doc and data [${datadir}]"
+		echo "  --infodir=DIR         info files directory [${infodir}]"
+		echo "  --mandir=DIR          man pages directory [${mandir}]"
+		echo "  --sysconfdir=DIR      read-only single-machine data directory [${sysconfdir}]"
+		echo "  --program-prefix=NAME install program and documentation prefixed with NAME"
+		echo "  CC=COMPILER           C compiler to use [gcc]"
+		echo "  CXX=COMPILER          C++ compiler to use [g++]"
+		echo "  CPPFLAGS=OPTIONS      command line options for the preprocessor [${CPPFLAGS}]"
+		echo "  CFLAGS=OPTIONS        command line options for the C compiler [${CFLAGS}]"
+		echo "  CXXFLAGS=OPTIONS      command line options for the C++ compiler [${CXXFLAGS}]"
+		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
 		echo
 		exit 0 ;;
 	--version | --ve*)
@@ -71,7 +73,7 @@ while [ x"$1" != x ] ; do
 		exit 0 ;;
 	--srcdir* | --sr*)
 		srcdir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--prefix* | --pr*)
+	--prefix* | --pre*)
 		prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
 	--exec-prefix* | --ex*)
 		exec_prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
@@ -85,6 +87,8 @@ while [ x"$1" != x ] ; do
 		mandir=`echo ${optarg} | sed -e 's,/$,,'` ;;
 	--sysconfdir* | --sy*)
 		sysconfdir=`echo ${optarg} | sed -e 's,/$,,'` ;;
+	--program-prefix* | --pro*)
+		program_prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
 	--no-create | --no-c*)
 		no_create=yes ;;
 
@@ -172,6 +176,7 @@ echo "datadir = ${datadir}"
 echo "infodir = ${infodir}"
 echo "mandir = ${mandir}"
 echo "sysconfdir = ${sysconfdir}"
+echo "program_prefix = ${program_prefix}"
 echo "CC = ${CC}"
 echo "CXX = ${CXX}"
 echo "CPPFLAGS = ${CPPFLAGS}"
@@ -197,6 +202,7 @@ datadir = ${datadir}
 infodir = ${infodir}
 mandir = ${mandir}
 sysconfdir = ${sysconfdir}
+program_prefix = ${program_prefix}
 CC = ${CC}
 CXX = ${CXX}
 CPPFLAGS = ${CPPFLAGS}

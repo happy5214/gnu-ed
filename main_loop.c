@@ -98,7 +98,7 @@ int get_shell_command( void )
   if( restricted() ) { set_error_msg( "Shell access restricted" ); return -1; }
   s = ibufp = get_extended_line( ibufp, &len, 1 );
   if( !s ) return -1;
-  if( !resize_buffer( &buf, &bsize, len + 1 ) ) return -1;
+  if( !resize_buffer( (void *)&buf, &bsize, len + 1 ) ) return -1;
   buf[i++] = '!';		/* prefix command w/ bang */
   while( *ibufp != '\n' )
     {
@@ -106,14 +106,14 @@ int get_shell_command( void )
       {
       if( s != ibufp )
 	{
-	if( !resize_buffer( &buf, &bsize, i + 1 ) ) return -1;
+	if( !resize_buffer( (void *)&buf, &bsize, i + 1 ) ) return -1;
 	buf[i++] = *ibufp++;
 	}
       else if( !shcmd || ( traditional() && !*( shcmd + 1 ) ) )
 	{ set_error_msg( "No previous command" ); return -1; }
       else
 	{
-	if( !resize_buffer( &buf, &bsize, i + shcmdi ) ) return -1;
+	if( !resize_buffer( (void *)&buf, &bsize, i + shcmdi ) ) return -1;
 	for( s = shcmd + 1; s < shcmd + shcmdi; ) buf[i++] = *s++;
 	s = ibufp++;
 	}
@@ -123,18 +123,18 @@ int get_shell_command( void )
       if( !def_filename[0] )
 	{ set_error_msg( "No current filename" ); return -1; }
       len = strlen( s = strip_escapes( def_filename ) );
-      if( !resize_buffer( &buf, &bsize, i + len ) ) return -1;
+      if( !resize_buffer( (void *)&buf, &bsize, i + len ) ) return -1;
       while( len-- ) buf[i++] = *s++;
       s = ibufp++;
       }
     else
       {
-      if( !resize_buffer( &buf, &bsize, i + 2 ) ) return -1;
+      if( !resize_buffer( (void *)&buf, &bsize, i + 2 ) ) return -1;
       buf[i++] = *ibufp;
       if( *ibufp++ == '\\' ) buf[i++] = *ibufp++;
       }
     }
-  if( !resize_buffer( &shcmd, &shcmdsz, i + 1 ) ) return -1;
+  if( !resize_buffer( (void *)&shcmd, &shcmdsz, i + 1 ) ) return -1;
   memcpy( shcmd, buf, i );
   shcmdi = i; shcmd[i] = 0;
   return ( *s == '!' || *s == '%' );
@@ -167,7 +167,7 @@ const char *get_filename( void )
     }
   else if( !traditional() && !def_filename[0] )
     { set_error_msg( "No current filename" ); return 0; }
-  if( !resize_buffer( &file, &filesz, path_max( 0 ) + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&file, &filesz, path_max( 0 ) + 1 ) ) return 0;
   for( n = 0; *ibufp != '\n'; ) file[n++] = *ibufp++;
   file[n] = 0;
   return ( is_valid_filename( file ) ? file : 0 );
@@ -633,7 +633,7 @@ char exec_global( const char *ibufp2, int gflags, const char interact )
       else if( !( cmd = get_extended_line( ibufp2, &len, 0 ) ) ) return 0;
       else
 	{
-	if( !resize_buffer( &ocmd, &ocmdsz, len + 1 ) ) return 0;
+	if( !resize_buffer( (void *)&ocmd, &ocmdsz, len + 1 ) ) return 0;
 	memcpy( ocmd, cmd, len + 1 );
 	cmd = ocmd;
 	}

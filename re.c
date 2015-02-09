@@ -100,7 +100,7 @@ char *extract_pattern( const char **ibufpp, const int delimiter )
     ++nd;
     }
   len = nd - *ibufpp;
-  if( !resize_buffer( &lhbuf, &lhbufsz, len + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&lhbuf, &lhbufsz, len + 1 ) ) return 0;
   memcpy( lhbuf, *ibufpp, len );
   lhbuf[len] = 0;
   *ibufpp = nd;
@@ -190,7 +190,7 @@ char *extract_subst_template( const char **ibufpp, const char isglobal )
     }
   while( **ibufpp != delimiter )
     {
-    if( !resize_buffer( &rhbuf, &rhbufsz, i + 2 ) ) return 0;
+    if( !resize_buffer( (void *)&rhbuf, &rhbufsz, i + 2 ) ) return 0;
     c = rhbuf[i++] = *(*ibufpp)++;
     if( c == '\n' && **ibufpp == 0 ) { --i, --(*ibufpp); break; }
     if( c == '\\' && ( rhbuf[i++] = *(*ibufpp)++ ) == '\n' && !isglobal )
@@ -201,7 +201,7 @@ char *extract_subst_template( const char **ibufpp, const char isglobal )
       if( !(*ibufpp) ) return 0;
       }
     }
-  if( !resize_buffer( &rhbuf, &rhbufsz, i + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&rhbuf, &rhbufsz, i + 1 ) ) return 0;
   rhbuf[rhbufi = i] = 0;
   return rhbuf;
   }
@@ -280,23 +280,23 @@ int apply_subst_template( const char *boln, const regmatch_t *rm, int off,
     if( *sub == '&' )
       {
       int j = rm[0].rm_so; int k = rm[0].rm_eo;
-      if( !resize_buffer( &rbuf, &rbufsz, off + k - j ) ) return -1;
+      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + k - j ) ) return -1;
       while( j < k ) rbuf[off++] = boln[j++];
       }
     else if( *sub == '\\' && *++sub >= '1' && *sub <= '9' &&
 	     ( n = *sub - '0' ) <= re_nsub )
       {
       int j = rm[n].rm_so; int k = rm[n].rm_eo;
-      if( !resize_buffer( &rbuf, &rbufsz, off + k - j ) ) return -1;
+      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + k - j ) ) return -1;
       while( j < k ) rbuf[off++] = boln[j++];
       }
     else
       {
-      if( !resize_buffer( &rbuf, &rbufsz, off + 1 ) ) return -1;
+      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + 1 ) ) return -1;
       rbuf[off++] = *sub;
       }
     }
-  if( !resize_buffer( &rbuf, &rbufsz, off + 1 ) ) return -1;
+  if( !resize_buffer( (void *)&rbuf, &rbufsz, off + 1 ) ) return -1;
   rbuf[off] = 0;
   return off;
   }
@@ -323,7 +323,7 @@ int substitute_matching_text( const line_t *lp, const int gflags, const int snum
       if( !snum || snum == ++matchno )
 	{
 	changed = 1; i = rm[0].rm_so;
-	if( !resize_buffer( &rbuf, &rbufsz, off + i ) ) return -1;
+	if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i ) ) return -1;
 	if( isbinary() ) newline_to_nul( txt, rm[0].rm_eo );
 	memcpy( rbuf + off, txt, i ); off += i;
 	off = apply_subst_template( txt, rm, off, global_pat->re_nsub );
@@ -332,7 +332,7 @@ int substitute_matching_text( const line_t *lp, const int gflags, const int snum
       else
 	{
 	i = rm[0].rm_eo;
-	if( !resize_buffer( &rbuf, &rbufsz, off + i ) ) return -1;
+	if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i ) ) return -1;
 	if( isbinary() ) newline_to_nul( txt, i );
 	memcpy( rbuf + off, txt, i ); off += i;
 	}
@@ -341,7 +341,7 @@ int substitute_matching_text( const line_t *lp, const int gflags, const int snum
     while( *txt && ( !changed || ( ( gflags & GSG ) && rm[0].rm_eo ) ) &&
 	   !regexec( global_pat, txt, se_max, rm, REG_NOTBOL ) );
     i = eot - txt;
-    if( !resize_buffer( &rbuf, &rbufsz, off + i + 2 ) ) return -1;
+    if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i + 2 ) ) return -1;
     if( i > 0 && !rm[0].rm_eo && ( gflags & GSG ) )
       { set_error_msg( "Infinite substitution loop" ); return -1; }
     if( isbinary() ) newline_to_nul( txt, i );

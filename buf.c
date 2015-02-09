@@ -270,7 +270,7 @@ char *get_sbuf_line( const line_t *lp )
       }
     }
   len = lp->len;
-  if( !resize_buffer( &sfbuf, &sfbufsz, len + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&sfbuf, &sfbufsz, len + 1 ) ) return 0;
   ct = fread( sfbuf, 1, len, sfp );
   if( ct < 0 || ct != len )
     {
@@ -313,12 +313,12 @@ char join_lines( const int from, const int to, const char isglobal )
   while( bp != ep )
     {
     char *s = get_sbuf_line( bp );
-    if( !s || !resize_buffer( &buf, &bsize, size + bp->len ) ) return 0;
+    if( !s || !resize_buffer( (void *)&buf, &bsize, size + bp->len ) ) return 0;
     memcpy( buf + size, s, bp->len );
     size += bp->len;
     bp = bp->q_forw;
     }
-  if( !resize_buffer( &buf, &bsize, size + 2 ) ) return 0;
+  if( !resize_buffer( (void *)&buf, &bsize, size + 2 ) ) return 0;
   memcpy( buf + size, "\n", 2 );
   if( !delete_lines( from, to, isglobal ) ) return 0;
   _current_addr = from - 1;
@@ -599,7 +599,7 @@ char pop_undo_stack( const char isglobal )
 undo_t *push_undo_stack( const int type, const int from, const int to )
   {
   disable_interrupts();
-  if( !resize_buffer( (char **)(void *)&ustack, &usize,
+  if( !resize_buffer( (void *)&ustack, &usize,
                       ( u_ptr + 1 ) * sizeof( undo_t ) ) )
     {
     show_strerror( 0, errno );

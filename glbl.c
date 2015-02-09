@@ -36,7 +36,7 @@ static int active_ndx = 0;	/* active_list index ( modulo active_last ) */
 char set_active_node( const line_t *lp )
   {
   disable_interrupts();
-  if( !resize_buffer( (char **)(void *)&active_list, &active_size,
+  if( !resize_buffer( (void *)&active_list, &active_size,
                       ( active_last + 1 ) * sizeof( line_t ** ) ) )
     {
     show_strerror( 0, errno ); set_error_msg( "Memory exhausted" );

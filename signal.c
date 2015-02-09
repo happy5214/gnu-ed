@@ -168,14 +168,14 @@ char parse_int( int *i, const char *str, const char **tail )
 
 
 /* assure at least a minimum size for buffer `buf' */
-char resize_buffer( char **buf, int *size, int min_size )
+char resize_buffer( void *buf, int *size, int min_size )
   {
   if( *size < min_size )
     {
     const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
-    char *new_buf = 0;
+    void *new_buf = 0;
     disable_interrupts();
-    if( *buf ) new_buf = realloc( *buf, new_size );
+    if( *(void **)buf ) new_buf = realloc( *(void **)buf, new_size );
     else new_buf = malloc( new_size );
     if( !new_buf )
       {
@@ -185,7 +185,7 @@ char resize_buffer( char **buf, int *size, int min_size )
       return 0;
       }
     *size = new_size;
-    *buf = new_buf;
+    *(void **)buf = new_buf;
     enable_interrupts();
     }
   return 1;
@@ -200,15 +200,16 @@ const char *skip_blanks( const char *s )
   }
 
 
-/* return copy of escaped string of at most length PATH_MAX */
+/* return unescaped copy of escaped string */
 const char *strip_escapes( const char *s )
   {
   static char *file = 0;
   static int filesz = 0;
+  const int len = strlen( s );
 
   int i = 0;
 
-  if( !resize_buffer( &file, &filesz, path_max( 0 ) + 1 ) ) return 0;
+  if( !resize_buffer( (void *)&file, &filesz, len + 1 ) ) return 0;
   /* assert: no trailing escape */
   while( ( file[i++] = ( (*s == '\\' ) ? *++s : *s ) ) )
     s++;
