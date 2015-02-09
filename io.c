@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

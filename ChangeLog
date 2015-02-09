@@ -1,3 +1,11 @@
+2009-01-31  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 1.2 released.
+	* configure: Locale has been fixed to "C".
+	* Makefile.in: Man page is now installed by default.
+	* "make install-info" should now work on Debian and OS X.
+	* ed.texinfo: License updated to GFDL version 1.3 or later.
+
 2008-10-14  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.1 released.
@@ -50,8 +58,7 @@
 2006-11-11  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.3 released.
-	* buf.c (open_sbuf):
-	  Fixed symlink vulnerability using standard function `tmpfile'.
+	* buf.c (open_sbuf): Fixed symlink vulnerability using `tmpfile'.
 	* signal.c: Fixed signal handling for SIGINT.
 	* main_loop.c (exec_command): Fixed `c' and `i' commands with address 0.
 	* The pause mode has been removed.

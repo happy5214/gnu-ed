@@ -10,9 +10,9 @@ Procedure
 ---------
 1. Unpack the archive if you have not done so already:
 
-	bzip2 -cd ed[version].tar.bz2 | tar -xf -
-or
 	lzip -cd ed[version].tar.lz | tar -xf -
+or
+	gzip -cd ed[version].tar.gz | tar -xf -
 
 This creates the directory ./ed[version] containing the source from
 the main archive.

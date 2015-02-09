@@ -1,5 +1,5 @@
 /*  Arg_parser - A POSIX/GNU command line argument parser. C version
-    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008, 2009 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ char parse_long_option( Arg_parser * ap,
 
   if( options[index].has_arg == ap_yes )
     {
-    if( !arg )
+    if( !arg || !arg[0] )
       {
       add_error( ap, "option `--" ); add_error( ap, options[index].name );
       add_error( ap, "' requires an argument" );
