@@ -1,4 +1,5 @@
-Changes in version 1.8:
+Changes in version 1.9:
 
-Ed now stops reading stdin when reaching real End Of File the first
-time. (Before it needed to reach EOF twice).
+Testsuite no more feeds shell scripts to ed.
+
+"configure" now accepts options with a separate argument.

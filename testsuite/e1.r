@@ -1,5 +1,4 @@
 3d
 e e1.ed
-1;/H/+d
+1,2d
 w e1.o
-EOT

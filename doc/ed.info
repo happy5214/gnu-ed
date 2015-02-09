@@ -19,7 +19,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.8, 23 April 2013).
+This manual is for GNU ed (version 1.9, 18 June 2013).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -905,7 +905,7 @@ command list is executed only once.
 modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
 
-   `ed' exits with 0 if no errors occurred; otherwise >0.
+   Exit status: 0 if no errors occurred; otherwise >0.
 
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
@@ -1412,16 +1412,16 @@ permit their use in free software.
 
 Tag Table:
 Node: Top574
-Node: Overview2258
-Node: Introduction to Line Editing4315
-Node: Invoking Ed11558
-Node: Line Addressing13359
-Node: Regular Expressions16436
-Node: Commands21780
-Node: Limitations32925
-Node: Diagnostics33566
-Node: Problems34270
-Node: GNU Free Documentation License34803
+Node: Overview2257
+Node: Introduction to Line Editing4314
+Node: Invoking Ed11557
+Node: Line Addressing13358
+Node: Regular Expressions16435
+Node: Commands21779
+Node: Limitations32924
+Node: Diagnostics33565
+Node: Problems34266
+Node: GNU Free Documentation License34799
 
 End Tag Table
 

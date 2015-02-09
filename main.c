@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*
-    Return values: 0 for a normal exit, 1 for environmental problems
+    Exit status: 0 for a normal exit, 1 for environmental problems
     (file not found, invalid flags, I/O errors, etc), 2 to indicate a
     corrupt or invalid input file, 3 for an internal consistency error
     (eg, bug) which caused ed to panic.
@@ -73,6 +73,10 @@ static void show_help( void )
           "  -v, --verbose              be verbose\n"
           "Start edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
+          "\nExit status: 0 for a normal exit, 1 for environmental problems (file\n"
+          "not found, invalid flags, I/O errors, etc), 2 to indicate a corrupt or\n"
+          "invalid input file, 3 for an internal consistency error (eg, bug) which\n"
+          "caused ed to panic.\n"
           "\nReport bugs to <bug-ed@gnu.org>.\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
           "General help using GNU software: http://www.gnu.org/gethelp\n" );

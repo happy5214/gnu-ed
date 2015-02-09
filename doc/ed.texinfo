@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 23 April 2013
-@set VERSION 1.8
+@set UPDATED 18 June 2013
+@set VERSION 1.9
 
 @dircategory Basics
 @direntry
@@ -982,7 +982,7 @@ Attempting to quit @command{ed} or edit another file before writing a
 modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
 
-@command{ed} exits with 0 if no errors occurred; otherwise >0.
+Exit status: 0 if no errors occurred; otherwise >0.
 
 
 @node Problems

@@ -6,10 +6,8 @@
 # This configure script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 
-args=
-no_create=
 pkgname=ed
-pkgversion=1.8
+pkgversion=1.9
 progname=ed
 srctrigger=ed.h
 
@@ -30,18 +28,19 @@ CFLAGS='-Wall -W -O2'
 LDFLAGS=
 
 # checking whether we are using GNU C.
-if [ ! -x /bin/gcc ] &&
-   [ ! -x /usr/bin/gcc ] &&
-   [ ! -x /usr/local/bin/gcc ] ; then
+${CC} --version > /dev/null 2>&1
+if [ $? != 0 ] ; then
 	CC=cc
 	CFLAGS='-W -O2'
 fi
 
 # Loop over all args
-while [ -n "$1" ] ; do
+args=
+no_create=
+while [ $# != 0 ] ; do
 
 	# Get the first arg, and shuffle
-	option=$1
+	option=$1 ; arg2=no
 	shift
 
 	# Add the argument quoted to args
@@ -77,6 +76,15 @@ while [ -n "$1" ] ; do
 	--version | -V)
 		echo "Configure script for GNU ${pkgname} version ${pkgversion}"
 		exit 0 ;;
+	--srcdir)            srcdir=$1 ; arg2=yes ;;
+	--prefix)            prefix=$1 ; arg2=yes ;;
+	--exec-prefix)  exec_prefix=$1 ; arg2=yes ;;
+	--bindir)            bindir=$1 ; arg2=yes ;;
+	--datarootdir)  datarootdir=$1 ; arg2=yes ;;
+	--infodir)          infodir=$1 ; arg2=yes ;;
+	--mandir)            mandir=$1 ; arg2=yes ;;
+	--program-prefix) program_prefix=$1 ; arg2=yes ;;
+
 	--srcdir=*)            srcdir=${optarg} ;;
 	--prefix=*)            prefix=${optarg} ;;
 	--exec-prefix=*)  exec_prefix=${optarg} ;;
@@ -92,11 +100,22 @@ while [ -n "$1" ] ; do
 	CFLAGS=*)     CFLAGS=${optarg} ;;
 	LDFLAGS=*)   LDFLAGS=${optarg} ;;
 
-	--* | *=* | *-*-*) ;;
+	--*)
+		echo "configure: WARNING: unrecognized option: '${option}'" 1>&2 ;;
+	*=* | *-*-*) ;;
 	*)
-		echo "configure: Unrecognized option: \"${option}\"; use --help for usage." 1>&2
+		echo "configure: unrecognized option: '${option}'" 1>&2
+		echo "Try 'configure --help' for more information." 1>&2
 		exit 1 ;;
 	esac
+
+	# Check if the option took a separate argument
+	if [ "${arg2}" = yes ] ; then
+		if [ $# != 0 ] ; then args="${args} \"$1\"" ; shift
+		else echo "configure: Missing argument to '${option}'" 1>&2
+			exit 1
+		fi
+	fi
 done
 
 # Find the source files, if location was not specified.
@@ -111,10 +130,8 @@ if [ -z "${srcdir}" ] ; then
 fi
 
 if [ ! -r "${srcdir}/${srctrigger}" ] ; then
-	exec 1>&2
-	echo
-	echo "configure: Can't find sources in ${srcdir} ${srcdirtext}"
-	echo "configure: (At least ${srctrigger} is missing)."
+	echo "configure: Can't find sources in ${srcdir} ${srcdirtext}" 1>&2
+	echo "configure: (At least ${srctrigger} is missing)." 1>&2
 	exit 1
 fi
 

@@ -7,8 +7,7 @@ INSTALL_DATA = $(INSTALL) -p -m 644
 INSTALL_DIR = $(INSTALL) -d -m 755
 SHELL = /bin/sh
 
-objs = buffer.o carg_parser.o global.o io.o \
-       main.o main_loop.o regex.o signal.o
+objs = buffer.o carg_parser.o global.o io.o main.o main_loop.o regex.o signal.o
 
 
 .PHONY : all install install-bin install-info install-man install-strip \

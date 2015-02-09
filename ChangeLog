@@ -1,3 +1,9 @@
+2013-06-18  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.9 released.
+	* check.sh: Do not feed shell scripts to ed.
+	* configure: Options now accept a separate argument.
+
 2013-04-23  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.8 released.

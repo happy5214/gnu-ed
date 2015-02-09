@@ -126,9 +126,9 @@ The test file suffixes have the following meanings:
 .pr   Result from a piped ed script.
 .err  Error - invalid ed commands that should generate an error
 
-The output of the tests is written to the files errs.ck, pipes.ck and
-scripts.ck.  At the end of the tests, these files are grep'ed for error
-messages, which look like:
+The output of the tests is written to files with .o and .ro suffixes and
+compared with their corresponding .r and .pr result files.
+If any test fails, the error messages look like:
 
 	*** The script u.ed exited abnormally ***
 or:
