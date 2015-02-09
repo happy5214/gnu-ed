@@ -1,4 +1,4 @@
-This is ed.info, produced by makeinfo version 4.13 from ed.texinfo.
+This is ed.info, produced by makeinfo version 4.13+ from ed.texi.
 
 INFO-DIR-SECTION Basics
 START-INFO-DIR-ENTRY
@@ -6,7 +6,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
-2013 Free Software Foundation, Inc.
+2013, 2014 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -19,7 +19,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.9, 18 June 2013).
+This manual is for GNU ed (version 1.10, 22 January 2014).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -32,20 +32,20 @@ superseded by full-screen editors such as GNU Emacs or GNU Moe.
 
 * Menu:
 
-* Overview::                       Overview of the `ed' command
-* Introduction to Line Editing::   Getting started with GNU `ed'
-* Invoking Ed::                    Command line interface
-* Line Addressing::                Specifying lines/ranges in the buffer
-* Regular Expressions::            Patterns for selecting text
-* Commands::                       Commands recognized by GNU `ed'
-* Limitations::                    Intrinsic limits of GNU `ed'
-* Diagnostics::                    GNU `ed' error handling
-* Problems::                       Reporting bugs
-* GNU Free Documentation License:: How you can copy and share this manual
+* Overview::                        Overview of the 'ed' command
+* Introduction to line editing::    Getting started with GNU 'ed'
+* Invoking ed::                     Command line interface
+* Line addressing::                 Specifying lines/ranges in the buffer
+* Regular expressions::             Patterns for selecting text
+* Commands::                        Commands recognized by GNU 'ed'
+* Limitations::                     Intrinsic limits of GNU 'ed'
+* Diagnostics::                     GNU 'ed' error handling
+* Problems::                        Reporting bugs
+* GNU Free Documentation License::  How you can copy and share this manual
 
 
    Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
-2013 Free Software Foundation, Inc.
+2013, 2014 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -53,23 +53,23 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 
-File: ed.info,  Node: Overview,  Next: Introduction to Line Editing,  Prev: Top,  Up: Top
+File: ed.info,  Node: Overview,  Next: Introduction to line editing,  Prev: Top,  Up: Top
 
 1 Overview
 **********
 
-`ed' is a line-oriented text editor. It is used to create, display,
-modify and otherwise manipulate text files. `red' is a restricted `ed':
+'ed' is a line-oriented text editor. It is used to create, display,
+modify and otherwise manipulate text files. 'red' is a restricted 'ed':
 it can only edit files in the current directory and cannot execute
 shell commands.
 
    If invoked with a FILE argument, then a copy of FILE is read into
 the editor's buffer. Changes are made to this copy and not directly to
-FILE itself. Upon quitting `ed', any changes not explicitly saved with
-a `w' command are lost.
+FILE itself. Upon quitting 'ed', any changes not explicitly saved with
+a 'w' command are lost.
 
    Editing is done in two distinct modes: "command" and "input".  When
-first invoked, `ed' is in command mode. In this mode commands are read
+first invoked, 'ed' is in command mode. In this mode commands are read
 from the standard input and executed to manipulate the contents of the
 editor buffer. A typical command might look like:
 
@@ -77,20 +77,20 @@ editor buffer. A typical command might look like:
 
    which replaces all occurences of the string OLD with NEW.
 
-   When an input command, such as `a' (append), `i' (insert) or `c'
-(change), is given, `ed' enters input mode. This is the primary means
+   When an input command, such as 'a' (append), 'i' (insert) or 'c'
+(change), is given, 'ed' enters input mode. This is the primary means
 of adding text to a file. In this mode, no commands are available;
 instead, the standard input is written directly to the editor buffer. A
 "line" consists of the text up to and including a <newline> character.
-Input mode is terminated by entering a single period (`.') on a line.
+Input mode is terminated by entering a single period ('.') on a line.
 
-   All `ed' commands operate on whole lines or ranges of lines; e.g.,
-the `d' command deletes lines; the `m' command moves lines, and so on.
+   All 'ed' commands operate on whole lines or ranges of lines; e.g.,
+the 'd' command deletes lines; the 'm' command moves lines, and so on.
 It is possible to modify only a portion of a line by means of
-replacement, as in the example above. However even here, the `s'
+replacement, as in the example above. However even here, the 's'
 command is applied to whole lines at a time.
 
-   In general, `ed' commands consist of zero or more line addresses,
+   In general, 'ed' commands consist of zero or more line addresses,
 followed by a single character command and possibly additional
 parameters; i.e., commands have the structure:
 
@@ -101,19 +101,19 @@ the command. If fewer addresses are given than the command accepts,
 then default addresses are supplied.
 
 
-File: ed.info,  Node: Introduction to Line Editing,  Next: Invoking Ed,  Prev: Overview,  Up: Top
+File: ed.info,  Node: Introduction to line editing,  Next: Invoking ed,  Prev: Overview,  Up: Top
 
-2 Introduction to Line Editing
+2 Introduction to line editing
 ******************************
 
-`ed' was created, along with the Unix operating system, by Ken Thompson
+'ed' was created, along with the Unix operating system, by Ken Thompson
 and Dennis Ritchie. It is the refinement of its more complex,
-programmable predecessor, `QED', to which Thompson and Ritchie had
+programmable predecessor, 'QED', to which Thompson and Ritchie had
 already added pattern matching capabilities (*note Regular
-Expressions::).
+expressions::).
 
    For the purposes of this tutorial, a working knowledge of the Unix
-shell `sh' and the Unix file system is recommended, since `ed' is
+shell 'sh' and the Unix file system is recommended, since 'ed' is
 designed to interact closely with them.  (*Note GNU bash manual:
 (bash)Top, for details about bash).
 
@@ -122,31 +122,31 @@ that display editors provide instant feedback to user commands, whereas
 line editors require sometimes lengthy input before any effects are
 seen. The advantage of instant feedback, of course, is that if a mistake
 is made, it can be corrected immediately, before more damage is done.
-Editing in `ed' requires more strategy and forethought; but if you are
+Editing in 'ed' requires more strategy and forethought; but if you are
 up to the task, it can be quite efficient.
 
-   Much of the `ed' command syntax is shared with other Unix utilities.
+   Much of the 'ed' command syntax is shared with other Unix utilities.
 
    As with the shell, <RETURN> (the carriage-return key) enters a line
 of input. So when we speak of "entering" a command or some text in
-`ed', <RETURN> is implied at the end of each line. Prior to typing
+'ed', <RETURN> is implied at the end of each line. Prior to typing
 <RETURN>, corrections to the line may be made by typing either
 <BACKSPACE> (sometimes labeled <DELETE> or <DEL>) to erase characters
 backwards, or <CONTROL>-u (i.e., hold the CONTROL key and type u) to
 erase the whole line.
 
-   When `ed' first opens, it expects to be told what to do but doesn't
-prompt us like the shell. So let's begin by telling `ed' to do so with
+   When 'ed' first opens, it expects to be told what to do but doesn't
+prompt us like the shell. So let's begin by telling 'ed' to do so with
 the <P> ("prompt") command:
 
      $ ed
      P
      *
 
-   By default, `ed' uses asterisk (`*') as command prompt to avoid
-confusion with the shell command prompt (`$').
+   By default, 'ed' uses asterisk ('*') as command prompt to avoid
+confusion with the shell command prompt ('$').
 
-   We can run Unix shell (`sh') commands from inside `ed' by prefixing
+   We can run Unix shell ('sh') commands from inside 'ed' by prefixing
 them with <!> (exclamation mark, aka "bang"). For example:
 
      *!date
@@ -161,15 +161,15 @@ them with <!> (exclamation mark, aka "bang"). For example:
    So far, this is no different from running commands in the Unix shell.
 But let's say we want to edit the output of a command, or save it to a
 file. First we must capture the command output to a temporary location
-called a "buffer" where `ed' can access it. This is done with `ed''s
+called a "buffer" where 'ed' can access it. This is done with 'ed''s
 <r> command (mnemonic: "read"):
 
-     *r !cal
+     *r !cal -m
      143
      *
 
-   Here `ed' is telling us that it has just read 143 characters into
-the editor buffer - i.e., the output of the `cal' command, which prints
+   Here 'ed' is telling us that it has just read 143 characters into
+the editor buffer - i.e., the output of the 'cal' command, which prints
 a simple ASCII calendar. To display the buffer contents we issue the
 <p> ("print") command (not to be confused with the prompt command,
 which is uppercase!). To indicate the range of lines in the buffer that
@@ -187,7 +187,7 @@ shorthand for "the whole buffer":
 
      *
 
-   Now let's write the buffer contents to a file named `junk' with the
+   Now let's write the buffer contents to a file named 'junk' with the
 <w> ("write") command. Again, we use the <,> prefix to indicate that
 it's the whole buffer we want:
 
@@ -197,12 +197,12 @@ it's the whole buffer we want:
 
    Need we say? It's good practice to frequently write the buffer
 contents, since unwritten changes to the buffer will be lost when we
-exit `ed'.
+exit 'ed'.
 
    The sample sessions below illustrate some basic concepts of line
-editing with `ed'. We begin by creating a file, `sonnet', with some
-help from Shakespeare. As with the shell, all input to `ed' must be
-followed by a <newline> character. Comments begin with a `#'.
+editing with 'ed'. We begin by creating a file, 'sonnet', with some
+help from Shakespeare. As with the shell, all input to 'ed' must be
+followed by a <newline> character. Comments begin with a '#'.
 
      $ ed
      # The 'a' command is for appending text to the editor buffer.
@@ -212,22 +212,22 @@ followed by a <newline> character. Comments begin with a `#'.
      Clouds and eclipses stain both moon and sun,
      And loathsome canker lives in sweetest bud.
      .
-     # Entering a single period on a line returns `ed' to command mode.
-     # Now write the buffer to the file `sonnet' and quit:
+     # Entering a single period on a line returns 'ed' to command mode.
+     # Now write the buffer to the file 'sonnet' and quit:
      w sonnet
      183
-     # `ed' reports the number of characters written.
+     # 'ed' reports the number of characters written.
      q
      $ ls -l
      total 2
      -rw-rw-r--    1 alm           183 Nov 10 01:16 sonnet
      $
 
-   In the next example, some typos are corrected in the file `sonnet'.
+   In the next example, some typos are corrected in the file 'sonnet'.
 
      $ ed sonnet
      183
-     # Begin by printing the buffer to the terminal with the `p' command.
+     # Begin by printing the buffer to the terminal with the 'p' command.
      # The ',' means "all lines".
      ,p
      No more be grieved at that which thou hast done.
@@ -237,7 +237,7 @@ followed by a <newline> character. Comments begin with a `#'.
      # Select line 2 for editing.
      2
      Roses have thorns, and filvers foutians mud.
-     # Use the substitute command, `s', to replace 'filvers' with 'silver',
+     # Use the substitute command, 's', to replace 'filvers' with 'silver',
      # and print the result.
      s/filvers/silver/p
      Roses have thorns, and silver foutians mud.
@@ -249,17 +249,17 @@ followed by a <newline> character. Comments begin with a `#'.
      q
      $
 
-   Since `ed' is line-oriented, we have to tell it which line, or range
+   Since 'ed' is line-oriented, we have to tell it which line, or range
 of lines we want to edit. In the above example, we do this by
 specifying the line's number, or sequence in the buffer. Alternatively,
-we could have specified a unique string in the line, e.g., `/filvers/',
-where the `/'s delimit the string in question.  Subsequent commands
+we could have specified a unique string in the line, e.g., '/filvers/',
+where the '/'s delimit the string in question.  Subsequent commands
 affect only the selected line, a.k.a. the "current" line. Portions of
 that line are then replaced with the substitute command, whose syntax
-is `s/OLD/NEW/'.
+is 's/OLD/NEW/'.
 
-   Although `ed' accepts only one command per line, the print command
-`p' is an exception, and may be appended to the end of most commands.
+   Although 'ed' accepts only one command per line, the print command
+'p' is an exception, and may be appended to the end of most commands.
 
    In the next example, a title is added to our sonnet.
 
@@ -291,12 +291,12 @@ is `s/OLD/NEW/'.
      195
      $
 
-   When `ed' opens a file, the current line is initially set to the
-last line of that file. Similarly, the move command `m' sets the
+   When 'ed' opens a file, the current line is initially set to the
+last line of that file. Similarly, the move command 'm' sets the
 current line to the last line moved.
 
-   Related programs or routines are `vi (1)', `sed (1)', `regex (3)',
-`sh (1)'. Relevant documents are:
+   Related programs or routines are 'vi (1)', 'sed (1)', 'regex (3)',
+'sh (1)'. Relevant documents are:
 
      Unix User's Manual Supplementary Documents: 12 -- 13
 
@@ -304,74 +304,74 @@ current line to the last line moved.
      Addison-Wesley, 1981.
 
 
-File: ed.info,  Node: Invoking Ed,  Next: Line Addressing,  Prev: Introduction to Line Editing,  Up: Top
+File: ed.info,  Node: Invoking ed,  Next: Line addressing,  Prev: Introduction to line editing,  Up: Top
 
-3 Invoking Ed
+3 Invoking ed
 *************
 
-The format for running `ed' is:
+The format for running 'ed' is:
 
      ed [OPTIONS] [FILE]
      red [OPTIONS] [FILE]
 
    FILE specifies the name of a file to read. If FILE is prefixed with
 a bang (!), then it is interpreted as a shell command. In this case,
-what is read is the standard output of FILE executed via `sh (1)'. To
+what is read is the standard output of FILE executed via 'sh (1)'. To
 read a file whose name begins with a bang, prefix the name with a
-backslash (`\'). The default filename is set to FILE only if it is not
+backslash ('\'). The default filename is set to FILE only if it is not
 prefixed with a bang.
 
-   `ed' supports the following options:
+   'ed' supports the following options:
 
-`-h'
-`--help'
+'-h'
+'--help'
      Print an informative help message describing the options and exit.
 
-`-V'
-`--version'
-     Print the version number of `ed' on the standard output and exit.
+'-V'
+'--version'
+     Print the version number of 'ed' on the standard output and exit.
 
-`-G'
-`--traditional'
+'-G'
+'--traditional'
      Forces backwards compatibility. This affects the behavior of the
-     `ed' commands `G', `V', `f', `l', `m', `t' and `!!'. If the
+     'ed' commands 'G', 'V', 'f', 'l', 'm', 't' and '!!'. If the
      default behavior of these commands does not seem familiar, then
-     try invoking `ed' with this switch.
+     try invoking 'ed' with this switch.
 
-`-l'
-`--loose-exit-status'
+'-l'
+'--loose-exit-status'
      Do not exit with bad status if a command happens to "fail" (for
      example if a substitution command finds nothing to replace). This
-     can be useful when `ed' is invoked as the editor for crontab.
+     can be useful when 'ed' is invoked as the editor for crontab.
 
-`-p STRING'
-`--prompt=STRING'
+'-p STRING'
+'--prompt=STRING'
      Specifies a command prompt. This may be toggled on and off with the
-     `P' command.
+     'P' command.
 
-`-r'
-`--restricted'
+'-r'
+'--restricted'
      Run in restricted mode. This mode disables edition of files out of
      the current directory and execution of shell commands.
 
-`-s'
-`--quiet'
-`--silent'
-     Suppresses diagnostics. This should be used if `ed''s standard
+'-s'
+'--quiet'
+'--silent'
+     Suppresses diagnostics. This should be used if 'ed''s standard
      input is from a script.
 
-`-v'
-`--verbose'
-     Verbose mode. This may be toggled on and off with the `H' command.
+'-v'
+'--verbose'
+     Verbose mode. This may be toggled on and off with the 'H' command.
 
 
 
-File: ed.info,  Node: Line Addressing,  Next: Regular Expressions,  Prev: Invoking Ed,  Up: Top
+File: ed.info,  Node: Line addressing,  Next: Regular expressions,  Prev: Invoking ed,  Up: Top
 
-4 Line Addressing
+4 Line addressing
 *****************
 
-An address represents the number of a line in the buffer. `ed'
+An address represents the number of a line in the buffer. 'ed'
 maintains a "current address" which is typically supplied to commands
 as the default address when none is specified. When a file is first
 read, the current address is set to the last line of the file. In
@@ -379,67 +379,67 @@ general, the current address is set to the last line affected by a
 command.
 
    One exception to the rule that addresses represent line numbers is
-the address `0' (zero). This means "before the first line", and is
+the address '0' (zero). This means "before the first line", and is
 valid wherever it makes sense.
 
-   An address range is two addresses separated either by a comma (`,')
-or a semicolon (`;'). The value of the first address in a range cannot
+   An address range is two addresses separated either by a comma (',')
+or a semicolon (';'). The value of the first address in a range cannot
 exceed the value of the second. If only one address is given in a
 range, then the second address is set to the given address. If an
 N-tuple of addresses is given where N > 2, then the corresponding range
 is determined by the last two addresses in the N-tuple. If only one
 address is expected, then the last address is used.
 
-   In a semicolon-delimited range, the current address (`.') is set to
+   In a semicolon-delimited range, the current address ('.') is set to
 the first address before the second address is calculated. This feature
 can be used to set the starting line for searches.
 
    A line address is constructed as follows:
 
-`.'
+'.'
      The current line (address) in the buffer.
 
-`$'
+'$'
      The last line in the buffer.
 
-`N'
-     The Nth line in the buffer, where N is a number in the range `0,$'.
+'N'
+     The Nth line in the buffer, where N is a number in the range '0,$'.
 
-`+N'
+'+N'
      The Nth next line, where N is a non-negative number.
 
-`-N'
+'-N'
      The Nth previous line, where N is a non-negative number.
 
-`+'
-     The next line. This is equivalent to `+1' and may be repeated with
+'+'
+     The next line. This is equivalent to '+1' and may be repeated with
      cumulative effect.
 
-`-'
-     The previous line. This is equivalent to `-1' and may be repeated
+'-'
+     The previous line. This is equivalent to '-1' and may be repeated
      with cumulative effect.
 
-`,'
+','
      The first through last lines in the buffer. This is equivalent to
-     the address range `1,$'.
+     the address range '1,$'.
 
-`;'
+';'
      The current through last lines in the buffer. This is equivalent
-     to the address range `.,$'.
+     to the address range '.,$'.
 
-`/RE/'
+'/RE/'
      The next line containing the regular expression RE. The search
      wraps to the beginning of the buffer and continues down to the
-     current line, if necessary. `//' repeats the last search.
+     current line, if necessary. '//' repeats the last search.
 
-`?RE?'
+'?RE?'
      The previous line containing the regular expression RE. The search
      wraps to the end of the buffer and continues up to the current
-     line, if necessary. `??' repeats the last search.
+     line, if necessary. '??' repeats the last search.
 
-`'x'
+''x'
      The apostrophe-x character pair addresses the line previously
-     marked by a `k' (mark) command, where `x' is a lower case letter
+     marked by a 'k' (mark) command, where 'x' is a lower case letter
      from the portable character set.
 
 
@@ -448,26 +448,26 @@ separated by whitespace. Offsets are constructed as follows:
 
    * A number adds the indicated number of lines to the address.
 
-   * `+' or `-' followed by a number adds or subtracts the indicated
+   * '+' or '-' followed by a number adds or subtracts the indicated
      number of lines to or from the address.
 
-   * `+' or `-' not followed by a number adds or subtracts 1 to or from
+   * '+' or '-' not followed by a number adds or subtracts 1 to or from
      the address.
 
 
 
-File: ed.info,  Node: Regular Expressions,  Next: Commands,  Prev: Line Addressing,  Up: Top
+File: ed.info,  Node: Regular expressions,  Next: Commands,  Prev: Line addressing,  Up: Top
 
-5 Regular Expressions
+5 Regular expressions
 *********************
 
 Regular expressions are patterns used in selecting text. For example,
-the `ed' command
+the 'ed' command
 
      g/STRING/
 
 prints all lines containing STRING. Regular expressions are also used
-by the `s' command for selecting old text to be replaced with new text.
+by the 's' command for selecting old text to be replaced with new text.
 
    In addition to a specifying string literals, regular expressions can
 represent classes of strings. Strings thus represented are said to be
@@ -477,22 +477,22 @@ left-most longest match is the one selected.
 
    The following symbols are used in constructing regular expressions:
 
-`C'
-     Any character C not listed below, including `{', `}', `(', `)',
-     `<' and `>', matches itself.
+'C'
+     Any character C not listed below, including '{', '}', '(', ')',
+     '<' and '>', matches itself.
 
-`\C'
-     Any backslash-escaped character C, other than `{', `}', `(', `)',
-     `<', `>', `b', `B', `w', `W', `+' and `?', matches itself.
+'\C'
+     Any backslash-escaped character C, other than '{', '}', '(', ')',
+     '<', '>', 'b', 'B', 'w', 'W', '+' and '?', matches itself.
 
-`.'
+'.'
      Matches any single character.
 
-`[CHAR-CLASS]'
-     Matches any single character in CHAR-CLASS. To include a `]' in
+'[CHAR-CLASS]'
+     Matches any single character in CHAR-CLASS. To include a ']' in
      CHAR-CLASS, it must be the first character. A range of characters
      may be specified by separating the end characters of the range
-     with a `-', e.g., `a-z' specifies the lower case characters. The
+     with a '-', e.g., 'a-z' specifies the lower case characters. The
      following literal expressions can also be used in CHAR-CLASS to
      specify sets of characters:
 
@@ -500,7 +500,7 @@ left-most longest match is the one selected.
           [:alpha:] [:digit:] [:print:] [:upper:]
           [:blank:] [:graph:] [:punct:] [:xdigit:]
 
-     If `-' appears as the first or last character of CHAR-CLASS, then
+     If '-' appears as the first or last character of CHAR-CLASS, then
      it matches itself. All other characters in CHAR-CLASS match
      themselves.
 
@@ -509,362 +509,362 @@ left-most longest match is the one selected.
           [=COL-ELM=]
 
      where COL-ELM is a "collating element" are interpreted according
-     to `locale (5)'. See `regex (3)' for an explanation of these
+     to 'locale (5)'. See 'regex (3)' for an explanation of these
      constructs.
 
-`[^CHAR-CLASS]'
+'[^CHAR-CLASS]'
      Matches any single character, other than newline, not in
      CHAR-CLASS.  CHAR-CLASS is defined as above.
 
-`^'
-     If `^' is the first character of a regular expression, then it
+'^'
+     If '^' is the first character of a regular expression, then it
      anchors the regular expression to the beginning of a line.
      Otherwise, it matches itself.
 
-`$'
-     If `$' is the last character of a regular expression, it anchors
+'$'
+     If '$' is the last character of a regular expression, it anchors
      the regular expression to the end of a line. Otherwise, it matches
      itself.
 
-`\(RE\)'
+'\(RE\)'
      Defines a (possibly null) subexpression RE. Subexpressions may be
-     nested. A subsequent backreference of the form `\N', where N is a
+     nested. A subsequent backreference of the form '\N', where N is a
      number in the range [1,9], expands to the text matched by the Nth
-     subexpression. For example, the regular expression `\(a.c\)\1'
-     matches the string `abcabc', but not `abcadc'. Subexpressions are
+     subexpression. For example, the regular expression '\(a.c\)\1'
+     matches the string 'abcabc', but not 'abcadc'. Subexpressions are
      ordered relative to their left delimiter.
 
-`*'
+'*'
      Matches the single character regular expression or subexpression
-     immediately preceding it zero or more times. If `*' is the first
+     immediately preceding it zero or more times. If '*' is the first
      character of a regular expression or subexpression, then it matches
-     itself. The `*' operator sometimes yields unexpected results. For
-     example, the regular expression `b*' matches the beginning of the
-     string `abbb', as opposed to the substring `bbb', since a null
+     itself. The '*' operator sometimes yields unexpected results. For
+     example, the regular expression 'b*' matches the beginning of the
+     string 'abbb', as opposed to the substring 'bbb', since a null
      match is the only left-most match.
 
-`\{N,M\}'
-`\{N,\}'
-`\{N\}'
+'\{N,M\}'
+'\{N,\}'
+'\{N\}'
      Matches the single character regular expression or subexpression
      immediately preceding it at least N and at most M times. If M is
      omitted, then it matches at least N times. If the comma is also
      omitted, then it matches exactly N times. If any of these forms
      occurs first in a regular expression or subexpression, then it is
-     interpreted literally (i.e., the regular expression `\{2\}'
-     matches the string `{2}', and so on).
+     interpreted literally (i.e., the regular expression '\{2\}'
+     matches the string '{2}', and so on).
 
-`\<'
-`\>'
+'\<'
+'\>'
      Anchors the single character regular expression or subexpression
-     immediately following it to the beginning (in the case of `\<') or
-     ending (in the case of `\>') of a "word", i.e., in ASCII, a
+     immediately following it to the beginning (in the case of '\<') or
+     ending (in the case of '\>') of a "word", i.e., in ASCII, a
      maximal string of alphanumeric characters, including the
      underscore (_).
 
 
-   The following extended operators are preceded by a backslash `\' to
-distinguish them from traditional `ed' syntax.
+   The following extended operators are preceded by a backslash '\' to
+distinguish them from traditional 'ed' syntax.
 
-`\`'
-`\''
-     Unconditionally matches the beginning `\`' or ending `\'' of a
+'\`'
+'\''
+     Unconditionally matches the beginning '\`' or ending '\'' of a
      line.
 
-`\?'
+'\?'
      Optionally matches the single character regular expression or
      subexpression immediately preceding it. For example, the regular
-     expression `a[bd]\?c' matches the strings `abc', `adc' and `ac'.
-     If `\?' occurs at the beginning of a regular expressions or
-     subexpression, then it matches a literal `?'.
+     expression 'a[bd]\?c' matches the strings 'abc', 'adc' and 'ac'.
+     If '\?' occurs at the beginning of a regular expressions or
+     subexpression, then it matches a literal '?'.
 
-`\+'
+'\+'
      Matches the single character regular expression or subexpression
      immediately preceding it one or more times. So the regular
-     expression `a+' is shorthand for `aa*'. If `\+' occurs at the
+     expression 'a+' is shorthand for 'aa*'. If '\+' occurs at the
      beginning of a regular expression or subexpression, then it
-     matches a literal `+'.
+     matches a literal '+'.
 
-`\b'
+'\b'
      Matches the beginning or ending (null string) of a word. Thus the
-     regular expression `\bhello\b' is equivalent to `\<hello\>'.
-     However, `\b\b' is a valid regular expression whereas `\<\>' is
+     regular expression '\bhello\b' is equivalent to '\<hello\>'.
+     However, '\b\b' is a valid regular expression whereas '\<\>' is
      not.
 
-`\B'
+'\B'
      Matches (a null string) inside a word.
 
-`\w'
+'\w'
      Matches any character in a word.
 
-`\W'
+'\W'
      Matches any character not in a word.
 
 
 
-File: ed.info,  Node: Commands,  Next: Limitations,  Prev: Regular Expressions,  Up: Top
+File: ed.info,  Node: Commands,  Next: Limitations,  Prev: Regular expressions,  Up: Top
 
 6 Commands
 **********
 
-All `ed' commands are single characters, though some require additonal
+All 'ed' commands are single characters, though some require additonal
 parameters. If a command's parameters extend over several lines, then
-each line except for the last must be terminated with a backslash (`\').
+each line except for the last must be terminated with a backslash ('\').
 
    In general, at most one command is allowed per line. However, most
-commands accept a print suffix, which is any of `p' (print), `l'
-(list), or `n' (enumerate), to print the last line affected by the
+commands accept a print suffix, which is any of 'p' (print), 'l'
+(list), or 'n' (enumerate), to print the last line affected by the
 command.
 
    An interrupt (typically <Control-C>) has the effect of aborting the
 current command and returning the editor to command mode.
 
-   `ed' recognizes the following commands. The commands are shown
+   'ed' recognizes the following commands. The commands are shown
 together with the default address or address range supplied if none is
 specified (in parenthesis).
 
-`(.)a'
+'(.)a'
      Appends text to the buffer after the addressed line, which may be
-     the address `0' (zero). Text is entered in input mode. The current
+     the address '0' (zero). Text is entered in input mode. The current
      address is set to last line entered.
 
-`(.,.)c'
+'(.,.)c'
      Changes lines in the buffer. The addressed lines are deleted from
      the buffer, and text is appended in their place. Text is entered
      in input mode. The current address is set to last line entered.
 
-`(.,.)d'
+'(.,.)d'
      Deletes the addressed lines from the buffer. If there is a line
      after the deleted range, then the current address is set to this
      line.  Otherwise the current address is set to the line before the
      deleted range.
 
-`e FILE'
+'e FILE'
      Edits FILE, and sets the default filename. If FILE is not
      specified, then the default filename is used. Any lines in the
      buffer are deleted before the new file is read. The current
      address is set to the last line read.
 
-`e !COMMAND'
-     Edits the standard output of `!COMMAND', (see the `!' command
+'e !COMMAND'
+     Edits the standard output of '!COMMAND', (see the '!' command
      below). The default filename is unchanged. Any lines in the buffer
      are deleted before the output of COMMAND is read. The current
      address is set to the last line read.
 
-`E FILE'
-     Edits FILE unconditionally. This is similar to the `e' command,
+'E FILE'
+     Edits FILE unconditionally. This is similar to the 'e' command,
      except that unwritten changes are discarded without warning.  The
      current address is set to the last line read.
 
-`f FILE'
+'f FILE'
      Sets the default filename to FILE. If FILE is not specified, then
      the default unescaped filename is printed.
 
-`(1,$)g /RE/COMMAND-LIST'
+'(1,$)g /RE/COMMAND-LIST'
      Global command. Applies COMMAND-LIST to each of the addressed
      lines matching a regular expression RE. The current address is set
      to the line currently matched before COMMAND-LIST is executed. At
-     the end of the `g' command, the current address is set to the last
+     the end of the 'g' command, the current address is set to the last
      line affected by COMMAND-LIST.
 
      At least the first command of COMMAND-LIST must appear on the same
-     line as the `g' command. All lines of a multi-line COMMAND-LIST
-     except the last line must be terminated with a backslash (`\').
-     Any commands are allowed, except for `g', `G', `v', and `V'. By
-     default, a newline alone in COMMAND-LIST is equivalent to a `p'
-     command. If `ed' is invoked with the command-line option `-G',
-     then a newline in COMMAND-LIST is equivalent to a `.+1p' command.
+     line as the 'g' command. All lines of a multi-line COMMAND-LIST
+     except the last line must be terminated with a backslash ('\').
+     Any commands are allowed, except for 'g', 'G', 'v', and 'V'. By
+     default, a newline alone in COMMAND-LIST is equivalent to a 'p'
+     command. If 'ed' is invoked with the command-line option '-G',
+     then a newline in COMMAND-LIST is equivalent to a '.+1p' command.
 
-`(1,$)G /RE/'
+'(1,$)G /RE/'
      Interactive global command. Interactively edits the addressed lines
      matching a regular expression RE. For each matching line, the line
      is printed, the current address is set, and the user is prompted to
-     enter a COMMAND-LIST. At the end of the `G' command, the current
+     enter a COMMAND-LIST. At the end of the 'G' command, the current
      address is set to the last line affected by (the last)
      COMMAND-LIST.
 
-     The format of COMMAND-LIST is the same as that of the `g' command.
-     A newline alone acts as a null command list. A single `&' repeats
+     The format of COMMAND-LIST is the same as that of the 'g' command.
+     A newline alone acts as a null command list. A single '&' repeats
      the last non-null command list.
 
-`H'
+'H'
      Toggles the printing of error explanations. By default,
      explanations are not printed. It is recommended that ed scripts
      begin with this command to aid in debugging.
 
-`h'
+'h'
      Prints an explanation of the last error.
 
-`(.)i'
-     Inserts text in the buffer before the current line. The address `0'
-     (zero) is valid for this command; it is equivalent to address `1'.
+'(.)i'
+     Inserts text in the buffer before the current line. The address '0'
+     (zero) is valid for this command; it is equivalent to address '1'.
      Text is entered in input mode. The current address is set to the
      last line entered.
 
-`(.,.+1)j'
+'(.,.+1)j'
      Joins the addressed lines. The addressed lines are deleted from the
      buffer and replaced by a single line containing their joined text.
      The current address is set to the resultant line.
 
-`(.)kx'
-     Marks a line with a lower case letter `x'. The line can then be
-     addressed as `'x' (i.e., a single quote followed by `x') in
+'(.)kx'
+     Marks a line with a lower case letter 'x'. The line can then be
+     addressed as ''x' (i.e., a single quote followed by 'x') in
      subsequent commands. The mark is not cleared until the line is
      deleted or otherwise modified.
 
-`(.,.)l'
+'(.,.)l'
      Prints the addressed lines unambiguously. The end of each line is
-     marked with a `$', and every `$' character within the text is
+     marked with a '$', and every '$' character within the text is
      printed with a preceding backslash. The current address is set to
      the last line printed.
 
-`(.,.)m(.)'
+'(.,.)m(.)'
      Moves lines in the buffer. The addressed lines are moved to after
-     the right-hand destination address, which may be the address `0'
+     the right-hand destination address, which may be the address '0'
      (zero). The current address is set to the new address of the last
      line moved.
 
-`(.,.)n'
+'(.,.)n'
      Prints the addressed lines, preceding each line by its line number
      and a <tab>. The current address is set to the last line printed.
 
-`(.,.)p'
+'(.,.)p'
      Prints the addressed lines. The current address is set to the last
      line printed.
 
-`P'
+'P'
      Toggles the command prompt on and off. Unless a prompt is
-     specified with command-line option `-p', the command prompt is by
+     specified with command-line option '-p', the command prompt is by
      default turned off.
 
-`q'
-     Quits `ed'.
+'q'
+     Quits 'ed'.
 
-`Q'
-     Quits `ed' unconditionally. This is similar to the `q' command,
+'Q'
+     Quits 'ed' unconditionally. This is similar to the 'q' command,
      except that unwritten changes are discarded without warning.
 
-`($)r FILE'
+'($)r FILE'
      Reads FILE to after the addressed line. If FILE is not specified,
      then the default filename is used. If there is no default filename
      prior to the command, then the default filename is set to FILE.
      Otherwise, the default filename is unchanged. The current address
      is set to the last line read.
 
-`($)r !COMMAND'
+'($)r !COMMAND'
      Reads to after the addressed line the standard output of
-     `!command', (see the `!' command below). The default filename is
+     '!command', (see the '!' command below). The default filename is
      unchanged. The current address is set to the last line read.
 
-`(.,.)s /RE/REPLACEMENT/'
-`(.,.)s /RE/REPLACEMENT/g'
-`(.,.)s /RE/REPLACEMENT/N'
+'(.,.)s /RE/REPLACEMENT/'
+'(.,.)s /RE/REPLACEMENT/g'
+'(.,.)s /RE/REPLACEMENT/N'
      Replaces text in the addressed lines matching a regular expression
      RE with REPLACEMENT. By default, only the first match in each line
-     is replaced. If the `g' (global) suffix is given, then every match
+     is replaced. If the 'g' (global) suffix is given, then every match
      is replaced. The N suffix, where N is a postive number, causes
      only the Nth match to be replaced. It is an error if no
      substitutions are performed on any of the addressed lines. The
      current address is set to the last line affected.
 
      RE and REPLACEMENT may be delimited by any character other than
-     <space>, <newline> and the characters used by the form of the `s'
+     <space>, <newline> and the characters used by the form of the 's'
      command shown below. If one or two of the last delimiters is
      omitted, then the last line affected is printed as if the print
-     suffix `p' were specified.
+     suffix 'p' were specified.
 
-     An unescaped `&' in REPLACEMENT is replaced by the currently
-     matched text. The character sequence `\M' where M is a number in
+     An unescaped '&' in REPLACEMENT is replaced by the currently
+     matched text. The character sequence '\M' where M is a number in
      the range [1,9], is replaced by the Mth backreference expression
-     of the matched text. If REPLACEMENT consists of a single `%', then
+     of the matched text. If REPLACEMENT consists of a single '%', then
      REPLACEMENT from the last substitution is used. Newlines may be
-     embedded in REPLACEMENT if they are escaped with a backslash (`\').
+     embedded in REPLACEMENT if they are escaped with a backslash ('\').
 
-`(.,.)s'
-     Repeats the last substitution. This form of the `s' command accepts
-     a count suffix N, and any combination of the characters `r', `g',
-     and `p'. If a count suffix N is given, then only the Nth match is
-     replaced. The `r' suffix causes the regular expression of the last
+'(.,.)s'
+     Repeats the last substitution. This form of the 's' command accepts
+     a count suffix N, and any combination of the characters 'r', 'g',
+     and 'p'. If a count suffix N is given, then only the Nth match is
+     replaced. The 'r' suffix causes the regular expression of the last
      search to be used instead of the that of the last substitution.
-     The `g' suffix toggles the global suffix of the last substitution.
-     The `p' suffix toggles the print suffix of the last substitution.
+     The 'g' suffix toggles the global suffix of the last substitution.
+     The 'p' suffix toggles the print suffix of the last substitution.
      The current address is set to the last line affected.
 
-`(.,.)t(.)'
+'(.,.)t(.)'
      Copies (i.e., transfers) the addressed lines to after the
-     right-hand destination address, which may be the address `0'
+     right-hand destination address, which may be the address '0'
      (zero). The current address is set to the last line copied.
 
-`u'
+'u'
      Undoes the last command and restores the current address to what
-     it was before the command. The global commands `g', `G', `v', and
-     `V' are treated as a single command by undo. `u' is its own
+     it was before the command. The global commands 'g', 'G', 'v', and
+     'V' are treated as a single command by undo. 'u' is its own
      inverse.
 
-`(1,$)v /RE/COMMAND-LIST'
-     This is similar to the `g' command except that it applies
+'(1,$)v /RE/COMMAND-LIST'
+     This is similar to the 'g' command except that it applies
      COMMAND-LIST to each of the addressed lines not matching the
      regular expression RE.
 
-`(1,$)V /RE/'
-     This is similar to the `G' command except that it interactively
+'(1,$)V /RE/'
+     This is similar to the 'G' command except that it interactively
      edits the addressed lines not matching the regular expression RE.
 
-`(1,$)w FILE'
+'(1,$)w FILE'
      Writes the addressed lines to FILE. Any previous contents of FILE
      is lost without warning. If there is no default filename, then the
      default filename is set to FILE, otherwise it is unchanged. If no
      filename is specified, then the default filename is used. The
      current address is unchanged.
 
-`(1,$)w !COMMAND'
-     Writes the addressed lines to the standard input of `!COMMAND',
-     (see the `!' command below). The default filename and current
+'(1,$)w !COMMAND'
+     Writes the addressed lines to the standard input of '!COMMAND',
+     (see the '!' command below). The default filename and current
      address are unchanged.
 
-`(1,$)wq FILE'
-     Writes the addressed lines to FILE, and then executes a `q'
+'(1,$)wq FILE'
+     Writes the addressed lines to FILE, and then executes a 'q'
      command.
 
-`(1,$)W FILE'
+'(1,$)W FILE'
      Appends the addressed lines to the end of FILE. This is similar to
-     the `w' command, expect that the previous contents of file is not
+     the 'w' command, expect that the previous contents of file is not
      clobbered. The current address is unchanged.
 
-`(.)x'
+'(.)x'
      Copies (puts) the contents of the cut buffer to after the addressed
      line. The current address is set to the last line copied.
 
-`(.,.)y'
+'(.,.)y'
      Copies (yanks) the addressed lines to the cut buffer. The cut
-     buffer is overwritten by subsequent `y', `s', `j', `d', or `c'
+     buffer is overwritten by subsequent 'y', 's', 'j', 'd', or 'c'
      commands. The current address is unchanged.
 
-`(.+1)z N'
+'(.+1)z N'
      Scrolls N lines at a time starting at addressed line. If N is not
      specified, then the current window size is used. The current
      address is set to the last line printed.
 
-`!COMMAND'
-     Executes COMMAND via `sh (1)'. If the first character of COMMAND
-     is `!', then it is replaced by text of the previous `!COMMAND'.
-     `ed' does not process COMMAND for backslash (`\') escapes.
-     However, an unescaped `%' is replaced by the default filename.
-     When the shell returns from execution, a `!' is printed to the
+'!COMMAND'
+     Executes COMMAND via 'sh (1)'. If the first character of COMMAND
+     is '!', then it is replaced by text of the previous '!COMMAND'.
+     'ed' does not process COMMAND for backslash ('\') escapes.
+     However, an unescaped '%' is replaced by the default filename.
+     When the shell returns from execution, a '!' is printed to the
      standard output. The current line is unchanged.
 
-`(.,.)#'
+'(.,.)#'
      Begins a comment; the rest of the line, up to a newline, is
      ignored. If a line address followed by a semicolon is given, then
      the current address is set to that address. Otherwise, the current
      address is unchanged.
 
-`($)='
+'($)='
      Prints the line number of the addressed line.
 
-`(.+1)<newline>'
+'(.+1)<newline>'
      An address alone prints the addressed line. A <newline> alone is
-     equivalent to `+1p'. the current address is set to the address of
+     equivalent to '+1p'. the current address is set to the address of
      the printed line.
 
 
@@ -874,18 +874,18 @@ File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: Commands,  Up: Top
 7 Limitations
 *************
 
-If the terminal hangs up, `ed' attempts to write the buffer to file
-`ed.hup' or, if this fails, to `$HOME/ed.hup'.
+If the terminal hangs up, 'ed' attempts to write the buffer to file
+'ed.hup' or, if this fails, to '$HOME/ed.hup'.
 
-   `ed' processes FILE arguments for backslash escapes, i.e., in a
-filename, any character preceded by a backslash (`\') is interpreted
+   'ed' processes FILE arguments for backslash escapes, i.e., in a
+filename, any character preceded by a backslash ('\') is interpreted
 literally.
 
    If a text (non-binary) file is not terminated by a newline character,
-then `ed' appends one on reading/writing it. In the case of a binary
-file, `ed' does not append a newline on reading/writing.
+then 'ed' appends one on reading/writing it. In the case of a binary
+file, 'ed' does not append a newline on reading/writing.
 
-   Per line overhead: 2 `pointer's, 1 `long int', and 1 `int'.
+   Per line overhead: 2 'pointer's, 1 'long int', and 1 'int'.
 
 
 File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
@@ -893,15 +893,15 @@ File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 8 Diagnostics
 *************
 
-When an error occurs, if `ed''s input is from a regular file or here
-document, then it exits, otherwise it prints a `?' and returns to
+When an error occurs, if 'ed''s input is from a regular file or here
+document, then it exits, otherwise it prints a '?' and returns to
 command mode. An explanation of the last error can be printed with the
-`h' (help) command.
+'h' (help) command.
 
-   If the `u' (undo) command occurs in a global command list, then the
+   If the 'u' (undo) command occurs in a global command list, then the
 command list is executed only once.
 
-   Attempting to quit `ed' or edit another file before writing a
+   Attempting to quit 'ed' or edit another file before writing a
 modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
 
@@ -910,17 +910,17 @@ time, it succeeds, but any changes to the buffer are lost.
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
 
-9 Reporting Bugs
+9 Reporting bugs
 ****************
 
-There are probably bugs in `ed'. There are certainly errors and
+There are probably bugs in 'ed'. There are certainly errors and
 omissions in this manual. If you report them, they will get fixed. If
 you don't, no one will ever know about them and they will remain unfixed
 for all eternity, if not longer.
 
-   If you find a bug in `ed', please send electronic mail to
+   If you find a bug in 'ed', please send electronic mail to
 <bug-ed@gnu.org>. Include the version number, which you can find by
-running `ed --version'.
+running 'ed --version'.
 
 
 File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
@@ -931,7 +931,7 @@ File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
                      Version 1.3, 3 November 2008
 
      Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
-     `http://fsf.org/'
+     'http://fsf.org/'
 
      Everyone is permitted to copy and distribute verbatim copies
      of this license document, but changing it is not allowed.
@@ -1331,7 +1331,7 @@ File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
      the GNU Free Documentation License from time to time.  Such new
      versions will be similar in spirit to the present version, but may
      differ in detail to address new problems or concerns.  See
-     `http://www.gnu.org/copyleft/'.
+     'http://www.gnu.org/copyleft/'.
 
      Each version of the License is given a distinguishing version
      number.  If the Document specifies that a particular numbered
@@ -1411,17 +1411,17 @@ permit their use in free software.
 
 
 Tag Table:
-Node: Top574
-Node: Overview2257
-Node: Introduction to Line Editing4314
-Node: Invoking Ed11557
-Node: Line Addressing13358
-Node: Regular Expressions16435
-Node: Commands21779
-Node: Limitations32924
-Node: Diagnostics33565
-Node: Problems34266
-Node: GNU Free Documentation License34799
+Node: Top578
+Node: Overview2281
+Node: Introduction to line editing4338
+Node: Invoking ed11584
+Node: Line addressing13385
+Node: Regular expressions16462
+Node: Commands21806
+Node: Limitations32951
+Node: Diagnostics33592
+Node: Problems34293
+Node: GNU Free Documentation License34826
 
 End Tag Table
 

@@ -1,5 +1,3 @@
-Changes in version 1.9:
+Changes in version 1.10:
 
-Testsuite no more feeds shell scripts to ed.
-
-"configure" now accepts options with a separate argument.
+"ed.texinfo" has been renamed to "ed.texi".

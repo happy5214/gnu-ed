@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
     Free Software Foundation, Inc.
 
     This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@
 
 static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2013";
+static const char * const program_year = "2014";
 static const char * invocation_name = 0;
 
 static bool restricted_ = false;	/* if set, run in restricted mode */
@@ -77,7 +77,7 @@ static void show_help( void )
           "not found, invalid flags, I/O errors, etc), 2 to indicate a corrupt or\n"
           "invalid input file, 3 for an internal consistency error (eg, bug) which\n"
           "caused ed to panic.\n"
-          "\nReport bugs to <bug-ed@gnu.org>.\n"
+          "\nReport bugs to bug-ed@gnu.org\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
           "General help using GNU software: http://www.gnu.org/gethelp\n" );
   }

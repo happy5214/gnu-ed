@@ -1,3 +1,8 @@
+2014-01-22  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.10 released.
+	* ed.texinfo: Renamed to ed.texi.
+
 2013-06-18  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.9 released.
@@ -203,7 +208,7 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew Moore
-Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
 Free Software Foundation, Inc.
 
 This file is a collection of facts, and thus it is not copyrightable,

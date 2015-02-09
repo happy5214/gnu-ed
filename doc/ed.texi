@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 18 June 2013
-@set VERSION 1.9
+@set UPDATED 22 January 2014
+@set VERSION 1.10
 
 @dircategory Basics
 @direntry
@@ -16,7 +16,7 @@
 
 @copying
 Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011,
-2012, 2013 Free Software Foundation, Inc.
+2012, 2013, 2014 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -56,17 +56,16 @@ superseded by full-screen editors such as GNU Emacs or GNU Moe.
 @end ifnottex
 
 @menu
-* Overview::                       Overview of the @command{ed} command
-* Introduction to Line Editing::   Getting started with GNU @command{ed}
-* Invoking Ed::                    Command line interface
-* Line Addressing::                Specifying lines/ranges in the buffer
-* Regular Expressions::            Patterns for selecting text
-* Commands::                       Commands recognized by GNU @command{ed}
-* Limitations::                    Intrinsic limits of GNU @command{ed}
-* Diagnostics::                    GNU @command{ed} error handling
-* Problems::                       Reporting bugs
-* GNU Free Documentation License:: How you can copy and share this manual
-
+* Overview::                        Overview of the @command{ed} command
+* Introduction to line editing::    Getting started with GNU @command{ed}
+* Invoking ed::                     Command line interface
+* Line addressing::                 Specifying lines/ranges in the buffer
+* Regular expressions::             Patterns for selecting text
+* Commands::                        Commands recognized by GNU @command{ed}
+* Limitations::                     Intrinsic limits of GNU @command{ed}
+* Diagnostics::                     GNU @command{ed} error handling
+* Problems::                        Reporting bugs
+* GNU Free Documentation License::  How you can copy and share this manual
 @end menu
 
 @sp 1
@@ -124,14 +123,14 @@ by the command. If fewer addresses are given than the command accepts,
 then default addresses are supplied.
 
 
-@node Introduction to Line Editing
-@chapter Introduction to Line Editing
+@node Introduction to line editing
+@chapter Introduction to line editing
 
 @command{ed} was created, along with the Unix operating system, by Ken
 Thompson and Dennis Ritchie. It is the refinement of its more complex,
 programmable predecessor, @cite{QED}, to which Thompson and Ritchie had
 already added pattern matching capabilities (@pxref{Regular
-Expressions}).
+expressions}).
 
 For the purposes of this tutorial, a working knowledge of the Unix shell
 @command{sh} and the Unix file system is recommended, since @command{ed}
@@ -199,7 +198,7 @@ called a @dfn{buffer} where @command{ed} can access it. This is done
 with @command{ed}'s @key{r} command (mnemonic: @dfn{read}):
 
 @example
-*r !cal
+*r !cal -m
 143
 *
 @end example
@@ -356,8 +355,8 @@ Addison-Wesley, 1981.
 @end quotation
 
 
-@node Invoking Ed
-@chapter Invoking Ed
+@node Invoking ed
+@chapter Invoking ed
 
 The format for running @command{ed} is:
 
@@ -420,8 +419,8 @@ Verbose mode. This may be toggled on and off with the @samp{H} command.
 @end table
 
 
-@node Line Addressing
-@chapter Line Addressing
+@node Line addressing
+@chapter Line addressing
 
 An address represents the number of a line in the buffer. @command{ed}
 maintains a @dfn{current address} which is typically supplied to
@@ -517,8 +516,8 @@ from the address.
 @end itemize
 
 
-@node Regular Expressions
-@chapter Regular Expressions
+@node Regular expressions
+@chapter Regular expressions
 
 Regular expressions are patterns used in selecting text. For example,
 the @command{ed} command
@@ -986,7 +985,7 @@ Exit status: 0 if no errors occurred; otherwise >0.
 
 
 @node Problems
-@chapter Reporting Bugs
+@chapter Reporting bugs
 
 There are probably bugs in @command{ed}. There are certainly errors and
 omissions in this manual. If you report them, they will get fixed. If
@@ -1000,6 +999,6 @@ find by running @w{@samp{ed --version}}.
 
 @node GNU Free Documentation License
 @chapter GNU Free Documentation License
-@include fdl.texinfo
+@include fdl.texi
 
 @bye

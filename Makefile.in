@@ -1,9 +1,9 @@
 
 DISTNAME = $(pkgname)-$(pkgversion)
 INSTALL = install
-INSTALL_PROGRAM = $(INSTALL) -p -m 755
-INSTALL_SCRIPT = $(INSTALL) -p -m 755
-INSTALL_DATA = $(INSTALL) -p -m 644
+INSTALL_PROGRAM = $(INSTALL) -m 755
+INSTALL_SCRIPT = $(INSTALL) -m 755
+INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIR = $(INSTALL) -d -m 755
 SHELL = /bin/sh
 
@@ -41,14 +41,13 @@ doc : info man
 
 info : $(VPATH)/doc/$(pkgname).info
 
-$(VPATH)/doc/$(pkgname).info : $(VPATH)/doc/$(pkgname).texinfo
-	cd $(VPATH)/doc && makeinfo $(pkgname).texinfo
+$(VPATH)/doc/$(pkgname).info : $(VPATH)/doc/$(pkgname).texi
+	cd $(VPATH)/doc && makeinfo $(pkgname).texi
 
 man : $(VPATH)/doc/$(progname).1
 
 $(VPATH)/doc/$(progname).1 : $(progname)
-	help2man -n 'line-oriented text editor' \
-	  -o $@ ./$(progname)
+	help2man -n 'line-oriented text editor' -o $@ ./$(progname)
 
 Makefile : $(VPATH)/configure $(VPATH)/Makefile.in
 	./config.status
@@ -93,7 +92,7 @@ uninstall-man :
 
 dist : doc
 	ln -sf $(VPATH) $(DISTNAME)
-	tar -cvf $(DISTNAME).tar \
+	tar -Hustar --owner=root --group=root -cvf $(DISTNAME).tar \
 	  $(DISTNAME)/AUTHORS \
 	  $(DISTNAME)/COPYING \
 	  $(DISTNAME)/ChangeLog \
@@ -105,8 +104,8 @@ dist : doc
 	  $(DISTNAME)/configure \
 	  $(DISTNAME)/doc/$(progname).1 \
 	  $(DISTNAME)/doc/$(pkgname).info \
-	  $(DISTNAME)/doc/$(pkgname).texinfo \
-	  $(DISTNAME)/doc/fdl.texinfo \
+	  $(DISTNAME)/doc/$(pkgname).texi \
+	  $(DISTNAME)/doc/fdl.texi \
 	  $(DISTNAME)/r$(progname).in \
 	  $(DISTNAME)/testsuite/check.sh \
 	  $(DISTNAME)/testsuite/*.t \

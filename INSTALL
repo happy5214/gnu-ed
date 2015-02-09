@@ -1,6 +1,6 @@
 Requirements
 ------------
-You'll need a C compiler and a C library compatible with GNU libc.
+You will need a C compiler and a C library compatible with GNU libc.
 I use gcc 4.8.1 and 3.3.6, but the code should compile with any
 standards compliant compiler.
 Gcc is available at http://gcc.gnu.org.
@@ -10,9 +10,9 @@ Procedure
 ---------
 1. Unpack the archive if you have not done so already:
 
-	lzip -cd ed[version].tar.lz | tar -xf -
+	tar -xf ed[version].tar.lz
 or
-	gzip -cd ed[version].tar.gz | tar -xf -
+	lzip -cd ed[version].tar.lz | tar -xf -
 
 This creates the directory ./ed[version] containing the source from
 the main archive.
@@ -39,12 +39,12 @@ the main archive.
 
 Another way
 -----------
-You can also compile ed into a separate directory. To do this, you
-must use a version of 'make' that supports the 'VPATH' variable, such
-as GNU 'make'. 'cd' to the directory where you want the object files
-and executables to go and run the 'configure' script. 'configure'
-automatically checks for the source code in '.', in '..' and in the
-directory that 'configure' is in.
+You can also compile ed into a separate directory.
+To do this, you must use a version of 'make' that supports the 'VPATH'
+variable, such as GNU 'make'. 'cd' to the directory where you want the
+object files and executables to go and run the 'configure' script.
+'configure' automatically checks for the source code in '.', in '..' and
+in the directory that 'configure' is in.
 
 'configure' recognizes the option '--srcdir=DIR' to control where to
 look for the sources. Usually 'configure' can determine that directory
@@ -54,7 +54,7 @@ After running 'configure', you can run 'make' and 'make install' as
 explained above.
 
 
-Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
