@@ -64,7 +64,7 @@ int inc_addr( int addr )
   { if( ++addr > _last_addr ) addr = 0; return addr; }
 
 int dec_addr( int addr )
-  { if( --addr < 0 ) addr = _last_addr - 1; return addr; }
+  { if( --addr < 0 ) addr = _last_addr; return addr; }
 
 
 /* link next and previous nodes */

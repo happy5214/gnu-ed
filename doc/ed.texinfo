@@ -5,8 +5,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 29 June 2007
-@set VERSION 0.6
+@set UPDATED 18 July 2007
+@set VERSION 0.7
 
 @dircategory Basics
 @direntry
