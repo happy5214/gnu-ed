@@ -42,7 +42,7 @@ static bool sigint_pending = false;
 
 static void sighup_handler( int signum )
   {
-  signum = 0;				/* keep compiler happy */
+  if( signum ) {}			/* keep compiler happy */
   if( mutex ) sighup_pending = true;
   else
     {
@@ -56,14 +56,14 @@ static void sighup_handler( int signum )
       const int need_slash = ( ( !len || s[len-1] != '/' ) ? 1 : 0 );
       char * const hup = ( ( len + need_slash + (int)sizeof hb < path_max( 0 ) ) ?
                     (char *) malloc( len + need_slash + sizeof hb ) : 0 );
-      if( len && hup )		/* hup filename */
+      if( len && hup )			/* hup filename */
         {
         memcpy( hup, s, len );
         if( need_slash ) hup[len] = '/';
         memcpy( hup + len + need_slash, hb, sizeof hb );
         if( write_file( hup, "w", 1, last_addr() ) >= 0 ) exit( 0 );
         }
-      exit( 1 );		/* hup file write failed */
+      exit( 1 );			/* hup file write failed */
       }
     exit( 0 );
     }
@@ -88,7 +88,7 @@ static void sigint_handler( int signum )
 static void sigwinch_handler( int signum )
   {
 #ifdef TIOCGWINSZ
-  struct winsize ws;            /* window size structure */
+  struct winsize ws;			/* window size structure */
 
   if( ioctl( 0, TIOCGWINSZ, (char *) &ws ) >= 0 )
     {
@@ -97,7 +97,7 @@ static void sigwinch_handler( int signum )
     if( ws.ws_col > 8 && ws.ws_col < 1800 ) window_columns_ = ws.ws_col - 8;
     }
 #endif
-  signum = 0;			/* keep compiler happy */
+  if( signum ) {}			/* keep compiler happy */
   }
 
 
@@ -172,7 +172,7 @@ bool parse_int( int * const i, const char * const str, const char ** const tail 
   }
 
 
-/* assure at least a minimum size for buffer `buf' */
+/* assure at least a minimum size for buffer 'buf' */
 bool resize_buffer( char ** const buf, int * const size, const int min_size )
   {
   if( *size < min_size )
@@ -197,7 +197,7 @@ bool resize_buffer( char ** const buf, int * const size, const int min_size )
   }
 
 
-/* assure at least a minimum size for buffer `buf' */
+/* assure at least a minimum size for buffer 'buf' */
 bool resize_line_buffer( const line_t *** const buf, int * const size,
                          const int min_size )
   {
@@ -223,7 +223,7 @@ bool resize_line_buffer( const line_t *** const buf, int * const size,
   }
 
 
-/* assure at least a minimum size for buffer `buf' */
+/* assure at least a minimum size for buffer 'buf' */
 bool resize_undo_buffer( undo_t ** const buf, int * const size,
                          const int min_size )
   {

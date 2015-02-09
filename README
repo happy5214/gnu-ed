@@ -1,3 +1,5 @@
+Description
+
 GNU ed is a line-oriented text editor. It is used to create, display,
 modify and otherwise manipulate text files, both interactively and via
 shell scripts. A restricted version of ed, red, can only edit files in
@@ -17,7 +19,7 @@ Report bugs to <bug-ed@gnu.org>.
 Ed home page: http://www.gnu.org/software/ed/ed.html
 
 For a description of the ed algorithm, see Kernighan and Plauger's book
-"Software Tools in Pascal," Addison-Wesley, 1981.
+"Software Tools in Pascal", Addison-Wesley, 1981.
 
 
 GNU ed(1) is not strictly POSIX compliant, as described in the
@@ -44,25 +46,25 @@ EXTENSIONS
       r /dev/null
       wq
 
-    Similarly, to remove a newline from the end of binary `file':
+    Similarly, to remove a newline from the end of binary 'file':
       $ ed file
       r /dev/null
       wq
 
   * BSD commands have been implemented wherever they do not conflict with
     the POSIX standard.  The BSD-ism's included are:
-      * `s' (i.e., s[n][rgp]*) to repeat a previous substitution,
-      * `W' for appending text to an existing file,
-      * `wq' for exiting after a write, and
-      * `z' for scrolling through the buffer.
+      * 's' (i.e., s[n][rgp]*) to repeat a previous substitution,
+      * 'W' for appending text to an existing file,
+      * 'wq' for exiting after a write, and
+      * 'z' for scrolling through the buffer.
 
-  * The POSIX interactive global commands `G' and `V' are extended to
-    support multiple commands, including `a', `i' and `c'.  The command
-    format is the same as for the global commands `g' and `v', i.e., one
+  * The POSIX interactive global commands 'G' and 'V' are extended to
+    support multiple commands, including 'a', 'i' and 'c'.  The command
+    format is the same as for the global commands 'g' and 'v', i.e., one
     command per line with each line, except for the last, ending in a
     backslash (\).
 
-  * The file commands `E', `e', `r', `W' and `w'  process a <file>
+  * The file commands 'E', 'e', 'r', 'W' and 'w'  process a <file>
     argument for backslash escapes; i.e.,  any character preceded by a
     backslash is interpreted literally.  If the first unescaped character
     of a <file> argument is a bang (!), then the rest of the line is
@@ -79,23 +81,23 @@ DEVIATIONS
     addresses cannot be used where only a single address is expected has
     been relaxed.
 
-  * To support the BSD `s' command (see EXTENSIONS above),
+  * To support the BSD 's' command (see EXTENSIONS above),
     substitution patterns cannot be delimited by numbers or the characters
-    `r', `g' and `p'.  In contrast, POSIX specifies any character expect
+    'r', 'g' and 'p'.  In contrast, POSIX specifies any character expect
     space or newline can used as a delimiter.
 
-  * Since the behavior of `u' (undo) within a `g' (global) command list is
+  * Since the behavior of 'u' (undo) within a 'g' (global) command list is
     not specified by POSIX, GNU ed follows the behavior of the SunOS ed:
     undo forces a global command list to be executed only once, rather than
     for each line matching a global pattern.  In addtion, each instance of
-    `u' within a global command undoes all previous commands (including
+    'u' within a global command undoes all previous commands (including
     undo's) in the command list.  This seems the best way, since the
     alternatives are either too complicated to implement or too confusing
     to use.
 
-  * The `m' (move) command within a `g' command list also follows the SunOS
+  * The 'm' (move) command within a 'g' command list also follows the SunOS
     ed implementation: any moved lines are removed from the global command's
-    `active' list.
+    'active' list.
 
   * If GNU ed is invoked with a name argument prefixed by a bang (!), then
     the remainder of the argument is interpreted as a shell command.  To invoke
@@ -109,9 +111,9 @@ DEVIATIONS
 
 TESTSUITE
 ---------
-The files in the `testsuite' directory with suffixes `.t', `.d', `.r',
-`.pr' and `.err' are used for testing ed. To run the tests, configure
-the package and type `make check' from the build directory. The tests do
+The files in the 'testsuite' directory with suffixes '.t', '.d', '.r',
+'.pr' and '.err' are used for testing ed. To run the tests, configure
+the package and type 'make check' from the build directory. The tests do
 not exhaustively verify POSIX compliance nor do they verify correct
 8-bit or long line support.
 

@@ -19,7 +19,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.6, 1 January 2012).
+This manual is for GNU ed (version 1.7, 9 October 2012).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -113,8 +113,9 @@ already added pattern matching capabilities (*note Regular
 Expressions::).
 
    For the purposes of this tutorial, a working knowledge of the Unix
-shell `sh' (*note Bash: (bash)Bash.) and the Unix file system is
-recommended, since `ed' is designed to interact closely with them.
+shell `sh' and the Unix file system is recommended, since `ed' is
+designed to interact closely with them.  (*Note GNU bash manual:
+(bash)Top, for details about bash).
 
    The principal difference between line editors and display editors is
 that display editors provide instant feedback to user commands, whereas
@@ -204,7 +205,7 @@ help from Shakespeare. As with the shell, all input to `ed' must be
 followed by a <newline> character. Comments begin with a `#'.
 
      $ ed
-     # The `a' command is for appending text to the editor buffer.
+     # The 'a' command is for appending text to the editor buffer.
      a
      No more be grieved at that which thou hast done.
      Roses have thorns, and filvers foutians mud.
@@ -227,7 +228,7 @@ followed by a <newline> character. Comments begin with a `#'.
      $ ed sonnet
      183
      # Begin by printing the buffer to the terminal with the `p' command.
-     # The `,' means ``all lines.''
+     # The ',' means "all lines".
      ,p
      No more be grieved at that which thou hast done.
      Roses have thorns, and filvers foutians mud.
@@ -236,11 +237,11 @@ followed by a <newline> character. Comments begin with a `#'.
      # Select line 2 for editing.
      2
      Roses have thorns, and filvers foutians mud.
-     # Use the substitute command, `s', to replace `filvers' with `silver',
+     # Use the substitute command, `s', to replace 'filvers' with 'silver',
      # and print the result.
      s/filvers/silver/p
      Roses have thorns, and silver foutians mud.
-     # And correct the spelling of `fountains'.
+     # And correct the spelling of 'fountains'.
      s/utia/untai/p
      Roses have thorns, and silver fountains mud.
      w sonnet
@@ -273,8 +274,8 @@ is `s/OLD/NEW/'.
      Clouds and eclipses stain both moon and sun,
      And loathsome canker lives in sweetest bud.
       Sonnet #50
-     # The title got appended to the end; we should have used `0a'
-     # to append ``before the first line.''
+     # The title got appended to the end; we should have used '0a'
+     # to append "before the first line".
      # Move the title to its proper place.
      5m0p
       Sonnet #50
@@ -377,30 +378,23 @@ read, the current address is set to the last line of the file. In
 general, the current address is set to the last line affected by a
 command.
 
-   A line address is constructed from one of the bases in the list
-below, optionally followed by a numeric offset. The offset may include
-any combination of digits, operators (i.e., `+' and `-') and
-whitespace. Addresses are read from left to right, and their values may
-be absolute or relative to the current address.
-
    One exception to the rule that addresses represent line numbers is
-the address `0' (zero). This means "before the first line," and is
+the address `0' (zero). This means "before the first line", and is
 valid wherever it makes sense.
 
-   An address range is two addresses separated either by a comma or
-semicolon. The value of the first address in a range cannot exceed the
-value of the second. If only one address is given in a range, then the
-second address is set to the given address. If an N-tuple of addresses
-is given where N > 2, then the corresponding range is determined by the
-last two addresses in the N-tuple. If only one address is expected,
-then the last address is used.
+   An address range is two addresses separated either by a comma (`,')
+or a semicolon (`;'). The value of the first address in a range cannot
+exceed the value of the second. If only one address is given in a
+range, then the second address is set to the given address. If an
+N-tuple of addresses is given where N > 2, then the corresponding range
+is determined by the last two addresses in the N-tuple. If only one
+address is expected, then the last address is used.
 
-   Each address in a comma-delimited range is interpreted relative to
-the current address. In a semicolon-delimited range, the first address
-is used to set the current address, and the second address is
-interpreted relative to the first.
+   In a semicolon-delimited range, the current address (`.') is set to
+the first address before the second address is calculated. This feature
+can be used to set the starting line for searches.
 
-   The following address symbols are recognized.
+   A line address is constructed as follows:
 
 `.'
      The current line (address) in the buffer.
@@ -409,7 +403,13 @@ interpreted relative to the first.
      The last line in the buffer.
 
 `N'
-     The Nth, line in the buffer where N is a number in the range `0,$'.
+     The Nth line in the buffer, where N is a number in the range `0,$'.
+
+`+N'
+     The Nth next line, where N is a non-negative number.
+
+`-N'
+     The Nth previous line, where N is a non-negative number.
 
 `+'
      The next line. This is equivalent to `+1' and may be repeated with
@@ -418,14 +418,6 @@ interpreted relative to the first.
 `-'
      The previous line. This is equivalent to `-1' and may be repeated
      with cumulative effect.
-
-`+N'
-`WHITESPACE N'
-     The Nth next line, where N is a non-negative number.  Whitespace
-     followed by a number N is interpreted as `+N'.
-
-`-N'
-     The Nth previous line, where N is a non-negative number.
 
 `,'
      The first through last lines in the buffer. This is equivalent to
@@ -449,6 +441,18 @@ interpreted relative to the first.
      The apostrophe-x character pair addresses the line previously
      marked by a `k' (mark) command, where `x' is a lower case letter
      from the portable character set.
+
+
+   Addresses can be followed by one or more address offsets, optionally
+separated by whitespace. Offsets are constructed as follows:
+
+   * A number adds the indicated number of lines to the address.
+
+   * `+' or `-' followed by a number adds or subtracts the indicated
+     number of lines to or from the address.
+
+   * `+' or `-' not followed by a number adds or subtracts 1 to or from
+     the address.
 
 
 
@@ -478,7 +482,7 @@ left-most longest match is the one selected.
      `<' and `>', matches itself.
 
 `\C'
-     Any backslash-escaped character C, other than `{', ``}', `(', `)',
+     Any backslash-escaped character C, other than `{', `}', `(', `)',
      `<', `>', `b', `B', `w', `W', `+' and `?', matches itself.
 
 `.'
@@ -916,7 +920,7 @@ for all eternity, if not longer.
 
    If you find a bug in `ed', please send electronic mail to
 <bug-ed@gnu.org>. Include the version number, which you can find by
-running ``ed' --version'.
+running `ed --version'.
 
 
 File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
@@ -1410,14 +1414,14 @@ Tag Table:
 Node: Top568
 Node: Overview2247
 Node: Introduction to Line Editing4304
-Node: Invoking Ed11516
-Node: Line Addressing13317
-Node: Regular Expressions16420
-Node: Commands21765
-Node: Limitations32910
-Node: Diagnostics33551
-Node: Problems34255
-Node: GNU Free Documentation License34790
+Node: Invoking Ed11547
+Node: Line Addressing13348
+Node: Regular Expressions16425
+Node: Commands21769
+Node: Limitations32914
+Node: Diagnostics33555
+Node: Problems34259
+Node: GNU Free Documentation License34792
 
 End Tag Table
 

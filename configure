@@ -9,7 +9,7 @@
 args=
 no_create=
 pkgname=ed
-pkgversion=1.6
+pkgversion=1.7
 progname=ed
 srctrigger=ed.h
 
@@ -20,10 +20,9 @@ srcdir=
 prefix=/usr/local
 exec_prefix='$(prefix)'
 bindir='$(exec_prefix)/bin'
-datadir='$(prefix)/share'
-infodir='$(datadir)/info'
-mandir='$(datadir)/man'
-sysconfdir='$(prefix)/etc'
+datarootdir='$(prefix)/share'
+infodir='$(datarootdir)/info'
+mandir='$(datarootdir)/man'
 program_prefix=
 CC=
 CPPFLAGS=
@@ -42,12 +41,12 @@ while [ -n "$1" ] ; do
 
 	# Split out the argument for options that take them
 	case ${option} in
-	*=*) optarg=`echo ${option} | sed -e 's,^[^=]*=,,'` ;;
+	*=*) optarg=`echo ${option} | sed -e 's,^[^=]*=,,;s,/$,,'` ;;
 	esac
 
 	# Process the options
 	case ${option} in
-	--help | --he* | -h)
+	--help | -h)
 		echo "Usage: configure [options]"
 		echo
 		echo "Options: [defaults in brackets]"
@@ -57,10 +56,9 @@ while [ -n "$1" ] ; do
 		echo "  --prefix=DIR          install into DIR [${prefix}]"
 		echo "  --exec-prefix=DIR     base directory for arch-dependent files [${exec_prefix}]"
 		echo "  --bindir=DIR          user executables directory [${bindir}]"
-		echo "  --datadir=DIR         base directory for doc and data [${datadir}]"
+		echo "  --datarootdir=DIR     base directory for doc and data [${datarootdir}]"
 		echo "  --infodir=DIR         info files directory [${infodir}]"
 		echo "  --mandir=DIR          man pages directory [${mandir}]"
-		echo "  --sysconfdir=DIR      read-only single-machine data directory [${sysconfdir}]"
 		echo "  --program-prefix=NAME install program and documentation prefixed with NAME"
 		echo "  CC=COMPILER           C compiler to use [gcc]"
 		echo "  CPPFLAGS=OPTIONS      command line options for the preprocessor [${CPPFLAGS}]"
@@ -68,34 +66,23 @@ while [ -n "$1" ] ; do
 		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
 		echo
 		exit 0 ;;
-	--version | --ve* | -V)
+	--version | -V)
 		echo "Configure script for GNU ${pkgname} version ${pkgversion}"
 		exit 0 ;;
-	--srcdir* | --sr*)
-		srcdir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--prefix* | --pre*)
-		prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--exec-prefix* | --ex*)
-		exec_prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--bindir* | --bi*)
-		bindir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--datadir* | --da*)
-		datadir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--infodir* | --inf*)
-		infodir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--mandir* | --ma*)
-		mandir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--sysconfdir* | --sy*)
-		sysconfdir=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--program-prefix* | --pro*)
-		program_prefix=`echo ${optarg} | sed -e 's,/$,,'` ;;
-	--no-create | --no-c*)
-		no_create=yes ;;
+	--srcdir=*)            srcdir=${optarg} ;;
+	--prefix=*)            prefix=${optarg} ;;
+	--exec-prefix=*)  exec_prefix=${optarg} ;;
+	--bindir=*)            bindir=${optarg} ;;
+	--datarootdir=*)  datarootdir=${optarg} ;;
+	--infodir=*)          infodir=${optarg} ;;
+	--mandir=*)            mandir=${optarg} ;;
+	--program-prefix=*) program_prefix=${optarg} ;;
+	--no-create)              no_create=yes ;;
 
-	CC=*)       CC=${optarg} ;;
+	CC=*)             CC=${optarg} ;;
 	CPPFLAGS=*) CPPFLAGS=${optarg} ;;
-	CFLAGS=*)   CFLAGS=${optarg} ;;
-	LDFLAGS=*)  LDFLAGS=${optarg} ;;
+	CFLAGS=*)     CFLAGS=${optarg} ;;
+	LDFLAGS=*)   LDFLAGS=${optarg} ;;
 
 	--* | *=* | *-*-*) ;;
 	*)
@@ -108,14 +95,14 @@ done
 srcdirtext=
 if [ -z "${srcdir}" ] ; then
 	srcdirtext="or . or .." ; srcdir=.
-	if [ ! -r ${srcdir}/${srctrigger} ] ; then srcdir=.. ; fi
-	if [ ! -r ${srcdir}/${srctrigger} ] ; then
+	if [ ! -r "${srcdir}/${srctrigger}" ] ; then srcdir=.. ; fi
+	if [ ! -r "${srcdir}/${srctrigger}" ] ; then
 		## the sed command below emulates the dirname command
 		srcdir=`echo $0 | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 	fi
 fi
 
-if [ ! -r ${srcdir}/${srctrigger} ] ; then
+if [ ! -r "${srcdir}/${srctrigger}" ] ; then
 	exec 1>&2
 	echo
 	echo "configure: Can't find sources in ${srcdir} ${srcdirtext}"
@@ -124,7 +111,7 @@ if [ ! -r ${srcdir}/${srctrigger} ] ; then
 fi
 
 # Set srcdir to . if that's what it is.
-if [ "`pwd`" = "`cd ${srcdir} ; pwd`" ] ; then srcdir=. ; fi
+if [ "`pwd`" = "`cd "${srcdir}" ; pwd`" ] ; then srcdir=. ; fi
 
 # checking whether we are using GNU C.
 if [ -z "${CC}" ] ; then		# Let the user override the test.
@@ -159,10 +146,9 @@ echo "VPATH = ${srcdir}"
 echo "prefix = ${prefix}"
 echo "exec_prefix = ${exec_prefix}"
 echo "bindir = ${bindir}"
-echo "datadir = ${datadir}"
+echo "datarootdir = ${datarootdir}"
 echo "infodir = ${infodir}"
 echo "mandir = ${mandir}"
-echo "sysconfdir = ${sysconfdir}"
 echo "program_prefix = ${program_prefix}"
 echo "CC = ${CC}"
 echo "CPPFLAGS = ${CPPFLAGS}"
@@ -185,16 +171,15 @@ VPATH = ${srcdir}
 prefix = ${prefix}
 exec_prefix = ${exec_prefix}
 bindir = ${bindir}
-datadir = ${datadir}
+datarootdir = ${datarootdir}
 infodir = ${infodir}
 mandir = ${mandir}
-sysconfdir = ${sysconfdir}
 program_prefix = ${program_prefix}
 CC = ${CC}
 CPPFLAGS = ${CPPFLAGS}
 CFLAGS = ${CFLAGS}
 LDFLAGS = ${LDFLAGS}
 EOF
-cat ${srcdir}/Makefile.in >> Makefile
+cat "${srcdir}/Makefile.in" >> Makefile
 
 echo "OK. Now you can run make."

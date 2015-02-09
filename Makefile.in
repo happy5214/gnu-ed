@@ -11,8 +11,8 @@ objs = buffer.o carg_parser.o global.o io.o \
        main.o main_loop.o regex.o signal.o
 
 
-.PHONY : all install install-info install-man install-strip \
-         uninstall uninstall-info uninstall-man \
+.PHONY : all install install-bin install-info install-man install-strip \
+         uninstall uninstall-bin uninstall-info uninstall-man \
          doc info man check dist clean distclean
 
 all : $(progname) r$(progname)
@@ -57,7 +57,9 @@ Makefile : $(VPATH)/configure $(VPATH)/Makefile.in
 check : all
 	@$(VPATH)/testsuite/check.sh $(VPATH)/testsuite $(pkgversion)
 
-install : all install-info install-man
+install : install-bin install-info install-man
+
+install-bin : all
 	if [ ! -d "$(DESTDIR)$(bindir)" ] ; then $(INSTALL_DIR) "$(DESTDIR)$(bindir)" ; fi
 	$(INSTALL_PROGRAM) ./$(progname) "$(DESTDIR)$(bindir)/$(program_prefix)$(progname)"
 	$(INSTALL_SCRIPT) ./r$(progname) "$(DESTDIR)$(bindir)/$(program_prefix)r$(progname)"
@@ -76,7 +78,9 @@ install-man :
 install-strip : all
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
-uninstall : uninstall-info uninstall-man
+uninstall : uninstall-bin uninstall-info uninstall-man
+
+uninstall-bin :
 	-rm -f "$(DESTDIR)$(bindir)/$(program_prefix)$(progname)"
 	-rm -f "$(DESTDIR)$(bindir)/$(program_prefix)r$(progname)"
 

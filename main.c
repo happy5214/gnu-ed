@@ -26,7 +26,7 @@
  *
  *      This program is based on the editor algorithm described in
  *      Brian W. Kernighan and P. J. Plauger's book "Software Tools
- *      in Pascal," Addison-Wesley, 1981.
+ *      in Pascal", Addison-Wesley, 1981.
  *
  *      The buffering algorithm is attributed to Rodney Ruddock of
  *      the University of Guelph, Guelph, Ontario.
@@ -71,8 +71,8 @@ static void show_help( void )
           "  -r, --restricted           run in restricted mode\n"
           "  -s, --quiet, --silent      suppress diagnostics\n"
           "  -v, --verbose              be verbose\n"
-          "Start edit by reading in `file' if given.\n"
-          "If `file' begins with a `!', read output of shell command.\n"
+          "Start edit by reading in 'file' if given.\n"
+          "If 'file' begins with a '!', read output of shell command.\n"
           "\nReport bugs to <bug-ed@gnu.org>.\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
           "General help using GNU software: http://www.gnu.org/gethelp\n" );
@@ -109,8 +109,9 @@ static void show_error( const char * const msg, const int errcode, const bool he
     if( errcode > 0 ) fprintf( stderr, ": %s", strerror( errcode ) );
     fprintf( stderr, "\n" );
     }
-  if( help && invocation_name && invocation_name[0] )
-    fprintf( stderr, "Try `%s --help' for more information.\n", invocation_name );
+  if( help )
+    fprintf( stderr, "Try '%s --help' for more information.\n",
+             invocation_name );
   }
 
 
@@ -152,12 +153,12 @@ int main( const int argc, const char * const argv[] )
     {  0 ,  0,                  ap_no } };
 
   struct Arg_parser parser;
+  invocation_name = argv[0];
 
   if( !ap_init( &parser, argc, argv, options, 0 ) )
     { show_error( "Memory exhausted.", 0, false ); return 1; }
   if( ap_error( &parser ) )				/* bad option */
     { show_error( ap_error( &parser ), 0, true ); return 1; }
-  invocation_name = argv[0];
 
   for( argind = 0; argind < ap_arguments( &parser ); ++argind )
     {

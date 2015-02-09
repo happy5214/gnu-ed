@@ -54,11 +54,14 @@ for i in *.err ; do
 done
 
 
+cd "${objdir}"/tmp
+fail=0
+
+printf "testing ed-%s...\n" "$2"
+
 # Run the .ed and .red scripts just generated
 # and compare their output against the .r and .pr files, which contain
 # the correct output.
-printf "testing ed-%s...\n" "$2"
-cd "${objdir}"/tmp
 
 # Run the *.red scripts first, since these don't generate output;
 # they exit with non-zero status
@@ -99,9 +102,12 @@ for i in *.ed ; do
 done > scripts.ck 2>&1
 
 grep '\*\*\*' *.ck | sed 's/^[^*]*//'
-if grep '\*\*\*' *.ck > /dev/null ; then
-	exit 127
-else
+grep '\*\*\*' *.ck > /dev/null && fail=127
+
+if [ ${fail} = 0 ] ; then
 	echo "tests completed successfully."
 	cd "${objdir}" && rm -r tmp
+else
+	echo "tests failed."
 fi
+exit ${fail}

@@ -32,7 +32,7 @@
 #include "carg_parser.h"
 
 
-/* assure at least a minimum size for buffer `buf' */
+/* assure at least a minimum size for buffer 'buf' */
 static void * ap_resize_buffer( void * buf, const int min_size )
   {
   if( buf ) buf = realloc( buf, min_size );
@@ -88,7 +88,7 @@ static char parse_long_option( struct Arg_parser * const ap,
                                const struct ap_Option options[],
                                int * const argindp )
   {
-  unsigned int len;
+  unsigned len;
   int index = -1;
   int i;
   char exact = 0, ambig = 0;
@@ -109,31 +109,31 @@ static char parse_long_option( struct Arg_parser * const ap,
 
   if( ambig && !exact )
     {
-    add_error( ap, "option `" ); add_error( ap, opt );
+    add_error( ap, "option '" ); add_error( ap, opt );
     add_error( ap, "' is ambiguous" );
     return 1;
     }
 
   if( index < 0 )		/* nothing found */
     {
-    add_error( ap, "unrecognized option `" ); add_error( ap, opt );
+    add_error( ap, "unrecognized option '" ); add_error( ap, opt );
     add_error( ap, "'" );
     return 1;
     }
 
   ++*argindp;
 
-  if( opt[len+2] )		/* `--<long_option>=<argument>' syntax */
+  if( opt[len+2] )		/* '--<long_option>=<argument>' syntax */
     {
     if( options[index].has_arg == ap_no )
       {
-      add_error( ap, "option `--" ); add_error( ap, options[index].name );
+      add_error( ap, "option '--" ); add_error( ap, options[index].name );
       add_error( ap, "' doesn't allow an argument" );
       return 1;
       }
     if( options[index].has_arg == ap_yes && !opt[len+3] )
       {
-      add_error( ap, "option `--" ); add_error( ap, options[index].name );
+      add_error( ap, "option '--" ); add_error( ap, options[index].name );
       add_error( ap, "' requires an argument" );
       return 1;
       }
@@ -144,7 +144,7 @@ static char parse_long_option( struct Arg_parser * const ap,
     {
     if( !arg || !arg[0] )
       {
-      add_error( ap, "option `--" ); add_error( ap, options[index].name );
+      add_error( ap, "option '--" ); add_error( ap, options[index].name );
       add_error( ap, "' requires an argument" );
       return 1;
       }
