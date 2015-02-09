@@ -1,7 +1,6 @@
-Changes in version 0.8:
+Changes in version 0.9:
 
-Testsuite now exits unsuccesfully in case of error.
+Return 0 exit status after receiving SIGHUP if the file is not modified
+or is saved without error.
 
-Some minor problems in the manual page have been fixed.
-
-21kB of legalese have been added to the info file (gfdl).
+Arg_parser has been updated to 1.1.

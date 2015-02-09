@@ -1,7 +1,7 @@
 /*  Global declarations for the ed editor.  */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -94,21 +94,23 @@ char set_active_node( const line_t *lp );
 void unset_active_nodes( const line_t *np, const line_t *mp );
 
 /* defined in io.c */
-char display_lines( int from, const int to, const int gflags, const char traditional );
+char display_lines( int from, const int to, const int gflags );
 const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl );
 const char *get_tty_line( int *lenp );
-int read_file( const char *filename, const int addr, const char scripted );
+int read_file( const char *filename, const int addr );
 int write_file( const char *filename, const char *mode,
-                const int from, const int to, const char scripted );
+                const int from, const int to );
 
 /* defined in main.c */
 char is_regular_file( int fd );
-char is_valid_filename( const char *name, const char restricted );
+char is_valid_filename( const char *name );
+char restricted( void );
+char scripted( void );
 void show_strerror( const char *filename, int errcode );
+char traditional( void );
 
 /* defined in main_loop.c */
-int main_loop( const char loose, const char restricted, const char scripted,
-               const char traditional );
+int main_loop( const char loose );
 void set_def_filename( const char *s );
 void set_error_msg( const char *msg );
 void set_prompt( const char *s );

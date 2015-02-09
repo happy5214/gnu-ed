@@ -1,3 +1,9 @@
+2008-02-24  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 0.9 released.
+	* signal.c (sighup_handler): Return 0 if no error.
+	* Arg_parser updated to 1.1.
+
 2007-08-18  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.8 released.

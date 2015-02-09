@@ -1,6 +1,6 @@
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,14 +88,14 @@ int get_marked_node_addr( int c )
 
 
 /* read a shell command from stdin; return substitution status ( -1, 0, +1 ) */
-int get_shell_command( const char restricted, const char traditional )
+int get_shell_command( void )
   {
   static char *buf = 0;
   static int bsize = 0;
   const char *s;			/* substitution char pointer */
   int i = 0, len;
 
-  if( restricted ) { set_error_msg( "Shell access restricted" ); return -1; }
+  if( restricted() ) { set_error_msg( "Shell access restricted" ); return -1; }
   s = ibufp = get_extended_line( ibufp, &len, 1 );
   if( !s ) return -1;
   if( !resize_buffer( &buf, &bsize, len + 1 ) ) return -1;
@@ -109,7 +109,7 @@ int get_shell_command( const char restricted, const char traditional )
 	if( !resize_buffer( &buf, &bsize, i + 1 ) ) return -1;
 	buf[i++] = *ibufp++;
 	}
-      else if( !shcmd || ( traditional && !*( shcmd + 1 ) ) )
+      else if( !shcmd || ( traditional() && !*( shcmd + 1 ) ) )
 	{ set_error_msg( "No previous command" ); return -1; }
       else
 	{
@@ -142,7 +142,7 @@ int get_shell_command( const char restricted, const char traditional )
 
 
 /* return pointer to copy of filename in the command buffer */
-const char *get_filename( const char restricted, const char traditional )
+const char *get_filename( void )
   {
   static char *file = 0;
   static int filesz = 0;
@@ -157,7 +157,7 @@ const char *get_filename( const char restricted, const char traditional )
     if( *ibufp == '!' )
       {
       ++ibufp;
-      n = get_shell_command( restricted, traditional );
+      n = get_shell_command();
       if( n < 0 ) return 0;
       if( n ) printf( "%s\n", shcmd + 1 );
       return shcmd;
@@ -165,12 +165,12 @@ const char *get_filename( const char restricted, const char traditional )
     else if( size > path_max( 0 ) )
       { set_error_msg( "Filename too long" ); return 0; }
     }
-  else if( !traditional && !def_filename[0] )
+  else if( !traditional() && !def_filename[0] )
     { set_error_msg( "No current filename" ); return 0; }
   if( !resize_buffer( &file, &filesz, path_max( 0 ) + 1 ) ) return 0;
   for( n = 0; *ibufp != '\n'; ) file[n++] = *ibufp++;
   file[n] = 0;
-  return ( is_valid_filename( file, restricted ) ? file : 0 );
+  return ( is_valid_filename( file ) ? file : 0 );
   }
 
 
@@ -260,13 +260,13 @@ int extract_addr_range( void )
 
 
 /* get a valid address from the command buffer */
-char get_third_addr( int *addr, const char traditional )
+char get_third_addr( int *addr )
   {
   int ol1 = first_addr;
   int ol2 = second_addr;
 
   int addr_cnt = extract_addr_range(); if( addr_cnt < 0 ) return 0;
-  if( traditional && addr_cnt == 0 )
+  if( traditional() && addr_cnt == 0 )
     { set_error_msg( "Destination expected" ); return 0; }
   if( second_addr < 0 || second_addr > last_addr() )
     { invalid_address(); return 0; }
@@ -322,8 +322,7 @@ char unexpected_command_suffix( const unsigned char ch )
   }
 
 
-char command_s( int *gflagsp, const int addr_cnt, const char isglobal,
-                const char traditional )
+char command_s( int *gflagsp, const int addr_cnt, const char isglobal )
   {
   static int gflags = 0;
   static int snum = 0;
@@ -376,17 +375,15 @@ char command_s( int *gflagsp, const int addr_cnt, const char isglobal,
   if( !search_and_replace( first_addr, second_addr, gflags, snum, isglobal ) )
     return 0;
   if( ( gflags & ( GPR | GLS | GNP ) ) &&
-      !display_lines( current_addr(), current_addr(), gflags, traditional ) )
+      !display_lines( current_addr(), current_addr(), gflags ) )
     return 0;
   return 1;
   }
 
 
-char exec_global( const char *ibufp2, int gflags, const char interact,
-                  const char restricted, const char scripted, const char traditional );
+char exec_global( const char *ibufp2, int gflags, const char interact );
 /* execute the next command in command buffer; return error status */
-int exec_command( const char isglobal, const char restricted,
-                  const char scripted, const char traditional )
+int exec_command( const char isglobal )
   {
   const char *fnp;
   int gflags = 0;
@@ -418,24 +415,24 @@ int exec_command( const char isglobal, const char restricted,
 	      if( !delete_lines( first_addr, second_addr, isglobal ) ) return ERR;
 	      inc_current_addr();
 	      break;
-    case 'e': if( modified() && !scripted ) return EMOD;	/* fall through */
+    case 'e': if( modified() && !scripted() ) return EMOD;	/* fall through */
     case 'E': if( unexpected_address( addr_cnt ) ||
 		  unexpected_command_suffix( *ibufp ) ) return ERR;
-	      fnp = get_filename( restricted, traditional );
+	      fnp = get_filename();
 	      if( !fnp || !get_command_suffix( &gflags ) ||
 		  !delete_lines( 1, last_addr(), isglobal ) ) return ERR;
 	      if( !close_sbuf() ) return ERR;
 	      if( !open_sbuf() ) return FATAL;
 	      if( fnp[0] && fnp[0] != '!' ) set_def_filename( fnp );
-	      if( traditional && !fnp[0] && !def_filename[0] )
+	      if( traditional() && !fnp[0] && !def_filename[0] )
 		{ set_error_msg( "No current filename" ); return ERR; }
-	      if( read_file( fnp[0] ? fnp : def_filename, 0, scripted ) < 0 )
+	      if( read_file( fnp[0] ? fnp : def_filename, 0 ) < 0 )
 		return ERR;
 	      disable_undo(); set_modified( 0 );
 	      break;
     case 'f': if( unexpected_address( addr_cnt ) ||
 		  unexpected_command_suffix( *ibufp ) ) return ERR;
-	      fnp = get_filename( restricted, traditional );
+	      fnp = get_filename();
 	      if( !fnp ) return ERR;
 	      if( fnp[0] == '!' )
 		{ set_error_msg( "Invalid redirection" ); return ERR; }
@@ -454,7 +451,7 @@ int exec_command( const char isglobal, const char restricted,
 		return ERR;
 	      n = ( c == 'G' || c == 'V' );	/* interact */
 	      if( ( n && !get_command_suffix( &gflags ) ) ||
-		  !exec_global( ibufp, gflags, n, restricted, scripted, traditional ) )
+		  !exec_global( ibufp, gflags, n ) )
 		return ERR;
 	      break;
     case 'h':
@@ -487,12 +484,12 @@ int exec_command( const char isglobal, const char restricted,
     case 'p': if( c == 'l' ) n = GLS; else if( c == 'n' ) n = GNP; else n = GPR;
 	      if( !check_addr_range( -1, -1, addr_cnt ) ||
 		  !get_command_suffix( &gflags ) ||
-		  !display_lines( first_addr, second_addr, gflags | n, traditional ) )
+		  !display_lines( first_addr, second_addr, gflags | n ) )
 		return ERR;
 	      gflags = 0;
 	      break;
     case 'm': if( !check_addr_range( -1, -1, addr_cnt ) ||
-		  !get_third_addr( &addr, traditional ) ) return ERR;
+		  !get_third_addr( &addr ) ) return ERR;
 	      if( addr >= first_addr && addr < second_addr )
 		{ set_error_msg( "Invalid destination" ); return ERR; }
 	      if( !get_command_suffix( &gflags ) ) return ERR;
@@ -505,25 +502,24 @@ int exec_command( const char isglobal, const char restricted,
     case 'Q': if( unexpected_address( addr_cnt ) ||
 		  !get_command_suffix( &gflags ) ) return ERR;
 	      if( c == 'P' ) prompt_on = !prompt_on;
-	      else status = ( ( modified() && !scripted && c == 'q' ) ? EMOD : -1 );
+	      else status = ( ( modified() && !scripted() && c == 'q' ) ? EMOD : -1 );
 	      break;
     case 'r': if( unexpected_command_suffix( *ibufp ) ) return ERR;
 	      if( addr_cnt == 0 ) second_addr = last_addr();
-	      fnp = get_filename( restricted, traditional );
+	      fnp = get_filename();
 	      if( !fnp || !get_command_suffix( &gflags ) ) return ERR;
 	      if( !isglobal ) clear_undo_stack();
 	      if( !def_filename[0] && fnp[0] != '!' ) set_def_filename( fnp );
-	      if( traditional && !fnp[0] && !def_filename[0] )
+	      if( traditional() && !fnp[0] && !def_filename[0] )
 		{ set_error_msg( "No current filename" ); return ERR; }
-	      addr = read_file( fnp[0] ? fnp : def_filename, second_addr, scripted );
+	      addr = read_file( fnp[0] ? fnp : def_filename, second_addr );
 	      if( addr < 0 ) return ERR;
 	      if( addr && addr != last_addr() ) set_modified( 1 );
 	      break;
-    case 's': if( !command_s( &gflags, addr_cnt, isglobal, traditional ) )
-		return ERR;
+    case 's': if( !command_s( &gflags, addr_cnt, isglobal ) ) return ERR;
 	      break;
     case 't': if( !check_addr_range( -1, -1, addr_cnt ) ||
-		  !get_third_addr( &addr, traditional ) ||
+		  !get_third_addr( &addr ) ||
 		  !get_command_suffix( &gflags ) ) return ERR;
 	      if( !isglobal ) clear_undo_stack();
 	      if( !copy_lines( first_addr, second_addr, addr ) ) return ERR;
@@ -536,19 +532,19 @@ int exec_command( const char isglobal, const char restricted,
     case 'W': n = *ibufp;
 	      if( n == 'q' || n == 'Q' ) { status = -1; ++ibufp; }
 	      if( unexpected_command_suffix( *ibufp ) ) return ERR;
-	      fnp = get_filename( restricted, traditional );
+	      fnp = get_filename();
 	      if( !fnp ) return ERR;
 	      if( addr_cnt == 0 && !last_addr() ) first_addr = second_addr = 0;
 	      else if( !check_addr_range( 1, last_addr(), addr_cnt ) ) return ERR;
 	      if( !get_command_suffix( &gflags ) ) return ERR;
 	      if( !def_filename[0] && fnp[0] != '!' ) set_def_filename( fnp );
-	      if( traditional && !fnp[0] && !def_filename[0] )
+	      if( traditional() && !fnp[0] && !def_filename[0] )
 		{ set_error_msg( "No current filename" ); return ERR; }
 	      addr = write_file( fnp[0] ? fnp : def_filename,
-		     ( c == 'W' ) ? "a" : "w", first_addr, second_addr, scripted );
+		     ( c == 'W' ) ? "a" : "w", first_addr, second_addr );
 	      if( addr < 0 ) return ERR;
 	      if( addr == last_addr() ) set_modified( 0 );
-	      else if( modified() && !scripted && n == 'q' ) status = EMOD;
+	      else if( modified() && !scripted() && n == 'q' ) status = EMOD;
 	      break;
     case 'x': if( second_addr < 0 || last_addr() < second_addr )
 		{ invalid_address(); return ERR; }
@@ -562,14 +558,14 @@ int exec_command( const char isglobal, const char restricted,
 	      break;
     case 'z': first_addr = 1;
 	      if( !check_addr_range( first_addr, current_addr() +
-	                             ( traditional || !isglobal ), addr_cnt ) )
+	                             ( traditional() || !isglobal ), addr_cnt ) )
 		return ERR;
 	      if( *ibufp > '0' && *ibufp <= '9' )
 		{ if( parse_int( &n, ibufp, &ibufp ) ) set_window_lines( n );
 		  else return ERR; }
 	      if( !get_command_suffix( &gflags ) ||
 		  !display_lines( second_addr, min( last_addr(), second_addr + window_lines() ),
-		                  gflags, traditional ) )
+		                  gflags ) )
 		return ERR;
 	      gflags = 0;
 	      break;
@@ -577,16 +573,16 @@ int exec_command( const char isglobal, const char restricted,
 	      printf( "%d\n", addr_cnt ? second_addr : last_addr() );
 	      break;
     case '!': if( unexpected_address( addr_cnt ) ) return ERR;
-	      n = get_shell_command( restricted, traditional );
+	      n = get_shell_command();
 	      if( n < 0 || !get_command_suffix( &gflags ) ) return ERR;
 	      if( n ) printf( "%s\n", shcmd + 1 );
 	      system( shcmd + 1 );
-	      if( !scripted ) printf( "!\n" );
+	      if( !scripted() ) printf( "!\n" );
 	      break;
     case '\n': first_addr = 1;
 	      if( !check_addr_range( first_addr, current_addr() +
-				     ( traditional || !isglobal ), addr_cnt ) ||
-		  !display_lines( second_addr, second_addr, 0, traditional ) )
+				     ( traditional() || !isglobal ), addr_cnt ) ||
+		  !display_lines( second_addr, second_addr, 0 ) )
 		return ERR;
 	      break;
     case '#': while( *ibufp++ != '\n' ) ;
@@ -594,7 +590,7 @@ int exec_command( const char isglobal, const char restricted,
     default:  set_error_msg( "Unknown command" ); return ERR;
     }
   if( !status && gflags &&
-      !display_lines( current_addr(), current_addr(), gflags, traditional ) )
+      !display_lines( current_addr(), current_addr(), gflags ) )
     status = ERR;
   return status;
   }
@@ -602,8 +598,7 @@ int exec_command( const char isglobal, const char restricted,
 
 /* apply command list in the command buffer to the active lines in a
    range; return false if error */
-char exec_global( const char *ibufp2, int gflags, const char interact,
-                  const char restricted, const char scripted, const char traditional )
+char exec_global( const char *ibufp2, int gflags, const char interact )
   {
   static char *ocmd = 0;
   static int ocmdsz = 0;
@@ -612,7 +607,7 @@ char exec_global( const char *ibufp2, int gflags, const char interact,
 
   if( !interact )
     {
-    if( traditional && !strcmp( ibufp2, "\n" ) )
+    if( traditional() && !strcmp( ibufp2, "\n" ) )
       cmd = "p\n";		/* null cmd-list == `p' */
     else if( !( cmd = get_extended_line( ibufp2, 0, 0 ) ) )
       return 0;
@@ -626,7 +621,7 @@ char exec_global( const char *ibufp2, int gflags, const char interact,
       {
       /* print current_addr; get a command in global syntax */
       int len;
-      if( !display_lines( current_addr(), current_addr(), gflags, traditional ) )
+      if( !display_lines( current_addr(), current_addr(), gflags ) )
         return 0;
       do { ibufp2 = get_tty_line( &len ); }
       while( ibufp2 && len > 0 && ibufp2[len-1] != '\n' );
@@ -644,16 +639,13 @@ char exec_global( const char *ibufp2, int gflags, const char interact,
 	}
       }
     ibufp = cmd;
-    while( *ibufp )
-      if( exec_command( 1, restricted, scripted, traditional ) < 0 )
-        return 0;
+    while( *ibufp ) if( exec_command( 1 ) < 0 ) return 0;
     }
   return 1;
   }
 
 
-int main_loop( const char loose, const char restricted, const char scripted,
-               const char traditional )
+int main_loop( const char loose )
   {
   extern jmp_buf jmp_state;
   const char *ibufp2;
@@ -675,7 +667,7 @@ int main_loop( const char loose, const char restricted, const char scripted,
     if( !ibufp2 ) return err_status;	/* { status = ERR; continue; } */
     if( !len )
       {
-      if( !modified() || scripted ) return err_status;
+      if( !modified() || scripted() ) return err_status;
       fputs( "?\n", stderr ); set_error_msg( "Warning: file modified" );
       if( is_regular_file( 0 ) )
 	{
@@ -688,7 +680,7 @@ int main_loop( const char loose, const char restricted, const char scripted,
       { set_error_msg( "Unexpected end-of-file" ); status = ERR; continue; }
     else ++linenum;
     ibufp = ibufp2;
-    status = exec_command( 0, restricted, scripted, traditional );
+    status = exec_command( 0 );
     if( status == 0 ) continue;
     if( status == -1 ) return err_status;
     if( !loose ) err_status = 1;

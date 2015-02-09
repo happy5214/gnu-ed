@@ -1,7 +1,7 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,23 +44,25 @@ void sighup_handler( int signum )
   else
     {
     char hb[] = "ed.hup";
-    char *hup = 0;             /* hup filename */
-    char *s;
-    int n, m = 0;
-
     sighup_pending = 0;
-    if( last_addr() && write_file( "ed.hup", "w", 1, last_addr(), 1 ) < 0 &&
-        ( s = getenv( "HOME" ) ) != 0 &&
-        ( !( n = strlen( s ) ) ||
-          ( int )( n + ( m = *( s + n - 1 ) != '/' ) + sizeof( hb ) ) < path_max( 0 ) ) &&
-        ( hup = ( char *) malloc( n + m + sizeof( hb ) ) ) != 0 )
+    if( last_addr() && modified() &&
+        write_file( hb, "w", 1, last_addr() ) < 0 )
       {
-      memcpy( hup, s, n );
-      memcpy( hup + n, m ? "/" : "", 1 );
-      memcpy( hup + n + m, hb, sizeof( hb ) );
-      write_file( hup, "w", 1, last_addr(), 1 );
+      char *s = getenv( "HOME" );
+      int n = ( s ? strlen( s ) : 0 );
+      int m = ( ( !n || *( s + n - 1 ) != '/' ) ? 1 : 0 );
+      char *hup = ( ( n + m + (int)sizeof( hb ) < path_max( 0 ) ) ?
+                    ( char *) malloc( n + m + sizeof( hb ) ) : 0 );
+      if( n && hup )		/* hup filename */
+        {
+        memcpy( hup, s, n );
+        if( m ) memcpy( hup + n, "/", 1 );
+        memcpy( hup + n + m, hb, sizeof( hb ) );
+        if( write_file( hup, "w", 1, last_addr() ) >= 0 ) exit( 0 );
+        }
+      exit( 1 );		/* hup file write failed */
       }
-    exit( 2 );
+    exit( 0 );
     }
   }
 

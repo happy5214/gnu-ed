@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007, 2008 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ static int sbufsz;			/* file i/o buffer size */
 
 
 /* print text to stdout */
-char put_tty_line( const char *s, int len, const int gflags, const char traditional )
+char put_tty_line( const char *s, int len, const int gflags )
   {
   const char escapes[] = "\a\b\f\n\r\t\v\\";
   const char escchars[] = "abfnrtv\\";
@@ -60,14 +60,14 @@ char put_tty_line( const char *s, int len, const int gflags, const char traditio
 	}
       }
     }
-  if( !traditional && ( gflags & GLS ) ) putchar('$');
+  if( !traditional() && ( gflags & GLS ) ) putchar('$');
   putchar('\n');
   return 1;
   }
 
 
 /* print a range of lines to stdout */
-char display_lines( int from, const int to, const int gflags, const char traditional )
+char display_lines( int from, const int to, const int gflags )
   {
   line_t *ep = search_line_node( inc_addr( to ) );
   line_t *bp = search_line_node( from );
@@ -78,7 +78,7 @@ char display_lines( int from, const int to, const int gflags, const char traditi
     char *s = get_sbuf_line( bp );
     if( !s ) return 0;
     set_current_addr( from++ );
-    if( !put_tty_line( s, bp->len, gflags, traditional ) ) return 0;
+    if( !put_tty_line( s, bp->len, gflags ) ) return 0;
     bp = bp->q_forw;
     }
   return 1;
@@ -233,7 +233,7 @@ long read_stream( FILE *fp, const int addr )
 
 
 /* read a named file/pipe into the buffer; return line count */
-int read_file( const char *filename, const int addr, const char scripted )
+int read_file( const char *filename, const int addr )
   {
   FILE *fp;
   long size;
@@ -253,7 +253,7 @@ int read_file( const char *filename, const int addr, const char scripted )
     set_error_msg( "Cannot close input file" );
     return -1;
     }
-  if( !scripted ) fprintf( stderr, "%lu\n", size );
+  if( !scripted() ) fprintf( stderr, "%lu\n", size );
   return current_addr() - addr;
   }
 
@@ -296,7 +296,7 @@ long write_stream( FILE *fp, int from, const int to )
 
 /* write a range of lines to a named file/pipe; return line count */
 int write_file( const char *filename, const char *mode,
-                const int from, const int to, const char scripted )
+                const int from, const int to )
   {
   FILE *fp;
   long size;
@@ -316,6 +316,6 @@ int write_file( const char *filename, const char *mode,
     set_error_msg( "Cannot close output file" );
     return -1;
     }
-  if( !scripted ) fprintf( stderr, "%lu\n", size );
+  if( !scripted() ) fprintf( stderr, "%lu\n", size );
   return from ? to - from + 1 : 0;
   }

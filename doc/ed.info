@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor.
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1993, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 0.8, 18 August 2007).
+This manual is for GNU ed (version 0.9, 24 February 2008).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -40,7 +40,7 @@ believe that "Small is Beautiful".
 * GNU Free Documentation License:: How you can copy and share this manual
 
 
-   Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1993, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -162,7 +162,7 @@ called a "buffer" where `ed' can access it. This is done with `ed''s
      143
      *
 
-   Here `ed' is telling us that it has just read 139 characters into
+   Here `ed' is telling us that it has just read 143 characters into
 the editor buffer - i.e., the output of the `cal' command, which prints
 a simple ASCII calendar. To display the buffer contents we issue the
 <p> ("print") command (not to be confused with the prompt command,
@@ -1328,15 +1328,15 @@ permit their use in free software.
 
 
 Tag Table:
-Node: Top532
-Node: Overview1933
-Node: Introduction to Line Editing3990
-Node: Invoking Ed11233
-Node: Line Addressing12881
-Node: Regular Expressions15988
-Node: Commands21333
-Node: Limitations32408
-Node: Diagnostics32983
-Node: GNU Free Documentation License33709
+Node: Top538
+Node: Overview1947
+Node: Introduction to Line Editing4004
+Node: Invoking Ed11247
+Node: Line Addressing12895
+Node: Regular Expressions16002
+Node: Commands21347
+Node: Limitations32422
+Node: Diagnostics32997
+Node: GNU Free Documentation License33723
 
 End Tag Table

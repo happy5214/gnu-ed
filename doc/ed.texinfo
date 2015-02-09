@@ -5,8 +5,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 18 August 2007
-@set VERSION 0.8
+@set UPDATED 24 February 2008
+@set VERSION 0.9
 
 @dircategory Basics
 @direntry
@@ -14,7 +14,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 2006, 2007 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -189,7 +189,7 @@ with @command{ed}'s @key{r} command (mnemonic: @dfn{read}):
 *
 @end example
 
-Here @command{ed} is telling us that it has just read 139 characters
+Here @command{ed} is telling us that it has just read 143 characters
 into the editor buffer - i.e., the output of the @command{cal} command,
 which prints a simple ASCII calendar. To display the buffer contents we
 issue the @key{p} (@dfn{print}) command (not to be confused with the
