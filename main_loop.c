@@ -222,6 +222,7 @@ int next_addr( int *addr_cnt )
 		++ibufp; addr = get_marked_node_addr( *ibufp++ );
 		if( addr < 0 ) return -2;
 		break;
+      case '%':
       case ',':
       case ';': if( first )
 		  {

@@ -17,7 +17,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-   This manual is for GNU ed (version 0.4, 15 January 2007).
+   This manual is for GNU ed (version 0.5, 9 March 2007).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -890,13 +890,13 @@ time, it succeeds, but any changes to the buffer are lost.
 
 Tag Table:
 Node: Top185
-Node: Overview1503
-Node: Introduction to Line Editing3902
-Node: Invoking Ed11149
-Node: Line Addressing12795
-Node: Regular Expressions15900
-Node: Commands21242
-Node: Limitations32315
-Node: Diagnostics32889
+Node: Overview1500
+Node: Introduction to Line Editing3899
+Node: Invoking Ed11146
+Node: Line Addressing12792
+Node: Regular Expressions15897
+Node: Commands21239
+Node: Limitations32312
+Node: Diagnostics32886
 
 End Tag Table
