@@ -35,14 +35,17 @@ static int active_ndx = 0;	/* active_list index ( modulo active_last ) */
 /* add a line node to the global-active list */
 char set_active_node( const line_t *lp )
   {
+  void * alias;
   disable_interrupts();
-  if( !resize_buffer( (void *)&active_list, &active_size,
+  alias = active_list;
+  if( !resize_buffer( &alias, &active_size,
                       ( active_last + 1 ) * sizeof( line_t ** ) ) )
     {
     show_strerror( 0, errno ); set_error_msg( "Memory exhausted" );
     enable_interrupts();
     return 0;
     }
+  active_list = (const line_t **)alias;
   enable_interrupts();
   active_list[active_last++] = lp;
   return 1;
@@ -61,7 +64,7 @@ void unset_active_nodes( const line_t *np, const line_t *mp )
       {
       if( ++active_ndx >= active_last ) active_ndx = 0;
       if( active_list[active_ndx] == lp )
-	{ active_list[active_ndx] = 0; break; }
+        { active_list[active_ndx] = 0; break; }
       }
     lp = lp->q_forw;
     }

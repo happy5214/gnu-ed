@@ -136,6 +136,6 @@ void set_window_lines( const int lines );
 int window_columns( void );
 int window_lines( void );
 char parse_int( int *i, const char *str, const char **tail );
-char resize_buffer( void *buf, int *size, int min_size );
+char resize_buffer( void **buf, int *size, int min_size );
 const char *skip_blanks( const char *s );
 const char *strip_escapes( const char *s );

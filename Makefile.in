@@ -8,17 +8,17 @@ SHELL = /bin/sh
 objs = buf.o carg_parser.o glbl.o io.o main.o main_loop.o re.o signal.o
 
 
-.PHONY : all doc check install install-info install-man install-strip \
+.PHONY : all install install-info install-man install-strip \
          uninstall uninstall-info uninstall-man \
-         dist clean distclean
+         doc info man check dist clean distclean
 
 all : $(progname)
 
 $(progname) : $(objs)
 	$(CC) $(LDFLAGS) -o $(progname) $(objs)
 
-profiled_$(progname) : $(objs)
-	$(CC) $(LDFLAGS) -pg -o profiled_$(progname) $(objs)
+$(progname)_profiled : $(objs)
+	$(CC) $(LDFLAGS) -pg -o $(progname)_profiled $(objs)
 
 main.o : main.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DPROGVERSION=\"$(progversion)\" -c -o $@ $<
@@ -64,7 +64,7 @@ install-man :
 install-strip : all
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install
 
-uninstall : uninstall-info
+uninstall : uninstall-info uninstall-man
 	-rm -f $(DESTDIR)$(bindir)/$(program_prefix)$(progname)
 	-rm -f $(DESTDIR)$(bindir)/$(program_prefix)r$(progname)
 
@@ -102,10 +102,10 @@ dist :
 	  $(DISTNAME)/*.h \
 	  $(DISTNAME)/*.c
 	rm -f $(DISTNAME)
-	lzip -v -s1MiB -m273 $(DISTNAME).tar
+	lzip -v -9 $(DISTNAME).tar
 
 clean :
-	-rm -f $(progname) r$(progname) profiled_$(progname) $(objs)
+	-rm -f $(progname) r$(progname) $(progname)_profiled $(objs)
 
 distclean : clean
 	-rm -f Makefile config.status *.tar *.tar.lz

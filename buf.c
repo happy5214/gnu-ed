@@ -29,11 +29,11 @@
 #include "ed.h"
 
 
-static int _current_addr;	/* current address in editor buffer */
-static int _last_addr;		/* last address in editor buffer */
-static char _isbinary;		/* if set, buffer contains ASCII NULs */
-static char _modified;		/* if set, buffer modified since last write */
-static char _newline_added;	/* if set, newline appended to input file */
+static int current_addr_;	/* current address in editor buffer */
+static int last_addr_;		/* last address in editor buffer */
+static char isbinary_;		/* if set, buffer contains ASCII NULs */
+static char modified_;		/* if set, buffer modified since last write */
+static char newline_added_;	/* if set, newline appended to input file */
 
 static int seek_write;		/* seek before writing */
 static FILE *sfp;		/* scratch file pointer */
@@ -42,29 +42,29 @@ static line_t buffer_head;	/* editor buffer ( linked list of line_t )*/
 static line_t yank_buffer_head;
 
 
-int current_addr( void ) { return _current_addr; }
+int current_addr( void ) { return current_addr_; }
 int inc_current_addr( void )
-  { if( ++_current_addr > _last_addr ) _current_addr = _last_addr;
-    return _current_addr; }
-void set_current_addr( const int addr ) { _current_addr = addr; }
+  { if( ++current_addr_ > last_addr_ ) current_addr_ = last_addr_;
+    return current_addr_; }
+void set_current_addr( const int addr ) { current_addr_ = addr; }
 
-int last_addr( void ) { return _last_addr; }
+int last_addr( void ) { return last_addr_; }
 
-char isbinary( void ) { return _isbinary; }
-void set_binary( void ) { _isbinary = 1; }
+char isbinary( void ) { return isbinary_; }
+void set_binary( void ) { isbinary_ = 1; }
 
-char modified( void ) { return _modified; }
-void set_modified( const char m ) { _modified = m; }
+char modified( void ) { return modified_; }
+void set_modified( const char m ) { modified_ = m; }
 
-char newline_added( void ) { return _newline_added; }
-void set_newline_added( void ) { _newline_added = 1; }
+char newline_added( void ) { return newline_added_; }
+void set_newline_added( void ) { newline_added_ = 1; }
 
 
 int inc_addr( int addr )
-  { if( ++addr > _last_addr ) addr = 0; return addr; }
+  { if( ++addr > last_addr_ ) addr = 0; return addr; }
 
 int dec_addr( int addr )
-  { if( --addr < 0 ) addr = _last_addr; return addr; }
+  { if( --addr < 0 ) addr = last_addr_; return addr; }
 
 
 /* link next and previous nodes */
@@ -90,7 +90,7 @@ void add_line_node( line_t *lp, const int addr )
   {
   line_t *p = search_line_node( addr );
   insert_node( lp, p );
-  ++_last_addr;
+  ++last_addr_;
   }
 
 
@@ -117,7 +117,7 @@ char append_lines( const char *ibufp2, const int addr, const char isglobal )
   const char *txt = ibufp2;
   const char *eot;
   undo_t *up = 0;
-  _current_addr = addr;
+  current_addr_ = addr;
 
   while( 1 )
     {
@@ -134,9 +134,9 @@ char append_lines( const char *ibufp2, const int addr, const char isglobal )
     eot = txt + len;
     disable_interrupts();
     do {
-      txt = put_sbuf_line( txt, _current_addr );
+      txt = put_sbuf_line( txt, current_addr_ );
       if( !txt ) { enable_interrupts(); return 0; }
-      if( up ) up->tail = search_line_node( _current_addr );
+      if( up ) up->tail = search_line_node( current_addr_ );
       else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
         { enable_interrupts(); return 0; }
       }
@@ -191,23 +191,23 @@ char copy_lines( const int first_addr, const int second_addr, const int addr )
   int n = second_addr - first_addr + 1;
   int m = 0;
 
-  _current_addr = addr;
+  current_addr_ = addr;
   if( addr >= first_addr && addr < second_addr )
     {
     n = addr - first_addr + 1;
     m = second_addr - addr;
     }
-  for( ; n > 0; n = m, m = 0, np = search_line_node( _current_addr + 1 ) )
+  for( ; n > 0; n = m, m = 0, np = search_line_node( current_addr_ + 1 ) )
     for( ; n-- > 0; np = np->q_forw )
       {
       disable_interrupts();
       lp = dup_line_node( np );
       if( !lp ) { enable_interrupts(); return 0; }
-      add_line_node( lp, _current_addr++ );
+      add_line_node( lp, current_addr_++ );
       if( up ) up->tail = lp;
       else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
-	{ enable_interrupts(); return 0; }
-      _modified = 1;
+        { enable_interrupts(); return 0; }
+      modified_ = 1;
       enable_interrupts();
       }
   return 1;
@@ -227,9 +227,9 @@ char delete_lines( const int from, const int to, const char isglobal )
   p = search_line_node( from - 1 );	/* this search_line_node last! */
   if( isglobal ) unset_active_nodes( p->q_forw, n );
   link_nodes( p, n );
-  _last_addr -= to - from + 1;
-  _current_addr = from - 1;
-  _modified = 1;
+  last_addr_ -= to - from + 1;
+  current_addr_ = from - 1;
+  modified_ = 1;
   enable_interrupts();
   return 1;
   }
@@ -253,7 +253,7 @@ char *get_sbuf_line( const line_t *lp )
   {
   static char *sfbuf = 0;	/* buffer */
   static int sfbufsz = 0;	/* buffer size */
-
+  void * alias;
   int len, ct;
 
   if( lp == &buffer_head ) return 0;
@@ -270,7 +270,9 @@ char *get_sbuf_line( const line_t *lp )
       }
     }
   len = lp->len;
-  if( !resize_buffer( (void *)&sfbuf, &sfbufsz, len + 1 ) ) return 0;
+  alias = sfbuf;
+  if( !resize_buffer( &alias, &sfbufsz, len + 1 ) ) return 0;
+  sfbuf = (char *)alias;
   ct = fread( sfbuf, 1, len, sfp );
   if( ct < 0 || ct != len )
     {
@@ -306,6 +308,7 @@ char join_lines( const int from, const int to, const char isglobal )
   {
   static char *buf = 0;
   static int bsize;
+  void * alias;
   int size = 0;
   line_t *ep = search_line_node( inc_addr( to ) );
   line_t *bp = search_line_node( from );
@@ -313,17 +316,21 @@ char join_lines( const int from, const int to, const char isglobal )
   while( bp != ep )
     {
     char *s = get_sbuf_line( bp );
-    if( !s || !resize_buffer( (void *)&buf, &bsize, size + bp->len ) ) return 0;
+    alias = buf;
+    if( !s || !resize_buffer( &alias, &bsize, size + bp->len ) ) return 0;
+    buf = (char *)alias;
     memcpy( buf + size, s, bp->len );
     size += bp->len;
     bp = bp->q_forw;
     }
-  if( !resize_buffer( (void *)&buf, &bsize, size + 2 ) ) return 0;
+  alias = buf;
+  if( !resize_buffer( &alias, &bsize, size + 2 ) ) return 0;
+  buf = (char *)alias;
   memcpy( buf + size, "\n", 2 );
   if( !delete_lines( from, to, isglobal ) ) return 0;
-  _current_addr = from - 1;
+  current_addr_ = from - 1;
   disable_interrupts();
-  if( !put_sbuf_line( buf, _current_addr ) ||
+  if( !put_sbuf_line( buf, current_addr_ ) ||
       !push_undo_stack( UADD, -1, -1 ) ) { enable_interrupts(); return 0; }
   set_modified( 1 );
   enable_interrupts();
@@ -344,10 +351,10 @@ char move_lines( const int first_addr, const int second_addr, const int addr,
     {
     a2 = search_line_node( n );
     b2 = search_line_node( p );
-    _current_addr = second_addr;
+    current_addr_ = second_addr;
     }
   else if( !push_undo_stack( UMOV, p, n ) ||
-	   !push_undo_stack( UMOV, addr, inc_addr( addr ) ) )
+           !push_undo_stack( UMOV, addr, inc_addr( addr ) ) )
     { enable_interrupts(); return 0; }
   else
     {
@@ -366,11 +373,11 @@ char move_lines( const int first_addr, const int second_addr, const int addr,
     link_nodes( b2, b1->q_forw );
     link_nodes( a1->q_back, a2 );
     link_nodes( b1, a1 );
-    _current_addr = addr + ( ( addr < first_addr ) ?
-			   second_addr - first_addr + 1 : 0 );
+    current_addr_ = addr + ( ( addr < first_addr ) ?
+                           second_addr - first_addr + 1 : 0 );
     }
   if( isglobal ) unset_active_nodes( b2->q_forw, a2 );
-  _modified = 1;
+  modified_ = 1;
   enable_interrupts();
   return 1;
   }
@@ -379,7 +386,7 @@ char move_lines( const int first_addr, const int second_addr, const int addr,
 /* open scratch file */
 char open_sbuf( void )
   {
-  _isbinary = _newline_added = 0;
+  isbinary_ = newline_added_ = 0;
   sfp = tmpfile();
   if( !sfp )
     {
@@ -410,16 +417,16 @@ char put_lines( const int addr )
   line_t *lp = yank_buffer_head.q_forw, *cp;
 
   if( lp == &yank_buffer_head ) { set_error_msg( "Nothing to put" ); return 0; }
-  _current_addr = addr;
+  current_addr_ = addr;
   while( lp != &yank_buffer_head )
     {
     disable_interrupts();
     if( !( cp = dup_line_node( lp ) ) ) { enable_interrupts(); return 0; }
-    add_line_node( cp, _current_addr++ );
+    add_line_node( cp, current_addr_++ );
     if( up ) up->tail = cp;
     else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
       { enable_interrupts(); return 0; }
-    _modified = 1;
+    modified_ = 1;
     lp = lp->q_forw;
     enable_interrupts();
     }
@@ -462,7 +469,7 @@ const char *put_sbuf_line( const char *cs, const int addr )
     }
   lp->len = len; lp->pos = sfpos;
   add_line_node( lp, addr );
-  ++_current_addr;
+  ++current_addr_;
   sfpos += len;		/* update file position */
   return ++s;
   }
@@ -477,11 +484,11 @@ line_t *search_line_node( const int addr )
   disable_interrupts();
   if( o_addr < addr )
     {
-    if( o_addr + _last_addr >= 2 * addr )
+    if( o_addr + last_addr_ >= 2 * addr )
       while( o_addr < addr ) { ++o_addr; lp = lp->q_forw; }
     else
       {
-      lp = buffer_head.q_back; o_addr = _last_addr;
+      lp = buffer_head.q_back; o_addr = last_addr_;
       while( o_addr > addr ) { --o_addr; lp = lp->q_back; }
       }
     }
@@ -532,16 +539,16 @@ void clear_undo_stack( void )
       line_t *ep = ustack[u_ptr].tail->q_forw;
       line_t *lp = ustack[u_ptr].head;
       while( lp != ep )
-	{
-	line_t *tl = lp->q_forw;
-	unmark_line_node( lp );
-	free( lp );
-	lp = tl;
-	}
+        {
+        line_t *tl = lp->q_forw;
+        unmark_line_node( lp );
+        free( lp );
+        lp = tl;
+        }
       }
   u_ptr = 0;
-  u_current_addr = _current_addr;
-  u_addr_last = _last_addr;
+  u_current_addr = current_addr_;
+  u_addr_last = last_addr_;
   }
 
 
@@ -556,8 +563,8 @@ void disable_undo( void )
 char pop_undo_stack( const char isglobal )
   {
   int n;
-  int o_current_addr = _current_addr;
-  int o_addr_last = _last_addr;
+  int o_current_addr = current_addr_;
+  int o_addr_last = last_addr_;
 
   if( u_current_addr < 0 || u_addr_last < 0 )
     { set_error_msg( "Nothing to undo" ); return 0; }
@@ -569,15 +576,15 @@ char pop_undo_stack( const char isglobal )
     switch( ustack[n].type )
       {
       case UADD: link_nodes( ustack[n].head->q_back, ustack[n].tail->q_forw );
-		 break;
+                 break;
       case UDEL: link_nodes( ustack[n].head->q_back, ustack[n].head );
-		 link_nodes( ustack[n].tail, ustack[n].tail->q_forw );
-		 break;
+                 link_nodes( ustack[n].tail, ustack[n].tail->q_forw );
+                 break;
       case UMOV:
       case VMOV: link_nodes( ustack[n-1].head, ustack[n].head->q_forw );
-		 link_nodes( ustack[n].tail->q_back, ustack[n-1].tail );
-		 link_nodes( ustack[n].head, ustack[n].tail ); --n;
-		 break;
+                 link_nodes( ustack[n].tail->q_back, ustack[n-1].tail );
+                 link_nodes( ustack[n].head, ustack[n].tail ); --n;
+                 break;
       }
     ustack[n].type ^= 1;
     }
@@ -588,8 +595,8 @@ char pop_undo_stack( const char isglobal )
     ustack[n] = ustack[u_ptr-1-n]; ustack[u_ptr-1-n] = tmp;
     }
   if( isglobal ) clear_active_list();
-  _current_addr = u_current_addr; u_current_addr = o_current_addr;
-  _last_addr = u_addr_last; u_addr_last = o_addr_last;
+  current_addr_ = u_current_addr; u_current_addr = o_current_addr;
+  last_addr_ = u_addr_last; u_addr_last = o_addr_last;
   enable_interrupts();
   return 1;
   }
@@ -598,9 +605,10 @@ char pop_undo_stack( const char isglobal )
 /* return pointer to intialized undo node */
 undo_t *push_undo_stack( const int type, const int from, const int to )
   {
+  void * alias;
   disable_interrupts();
-  if( !resize_buffer( (void *)&ustack, &usize,
-                      ( u_ptr + 1 ) * sizeof( undo_t ) ) )
+  alias = ustack;
+  if( !resize_buffer( &alias, &usize, ( u_ptr + 1 ) * sizeof( undo_t ) ) )
     {
     show_strerror( 0, errno );
     set_error_msg( "Memory exhausted" );
@@ -612,11 +620,13 @@ undo_t *push_undo_stack( const int type, const int from, const int to )
       usize = u_ptr = 0;
       u_current_addr = u_addr_last = -1;
       }
-    enable_interrupts(); return 0;
+    enable_interrupts();
+    return 0;
     }
+  ustack = (undo_t *)alias;
   enable_interrupts();
   ustack[u_ptr].type = type;
-  ustack[u_ptr].tail = search_line_node( ( to >= 0 ) ? to : _current_addr );
-  ustack[u_ptr].head = search_line_node( ( from >= 0 ) ? from : _current_addr );
+  ustack[u_ptr].tail = search_line_node( ( to >= 0 ) ? to : current_addr_ );
+  ustack[u_ptr].head = search_line_node( ( from >= 0 ) ? from : current_addr_ );
   return ustack + u_ptr++;
   }

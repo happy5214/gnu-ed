@@ -1,4 +1,12 @@
-2009-01-31  Antonio Diaz  <ant_diaz@teleline.es>
+2009-05-24  Antonio Diaz Diaz
+
+	* Version 1.3 released.
+	* carg_parser.c (ap_resize_buffer): An aliasing related segfault
+	  that only occurs when overoptimizing with GCC on some
+	  architectures (alpha, sparc) has been (hopefully) fixed.
+	* signal.c (resize_buffer): Likewise.
+
+2009-01-31  Antonio Diaz Diaz
 
 	* Version 1.2 released.
 	* configure: Locale has been fixed to "C".
@@ -6,37 +14,37 @@
 	* "make install-info" should now work on Debian and OS X.
 	* ed.texinfo: License updated to GFDL version 1.3 or later.
 
-2008-10-14  Antonio Diaz  <ant_diaz@teleline.es>
+2008-10-14  Antonio Diaz Diaz
 
 	* Version 1.1 released.
 	* configure: Quote arguments stored in config.status.
 
-2008-08-21  Antonio Diaz  <ant_diaz@teleline.es>
+2008-08-21  Antonio Diaz Diaz
 
 	* Version 1.0 released.
 	* configure: Added option `--program-prefix'.
 	* signal.c (strip_escapes): Buffer overflow fixed.
 	* signal.c (resize_buffer): Pointer aliasing warning fixed.
 
-2008-02-24  Antonio Diaz  <ant_diaz@teleline.es>
+2008-02-24  Antonio Diaz Diaz
 
 	* Version 0.9 released.
 	* signal.c (sighup_handler): Return 0 if no error.
 	* Arg_parser updated to 1.1.
 
-2007-08-18  Antonio Diaz  <ant_diaz@teleline.es>
+2007-08-18  Antonio Diaz Diaz
 
 	* Version 0.8 released.
 	* check.sh: Testsuite exits unsuccesfully in case of error.
 	* ed.1: Fixed some minor problems in the manual page.
 	* ed.texinfo: Added 21kB of legalese (fdl.texinfo).
 
-2007-07-18  Antonio Diaz  <ant_diaz@teleline.es>
+2007-07-18  Antonio Diaz Diaz
 
 	* Version 0.7 released.
 	* buf.c (dec_addr): Now returns correct address when wrapping.
 
-2007-06-29  Antonio Diaz  <ant_diaz@teleline.es>
+2007-06-29  Antonio Diaz Diaz
 
 	* Version 0.6 released.
 	* License updated to GPL version 3 or later.
@@ -45,17 +53,17 @@
 	* main_loop.c (main_loop):
 	  Fixed an infinite loop when reading an empty script.
 
-2007-03-09  Antonio Diaz  <ant_diaz@teleline.es>
+2007-03-09  Antonio Diaz Diaz
 
 	* Version 0.5 released.
 	* main_loop.c (next_addr): '%' reimplemented as it was in ed 0.2.
 
-2007-01-15  Antonio Diaz  <ant_diaz@teleline.es>
+2007-01-15  Antonio Diaz Diaz
 
 	* Version 0.4 released.
 	* Fixed some minor problems in the testsuite.
 
-2006-11-11  Antonio Diaz  <ant_diaz@teleline.es>
+2006-11-11  Antonio Diaz Diaz
 
 	* Version 0.3 released.
 	* buf.c (open_sbuf): Fixed symlink vulnerability using `tmpfile'.
@@ -71,7 +79,7 @@
 	* Removed all global variables.
 	* ed.texinfo: Added to the manual the changes from Andrew and some mine.
 
-Sun Jun 26 22:21:59 1994    (alm@worm.talke.org)
+Sun Jun 26 22:21:59 1994 Andrew Moore
 
 	* GNU ed 0.2 release.
 
@@ -89,30 +97,30 @@ Sun Jun 26 22:21:59 1994    (alm@worm.talke.org)
 
         * Capitilize error messages per the standard.
 
-Wed Jun 22 01:06:11 1994    (alm@woops.talke.org)
+Wed Jun 22 01:06:11 1994 Andrew Moore
 
-	* ed.h: Generic definition of INT_MAX <bson@ai.mit.edu>
+	* ed.h: Generic definition of INT_MAX <bson_at_ai.mit.edu>
 
-	* signal.c: Added #ifndef SIG_ERR <assar@stacken.kth.se>
+	* signal.c: Added #ifndef SIG_ERR <assar_at_stacken.kth.se>
 
-Tue Apr 19 10:52:51 1994    (alm@woops.talke.org)
+Tue Apr 19 10:52:51 1994 Andrew Moore
 
 	* Version 0.1.  Initial release for GNU.
 
 	* main.c (exec_command): Add comment command `#'.
 
-Mon Mar 21 21:58:11 PST 1994 Andrew Moore <alm@netcom.com>
+Mon Mar 21 21:58:11 PST 1994 Andrew Moore
 
 	*  Use umask 077 to open buffer file.
 
-Sat Mar 19 14:06:52 PST 1994 Andrew Moore <alm@netcom.com>
+Sat Mar 19 14:06:52 PST 1994 Andrew Moore
 
 	* Removed problematic DES and insque support.
 
-Wed Jan 19 20:42:50 PST 1994 Andrew Moore <alm@netcom.com>
+Wed Jan 19 20:42:50 PST 1994 Andrew Moore
 
 	* Added reliable signal(2) for SysV.
 
-Dec 1993  Francois Pinard  (pinard@icule)
+Dec 1993  Francois Pinard
 
 	* GNUified ed.

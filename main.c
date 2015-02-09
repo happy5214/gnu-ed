@@ -47,21 +47,21 @@ static const char * const Program_name    = "GNU Ed";
 static const char * const program_name    = "ed";
 static const char * const program_year    = "2009";
 
-static char _restricted = 0;		/* invoked as "red" */
-static char _scripted = 0;		/* if set, suppress diagnostics */
-static char _traditional = 0;		/* if set, be backwards compatible */
+static char restricted_ = 0;		/* invoked as "red" */
+static char scripted_ = 0;		/* if set, suppress diagnostics */
+static char traditional_ = 0;		/* if set, be backwards compatible */
 
 
-char restricted( void ) { return _restricted; }
-char scripted( void ) { return _scripted; }
-char traditional( void ) { return _traditional; }
+char restricted( void ) { return restricted_; }
+char scripted( void ) { return scripted_; }
+char traditional( void ) { return traditional_; }
 
 
 void show_help( void )
   {
   printf( "%s - The GNU line editor.\n", Program_name );
   printf( "\nUsage: %s [options] [file]\n", invocation_name );
-  printf( "Options:\n" );
+  printf( "\nOptions:\n" );
   printf( "  -h, --help                 display this help and exit\n" );
   printf( "  -V, --version              output version information and exit\n" );
   printf( "  -G, --traditional          run in compatibility mode\n" );
@@ -89,7 +89,7 @@ void show_version( void )
 
 void show_strerror( const char *filename, int errcode )
   {
-  if( !_scripted )
+  if( !scripted_ )
     {
     if( filename && filename[0] != 0 )
       fprintf( stderr, "%s: ", filename );
@@ -121,7 +121,7 @@ char is_regular_file( int fd )
 
 char is_valid_filename( const char *name )
   {
-  if( _restricted && ( *name == '!' || !strcmp( name, ".." ) || strchr( name, '/' ) ) )
+  if( restricted_ && ( *name == '!' || !strcmp( name, ".." ) || strchr( name, '/' ) ) )
     {
     set_error_msg( "Shell access restricted" );
     return 0;
@@ -153,7 +153,7 @@ int main( const int argc, const char *argv[] )
   if( ap_error( &parser ) )				/* bad option */
     { show_error( ap_error( &parser ), 0, 1 ); return 1; }
   invocation_name = argv[0];
-  _restricted = ( n > 2 && argv[0][n-3] == 'r' );
+  restricted_ = ( n > 2 && argv[0][n-3] == 'r' );
 
   for( argind = 0; argind < ap_arguments( &parser ); ++argind )
     {
@@ -162,11 +162,11 @@ int main( const int argc, const char *argv[] )
     if( !code ) break;					/* no more options */
     switch( code )
       {
-      case 'G': _traditional = 1; break;	/* backward compatibility */
+      case 'G': traditional_ = 1; break;	/* backward compatibility */
       case 'h': show_help(); return 0;
       case 'l': loose = 1; break;
       case 'p': set_prompt( arg ); break;
-      case 's': _scripted = 1; break;
+      case 's': scripted_ = 1; break;
       case 'v': set_verbose(); break;
       case 'V': show_version(); return 0;
       default: show_error( "internal_error: uncaught option", 0, 0 ); return 3;
@@ -178,7 +178,7 @@ int main( const int argc, const char *argv[] )
   while( argind < ap_arguments( &parser ) )
     {
     const char * arg = ap_argument( &parser, argind );
-    if( !strcmp( arg, "-" ) ) { _scripted = 1; ++argind; continue; }
+    if( !strcmp( arg, "-" ) ) { scripted_ = 1; ++argind; continue; }
     if( is_valid_filename( arg ) )
       {
       if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )

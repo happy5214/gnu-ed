@@ -74,8 +74,8 @@ const char *parse_char_class( const char *s )
   for( ; *s != ']' && *s != '\n'; ++s )
     if( *s == '[' && ( ( d = s[1] ) == '.' || d == ':' || d == '=' ) )
       for( ++s, c = *++s; *s != ']' || c != d; ++s )
-	if( ( c = *s ) == '\n' )
-	  return 0;
+        if( ( c = *s ) == '\n' )
+          return 0;
   return ( ( *s == ']' ) ? s : 0 );
   }
 
@@ -85,6 +85,7 @@ char *extract_pattern( const char **ibufpp, const int delimiter )
   {
   static char *lhbuf = 0;	/* buffer */
   static int lhbufsz = 0;	/* buffer size */
+  void * alias;
   const char *nd = *ibufpp;
   int len;
 
@@ -100,7 +101,9 @@ char *extract_pattern( const char **ibufpp, const int delimiter )
     ++nd;
     }
   len = nd - *ibufpp;
-  if( !resize_buffer( (void *)&lhbuf, &lhbufsz, len + 1 ) ) return 0;
+  alias = lhbuf;
+  if( !resize_buffer( &alias, &lhbufsz, len + 1 ) ) return 0;
+  lhbuf = (char *)alias;
   memcpy( lhbuf, *ibufpp, len );
   lhbuf[len] = 0;
   *ibufpp = nd;
@@ -177,6 +180,7 @@ char build_active_list( const char **ibufpp, const int first_addr,
 /* return pointer to copy of substitution template in the command buffer */
 char *extract_subst_template( const char **ibufpp, const char isglobal )
   {
+  void * alias;
   int i = 0, n = 0;
   char c;
   const char delimiter = **ibufpp;
@@ -190,18 +194,22 @@ char *extract_subst_template( const char **ibufpp, const char isglobal )
     }
   while( **ibufpp != delimiter )
     {
-    if( !resize_buffer( (void *)&rhbuf, &rhbufsz, i + 2 ) ) return 0;
+    alias = rhbuf;
+    if( !resize_buffer( &alias, &rhbufsz, i + 2 ) ) return 0;
+    rhbuf = (char *)alias;
     c = rhbuf[i++] = *(*ibufpp)++;
     if( c == '\n' && **ibufpp == 0 ) { --i, --(*ibufpp); break; }
     if( c == '\\' && ( rhbuf[i++] = *(*ibufpp)++ ) == '\n' && !isglobal )
       {
       while( ( *ibufpp = get_tty_line( &n ) ) &&
-	     ( n == 0 || ( n > 0 && (*ibufpp)[n-1] != '\n' ) ) )
-	clearerr( stdin );
+             ( n == 0 || ( n > 0 && (*ibufpp)[n-1] != '\n' ) ) )
+        clearerr( stdin );
       if( !(*ibufpp) ) return 0;
       }
     }
-  if( !resize_buffer( (void *)&rhbuf, &rhbufsz, i + 1 ) ) return 0;
+  alias = rhbuf;
+  if( !resize_buffer( &alias, &rhbufsz, i + 1 ) ) return 0;
+  rhbuf = (char *)alias;
   rhbuf[rhbufi = i] = 0;
   return rhbuf;
   }
@@ -273,6 +281,7 @@ int apply_subst_template( const char *boln, const regmatch_t *rm, int off,
                           const int re_nsub )
   {
   const char *sub = rhbuf;
+  void * alias;
 
   for( ; sub - rhbuf < rhbufi; ++sub )
     {
@@ -280,23 +289,31 @@ int apply_subst_template( const char *boln, const regmatch_t *rm, int off,
     if( *sub == '&' )
       {
       int j = rm[0].rm_so; int k = rm[0].rm_eo;
-      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + k - j ) ) return -1;
+      alias = rbuf;
+      if( !resize_buffer( &alias, &rbufsz, off + k - j ) ) return -1;
+      rbuf = (char *)alias;
       while( j < k ) rbuf[off++] = boln[j++];
       }
     else if( *sub == '\\' && *++sub >= '1' && *sub <= '9' &&
-	     ( n = *sub - '0' ) <= re_nsub )
+             ( n = *sub - '0' ) <= re_nsub )
       {
       int j = rm[n].rm_so; int k = rm[n].rm_eo;
-      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + k - j ) ) return -1;
+      alias = rbuf;
+      if( !resize_buffer( &alias, &rbufsz, off + k - j ) ) return -1;
+      rbuf = (char *)alias;
       while( j < k ) rbuf[off++] = boln[j++];
       }
     else
       {
-      if( !resize_buffer( (void *)&rbuf, &rbufsz, off + 1 ) ) return -1;
+      alias = rbuf;
+      if( !resize_buffer( &alias, &rbufsz, off + 1 ) ) return -1;
+      rbuf = (char *)alias;
       rbuf[off++] = *sub;
       }
     }
-  if( !resize_buffer( (void *)&rbuf, &rbufsz, off + 1 ) ) return -1;
+  alias = rbuf;
+  if( !resize_buffer( &alias, &rbufsz, off + 1 ) ) return -1;
+  rbuf = (char *)alias;
   rbuf[off] = 0;
   return off;
   }
@@ -310,6 +327,7 @@ int substitute_matching_text( const line_t *lp, const int gflags, const int snum
   regmatch_t rm[se_max];
   char *txt = get_sbuf_line( lp );
   char *eot;
+  void * alias;
   int i = 0, off = 0;
   char changed = 0;
 
@@ -321,27 +339,33 @@ int substitute_matching_text( const line_t *lp, const int gflags, const int snum
     int matchno = 0;
     do {
       if( !snum || snum == ++matchno )
-	{
-	changed = 1; i = rm[0].rm_so;
-	if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i ) ) return -1;
-	if( isbinary() ) newline_to_nul( txt, rm[0].rm_eo );
-	memcpy( rbuf + off, txt, i ); off += i;
-	off = apply_subst_template( txt, rm, off, global_pat->re_nsub );
-	if( off < 0 ) return -1;
-	}
+        {
+        changed = 1; i = rm[0].rm_so;
+        alias = rbuf;
+        if( !resize_buffer( &alias, &rbufsz, off + i ) ) return -1;
+        rbuf = (char *)alias;
+        if( isbinary() ) newline_to_nul( txt, rm[0].rm_eo );
+        memcpy( rbuf + off, txt, i ); off += i;
+        off = apply_subst_template( txt, rm, off, global_pat->re_nsub );
+        if( off < 0 ) return -1;
+        }
       else
-	{
-	i = rm[0].rm_eo;
-	if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i ) ) return -1;
-	if( isbinary() ) newline_to_nul( txt, i );
-	memcpy( rbuf + off, txt, i ); off += i;
-	}
+        {
+        i = rm[0].rm_eo;
+        alias = rbuf;
+        if( !resize_buffer( &alias, &rbufsz, off + i ) ) return -1;
+        rbuf = (char *)alias;
+        if( isbinary() ) newline_to_nul( txt, i );
+        memcpy( rbuf + off, txt, i ); off += i;
+        }
       txt += rm[0].rm_eo;
       }
     while( *txt && ( !changed || ( ( gflags & GSG ) && rm[0].rm_eo ) ) &&
-	   !regexec( global_pat, txt, se_max, rm, REG_NOTBOL ) );
+           !regexec( global_pat, txt, se_max, rm, REG_NOTBOL ) );
     i = eot - txt;
-    if( !resize_buffer( (void *)&rbuf, &rbufsz, off + i + 2 ) ) return -1;
+    alias = rbuf;
+    if( !resize_buffer( &alias, &rbufsz, off + i + 2 ) ) return -1;
+    rbuf = (char *)alias;
     if( i > 0 && !rm[0].rm_eo && ( gflags & GSG ) )
       { set_error_msg( "Infinite substitution loop" ); return -1; }
     if( isbinary() ) newline_to_nul( txt, i );
@@ -374,11 +398,11 @@ char search_and_replace( const int first_addr, const int second_addr,
       disable_interrupts();
       do {
         txt = put_sbuf_line( txt, current_addr() );
-	if( !txt ) { enable_interrupts(); return 0; }
-	if( up ) up->tail = search_line_node( current_addr() );
-	else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
-	  { enable_interrupts(); return 0; }
-	}
+        if( !txt ) { enable_interrupts(); return 0; }
+        if( up ) up->tail = search_line_node( current_addr() );
+        else if( !( up = push_undo_stack( UADD, -1, -1 ) ) )
+          { enable_interrupts(); return 0; }
+        }
       while( txt != eot );
       enable_interrupts();
       ++nsubs;

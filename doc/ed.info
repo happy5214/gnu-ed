@@ -1,4 +1,4 @@
-This is ed.info, produced by makeinfo version 4.8 from ed.texinfo.
+This is ed.info, produced by makeinfo version 4.13 from ed.texinfo.
 
 INFO-DIR-SECTION Basics
 START-INFO-DIR-ENTRY
@@ -19,7 +19,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.2, 31 January 2009).
+This manual is for GNU ed (version 1.3, 24 May 2009).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -38,6 +38,7 @@ believe that "Small is Beautiful".
 * Commands::                       Commands recognized by GNU `ed'
 * Limitations::                    Intrinsic limits of GNU `ed'
 * Diagnostics::                    GNU `ed' error handling
+* Problems::                       Reporting bugs
 * GNU Free Documentation License:: How you can copy and share this manual
 
 
@@ -876,7 +877,7 @@ file, `ed' does not append a newline on reading/writing.
    Per line overhead: 4 `int's.
 
 
-File: ed.info,  Node: Diagnostics,  Next: GNU Free Documentation License,  Prev: Limitations,  Up: Top
+File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 
 8 Diagnostics
 *************
@@ -896,10 +897,25 @@ time, it succeeds, but any changes to the buffer are lost.
    `ed' exits with 0 if no errors occurred; otherwise >0.
 
 
-File: ed.info,  Node: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
+File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
 
-9 GNU Free Documentation License
-********************************
+9 Reporting Bugs
+****************
+
+There are probably bugs in `ed'. There are certainly errors and
+omissions in this manual. If you report them, they will get fixed. If
+you don't, no one will ever know about them and they will remain unfixed
+for all eternity, if not longer.
+
+   If you find a bug in `ed', please send electronic mail to
+<bug-ed@gnu.org>. Include the version number, which you can find by
+running ``ed' --version'.
+
+
+File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
+
+10 GNU Free Documentation License
+*********************************
 
                      Version 1.3, 3 November 2008
 
@@ -1384,15 +1400,16 @@ permit their use in free software.
 
 
 Tag Table:
-Node: Top543
-Node: Overview1957
-Node: Introduction to Line Editing4014
-Node: Invoking Ed11257
-Node: Line Addressing12905
-Node: Regular Expressions16012
-Node: Commands21357
-Node: Limitations32432
-Node: Diagnostics33007
-Node: GNU Free Documentation License33733
+Node: Top544
+Node: Overview2004
+Node: Introduction to Line Editing4061
+Node: Invoking Ed11304
+Node: Line Addressing12952
+Node: Regular Expressions16059
+Node: Commands21404
+Node: Limitations32479
+Node: Diagnostics33054
+Node: Problems33758
+Node: GNU Free Documentation License34293
 
 End Tag Table

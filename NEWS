@@ -1,7 +1,4 @@
-Changes in version 1.2:
+Changes in version 1.3:
 
-The man page is now installed by default.
-
-"make install-info" should now work on Debian and OS X.
-
-The license of the manual has been updated to GFDL version 1.3 or later.
+An aliasing related segfault that only occurs when overoptimizing with
+GCC on some architectures (alpha, sparc) has been (hopefully) fixed.

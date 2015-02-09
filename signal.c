@@ -31,8 +31,8 @@
 
 jmp_buf jmp_state;
 static int mutex = 0;			/* If set, signals stay pending */
-static int _window_lines = 22;		/* scroll length: ws_row - 2 */
-static int _window_columns = 72;
+static int window_lines_ = 22;		/* scroll length: ws_row - 2 */
+static int window_columns_ = 72;
 static char sighup_pending = 0;
 static char sigint_pending = 0;
 
@@ -90,8 +90,8 @@ void sigwinch_handler( int signum )
   if( ioctl( 0, TIOCGWINSZ, (char *) &ws ) >= 0 )
     {
     /* Sanity check values of environment vars */
-    if( ws.ws_row > 2 && ws.ws_row < 600 ) _window_lines = ws.ws_row - 2;
-    if( ws.ws_col > 8 && ws.ws_col < 1800 ) _window_columns = ws.ws_col - 8;
+    if( ws.ws_row > 2 && ws.ws_row < 600 ) window_lines_ = ws.ws_row - 2;
+    if( ws.ws_col > 8 && ws.ws_col < 1800 ) window_columns_ = ws.ws_col - 8;
     }
 #endif
   signum = 0;			/* keep compiler happy */
@@ -139,9 +139,9 @@ void set_signals( void )
   }
 
 
-void set_window_lines( const int lines ) { _window_lines = lines; }
-int window_columns( void ) { return _window_columns; }
-int window_lines( void ) { return _window_lines; }
+void set_window_lines( const int lines ) { window_lines_ = lines; }
+int window_columns( void ) { return window_columns_; }
+int window_lines( void ) { return window_lines_; }
 
 
 /* convert a string to int with out_of_range detection */
@@ -168,14 +168,14 @@ char parse_int( int *i, const char *str, const char **tail )
 
 
 /* assure at least a minimum size for buffer `buf' */
-char resize_buffer( void *buf, int *size, int min_size )
+char resize_buffer( void **buf, int *size, int min_size )
   {
   if( *size < min_size )
     {
     const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
     void *new_buf = 0;
     disable_interrupts();
-    if( *(void **)buf ) new_buf = realloc( *(void **)buf, new_size );
+    if( *buf ) new_buf = realloc( *buf, new_size );
     else new_buf = malloc( new_size );
     if( !new_buf )
       {
@@ -185,7 +185,7 @@ char resize_buffer( void *buf, int *size, int min_size )
       return 0;
       }
     *size = new_size;
-    *(void **)buf = new_buf;
+    *buf = new_buf;
     enable_interrupts();
     }
   return 1;
@@ -209,7 +209,9 @@ const char *strip_escapes( const char *s )
 
   int i = 0;
 
-  if( !resize_buffer( (void *)&file, &filesz, len + 1 ) ) return 0;
+  void * alias = file;
+  if( !resize_buffer( &alias, &filesz, len + 1 ) ) return 0;
+  file = (char *)alias;
   /* assert: no trailing escape */
   while( ( file[i++] = ( (*s == '\\' ) ? *++s : *s ) ) )
     s++;
