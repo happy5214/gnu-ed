@@ -1,9 +1,9 @@
 /*  Arg_parser - A simple argument parser. C version
     Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
-    This program is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -12,8 +12,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*  Arg_parser reads the arguments in `argv' and creates a number of
@@ -24,7 +23,8 @@
 
     `options' is an array of `struct ap_Option' terminated by an element
     containing a code which is zero. A null name means a short-only
-    option. A code value outside the char range means a long-only option.
+    option. A code value outside the unsigned char range means a
+    long-only option.
 
     Arg_parser normally makes it appear as if all the option arguments
     were specified before all the non-option arguments for the purposes

@@ -3,9 +3,9 @@
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
     Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
-    This program is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -14,8 +14,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <errno.h>
@@ -133,8 +132,8 @@ const char *get_extended_line( const char *ibufp2, int *lenp, const char nonl )
 /* read a line of text from stdin; return pointer to buffer and line length */
 const char *get_tty_line( int *lenp )
   {
-  static char *ibuf;			/* ed command-line buffer */
-  static int ibufsz;			/* ed command-line buffer size */
+  static char *ibuf = 0;		/* ed command-line buffer */
+  static int ibufsz = 0;		/* ed command-line buffer size */
   int i = 0, oi = -1;
 
   while( 1 )

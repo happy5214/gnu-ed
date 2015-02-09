@@ -2,9 +2,9 @@
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
     Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
-    This program is free software; you can redistribute it and/or modify
+    This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -13,8 +13,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ctype.h>
@@ -673,7 +672,7 @@ int main_loop( const char loose, const char restricted, const char scripted,
     if( status < 0 && verbose ) fprintf( stderr, "%s\n", errmsg );
     if( prompt_on ) { printf( "%s", prompt_str ); fflush( stdout ); }
     ibufp2 = get_tty_line( &len );
-    if( !ibufp2 ) { status = ERR; continue; }
+    if( !ibufp2 ) return err_status;	/* { status = ERR; continue; } */
     if( !len )
       {
       if( !modified() || scripted ) return err_status;

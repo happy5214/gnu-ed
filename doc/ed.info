@@ -1,23 +1,24 @@
-This is ed.info, produced by makeinfo version 4.2 from ed.texinfo.
+This is ed.info, produced by makeinfo version 4.8 from ed.texinfo.
 
 INFO-DIR-SECTION Basics
 START-INFO-DIR-ENTRY
-* Ed: (ed).                    The GNU line editor.
+* Ed: (ed).                     The GNU line editor.
 END-INFO-DIR-ENTRY
 
-Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
 
 File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 
 The GNU ed line editor
 **********************
 
-   This manual is for GNU ed (version 0.5, 9 March 2007).
+This manual is for GNU ed (version 0.6, 29 June 2007).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -38,19 +39,20 @@ believe that "Small is Beautiful".
 * Diagnostics::                   GNU `ed' error handling
 
 
-Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
 
 File: ed.info,  Node: Overview,  Next: Introduction to Line Editing,  Prev: Top,  Up: Top
 
-Overview
-********
+1 Overview
+**********
 
-   `ed' is a line-oriented text editor. It is used to create, display,
+`ed' is a line-oriented text editor. It is used to create, display,
 modify and otherwise manipulate text files. `red' is a restricted `ed':
 it can only edit files in the current directory and cannot execute
 shell commands.
@@ -95,11 +97,11 @@ then default addresses are supplied.
 
 File: ed.info,  Node: Introduction to Line Editing,  Next: Invoking Ed,  Prev: Overview,  Up: Top
 
-Introduction to Line Editing
-****************************
+2 Introduction to Line Editing
+******************************
 
-   `ed' was created, along with the Unix operating system, by Ken
-Thompson and Dennis Ritchie. It is the refinement of its more complex,
+`ed' was created, along with the Unix operating system, by Ken Thompson
+and Dennis Ritchie. It is the refinement of its more complex,
 programmable predecessor, `QED', to which Thompson and Ritchie had
 already added pattern matching capabilities (*note Regular
 Expressions::).
@@ -175,7 +177,7 @@ shorthand for "the whole buffer":
      11 12 13 14 15 16 17
      18 19 20 21 22 23 24
      25 26 27 28 29 30
-     
+
      *
 
    Now let's write the buffer contents to a file named `junk' with the
@@ -299,10 +301,10 @@ current line to the last line moved.
 
 File: ed.info,  Node: Invoking Ed,  Next: Line Addressing,  Prev: Introduction to Line Editing,  Up: Top
 
-Invoking Ed
-***********
+3 Invoking Ed
+*************
 
-   The format for running `ed' is:
+The format for running `ed' is:
 
      ed [OPTIONS] [FILE]
      red [OPTIONS] [FILE]
@@ -352,13 +354,14 @@ prefixed with a bang.
 `-v'
      Verbose mode. This may be toggled on and off with the `H' command.
 
+
 
 File: ed.info,  Node: Line Addressing,  Next: Regular Expressions,  Prev: Invoking Ed,  Up: Top
 
-Line Addressing
-***************
+4 Line Addressing
+*****************
 
-   An address represents the number of a line in the buffer. `ed'
+An address represents the number of a line in the buffer. `ed'
 maintains a "current address" which is typically supplied to commands
 as the default address when none is specified. When a file is first
 read, the current address is set to the last line of the file. In
@@ -438,13 +441,14 @@ interpreted relative to the first.
      marked by a `k' (mark) command, where `x' is a lower case letter
      from the portable character set.
 
+
 
 File: ed.info,  Node: Regular Expressions,  Next: Commands,  Prev: Line Addressing,  Up: Top
 
-Regular Expressions
-*******************
+5 Regular Expressions
+*********************
 
-   Regular expressions are patterns used in selecting text. For example,
+Regular expressions are patterns used in selecting text. For example,
 the `ed' command
 
      g/STRING/
@@ -545,6 +549,7 @@ left-most longest match is the one selected.
      maximal string of alphanumeric characters, including the
      underscore (_).
 
+
    The following extended operators are preceded by a backslash `\' to
 distinguish them from traditional `ed' syntax.
 
@@ -582,16 +587,16 @@ distinguish them from traditional `ed' syntax.
 `\W'
      Matches any character not in a word.
 
+
 
 File: ed.info,  Node: Commands,  Next: Limitations,  Prev: Regular Expressions,  Up: Top
 
-Commands
-********
+6 Commands
+**********
 
-   All `ed' commands are single characters, though some require
-additonal parameters. If a command's parameters extend over several
-lines, then each line except for the last must be terminated with a
-backslash (`\').
+All `ed' commands are single characters, though some require additonal
+parameters. If a command's parameters extend over several lines, then
+each line except for the last must be terminated with a backslash (`\').
 
    In general, at most one command is allowed per line. However, most
 commands accept a print suffix, which is any of `p' (print), `l'
@@ -847,13 +852,14 @@ specified (in parenthesis).
      equivalent to `+1p'. the current address is set to the address of
      the printed line.
 
+
 
 File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: Commands,  Up: Top
 
-Limitations
-***********
+7 Limitations
+*************
 
-   If the terminal hangs up, `ed' attempts to write the buffer to file
+If the terminal hangs up, `ed' attempts to write the buffer to file
 `ed.hup'.
 
    `ed' processes FILE arguments for backslash escapes, i.e., in a
@@ -869,10 +875,10 @@ file, `ed' does not append a newline on reading/writing.
 
 File: ed.info,  Node: Diagnostics,  Prev: Limitations,  Up: Top
 
-Diagnostics
-***********
+8 Diagnostics
+*************
 
-   When an error occurs, if `ed''s input is from a regular file or here
+When an error occurs, if `ed''s input is from a regular file or here
 document, then it exits, otherwise it prints a `?' and returns to
 command mode. An explanation of the last error can be printed with the
 `h' (help) command.
@@ -889,14 +895,14 @@ time, it succeeds, but any changes to the buffer are lost.
 
 
 Tag Table:
-Node: Top185
-Node: Overview1500
-Node: Introduction to Line Editing3899
-Node: Invoking Ed11146
-Node: Line Addressing12792
-Node: Regular Expressions15897
-Node: Commands21239
-Node: Limitations32312
-Node: Diagnostics32886
+Node: Top532
+Node: Overview1849
+Node: Introduction to Line Editing3906
+Node: Invoking Ed11149
+Node: Line Addressing12797
+Node: Regular Expressions15904
+Node: Commands21249
+Node: Limitations32324
+Node: Diagnostics32899
 
 End Tag Table

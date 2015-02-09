@@ -1,3 +1,10 @@
+2007-06-29  Antonio Diaz  <ant_diaz@teleline.es>
+
+	* Version 0.6 released.
+	* License updated to GPL version 3 or later.
+	* Fixed two minor compatibility problems in signal.c.
+	* Fixed an infinite loop when reading an empty script.
+
 2007-03-09  Antonio Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.5 released.

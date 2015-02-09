@@ -5,12 +5,12 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 9 March 2007
-@set VERSION 0.5
+@set UPDATED 29 June 2007
+@set VERSION 0.6
 
 @dircategory Basics
 @direntry
-* Ed: (ed).                    The GNU line editor.
+* Ed: (ed).                     The GNU line editor.
 @end direntry
 
 @copying
