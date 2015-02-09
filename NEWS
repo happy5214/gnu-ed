@@ -1,20 +1,3 @@
-Changes in version 0.3:
+Changes in version 0.4:
 
-The symlink vulnerability has been fixed using the "tmpfile" function.
-
-The signal handling for SIGINT has been fixed.
-
-The `c' and `i' commands now work with address 0 as they should.
-
-The pause mode has been removed.
-
-Two new command line options "--loose-exit-status" and "--verbose" have
-been added.
-
-A new argument parser that replaces "getopt_long" has been added.
-
-`configure' and `Makefile.in' have been replaced.
-
-The manual has been updated.
-
-An extensive code cleanup has been done.
+Some minor problems in the testsuite have been fixed.

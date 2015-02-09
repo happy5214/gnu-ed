@@ -1,7 +1,7 @@
 /* re.c: regular expression interface routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <stddef.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -91,7 +91,13 @@ dist :
 	  $(DISTNAME)/doc/$(progname).1 \
 	  $(DISTNAME)/doc/$(progname).info \
 	  $(DISTNAME)/doc/$(progname).texinfo \
-	  $(DISTNAME)/testsuite/ \
+	  $(DISTNAME)/testsuite/check.sh \
+	  $(DISTNAME)/testsuite/*.t \
+	  $(DISTNAME)/testsuite/*.d \
+	  $(DISTNAME)/testsuite/*.r \
+	  $(DISTNAME)/testsuite/*.pr \
+	  $(DISTNAME)/testsuite/*.err \
+	  $(DISTNAME)/testsuite/*.posix \
 	  $(DISTNAME)/*.c \
 	  $(DISTNAME)/*.h
 	rm -f $(DISTNAME)

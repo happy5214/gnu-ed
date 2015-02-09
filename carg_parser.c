@@ -1,5 +1,5 @@
 /*  Arg_parser - A simple argument parser. C version
-    Copyright (C) 2006 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

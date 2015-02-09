@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006 Antonio Diaz Diaz.
+    Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@
 static const char *invocation_name = 0;
 static const char *const Program_name    = "GNU Ed";
 static const char *const program_name    = "ed";
-static const char *const program_year    = "2006";
+static const char *const program_year    = "2007";
 
 
 void show_strerror( const char *filename, int errcode )

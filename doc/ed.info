@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                    The GNU line editor.
 END-INFO-DIR-ENTRY
 
-Copyright (C) 1993, 2006 Free Software Foundation, Inc.
+Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -17,7 +17,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-   This manual is for GNU ed (version 0.3, 11 November 2006).
+   This manual is for GNU ed (version 0.4, 15 January 2007).
 
 
    GNU ed is an 8-bit clean, more or less POSIX-compliant
@@ -38,7 +38,7 @@ believe that "Small is Beautiful".
 * Diagnostics::                   GNU `ed' error handling
 
 
-Copyright (C) 1993, 2006 Free Software Foundation, Inc.
+Copyright (C) 1993, 2006, 2007 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -890,13 +890,13 @@ time, it succeeds, but any changes to the buffer are lost.
 
 Tag Table:
 Node: Top185
-Node: Overview1498
-Node: Introduction to Line Editing3891
-Node: Invoking Ed11138
-Node: Line Addressing12784
-Node: Regular Expressions15889
-Node: Commands21231
-Node: Limitations32304
-Node: Diagnostics32878
+Node: Overview1503
+Node: Introduction to Line Editing3902
+Node: Invoking Ed11149
+Node: Line Addressing12795
+Node: Regular Expressions15900
+Node: Commands21242
+Node: Limitations32315
+Node: Diagnostics32889
 
 End Tag Table

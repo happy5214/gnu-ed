@@ -1,6 +1,6 @@
 #!/bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006 Antonio Diaz Diaz.
+# Copyright (C) 2006, 2007 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute and modify it.
@@ -22,7 +22,7 @@ mkdir tmp
 echo "building test scripts for ed..."
 cd ${testdir}
 
-for i in *.t; do
+for i in *.t ; do
 	base=`echo $i | sed 's/\.t$//'`
 	(
 	echo "#!/bin/sh"
@@ -36,7 +36,7 @@ for i in *.t; do
 	chmod u+x ${objdir}/tmp/$base.ed
 done
 
-for i in *.err; do
+for i in *.err ; do
 	base=`echo $i | sed 's/\.err$//'`
 	(
 	echo "#!/bin/sh -"
@@ -59,31 +59,35 @@ cd ${objdir}/tmp
 
 # Run the *.red scripts first, since these don't generate output;
 # they exit with non-zero status
-for i in *.red; do
+for i in *.red ; do
 	echo $i
-	if $i; then
+	if ./$i ; then
 		echo "*** The script $i exited abnormally  ***"
 	fi
 done > errs.ck 2>&1
 
 # Run error scripts again as pipes - these should generate output and
 # exit with error (>0) status.
-for i in *.red; do
+for i in *.red ; do
 	base=`echo $i | sed 's/\.red$//'`
 	if cat  $base.red | $ED -s ; then
 		echo "*** The piped script $i exited abnormally ***"
 	else
-		if cmp -s $base.ro ${testdir}/$base.rr; then :; else
+		if cmp -s $base.ro ${testdir}/$base.pr ; then
+			true
+		else
 			echo "*** Output $base.ro of piped script $i is incorrect ***"
 		fi
 	fi
 done > pipes.ck 2>&1
 
 # Run the remainding scripts; they exit with zero status
-for i in *.ed; do
+for i in *.ed ; do
 	base=`echo $i | sed 's/\.ed$//'`
-	if $base.ed; then
-		if cmp -s $base.o ${testdir}/$base.r; then :; else
+	if ./$base.ed ; then
+		if cmp -s $base.o ${testdir}/$base.r ; then
+			true
+		else
 			echo "*** Output $base.o of script $i is incorrect ***"
 		fi
 	else
@@ -92,7 +96,9 @@ for i in *.ed; do
 done > scripts.ck 2>&1
 
 grep '\*\*\*' *.ck | sed 's/^[^*]*//'
-if ! grep '\*\*\*' *.ck > /dev/null ; then
-  echo "tests completed successfully."
-  if cd ${objdir} ; then rm -r tmp ; fi
+if grep '\*\*\*' *.ck > /dev/null ; then
+	true
+else
+	echo "tests completed successfully."
+	if cd ${objdir} ; then rm -r tmp ; fi
 fi

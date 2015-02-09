@@ -102,3 +102,41 @@ DEVIATIONS
   * For backwards compatibility, errors in piped scripts do not force ed
     to exit.  POSIX only specifies ed's response for input via regular
     files (including here documents) or tty's.
+
+
+TESTSUITE
+---------
+The files in the `testsuite' directory with suffixes `.t', `.d', `.r',
+`.pr' and `.err' are used for testing ed. To run the tests, configure
+the package and type `make check' from the build directory. The tests do
+not exhaustively verify POSIX compliance nor do they verify correct
+8-bit or long line support.
+
+The test file suffixes have the following meanings:
+.t    Template - a list of ed commands from which an ed script is
+      constructed
+.d    Data - read by an ed script
+.r    Result - the expected output after processing data via an ed
+      script.
+.pr   Result from a piped ed script.
+.err  Error - invalid ed commands that should generate an error
+
+The output of the tests is written to the files errs.ck, pipes.ck and
+scripts.ck.  At the end of the tests, these files are grep'ed for error
+messages, which look like:
+
+	*** The script u.ed exited abnormally ***
+or:
+	*** Output u.o of script u.ed is incorrect ***
+
+The POSIX requirement that an address range not be used where at most
+a single address is expected has been relaxed in this version of ed.
+Therefore, the  following script templates are disabled:
+=-err.t.posix
+a1-err.posix
+i1-err.posix
+k1-err.posix
+r1-err.posix
+
+To use these, remove the .posix suffix and run the tests as described
+above.
