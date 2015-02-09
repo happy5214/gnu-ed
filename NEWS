@@ -1,5 +1,4 @@
-Changes in version 1.0:
+Changes in version 1.1:
 
-The option "--program-prefix" has been added to the configure script.
-
-A buffer overflow has been fixed.
+The configure script now quotes arguments before storing them in
+config.status.
