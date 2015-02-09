@@ -1,4 +1,4 @@
-1;r u.t
+1;r ascii.o
 u
 a
 hello

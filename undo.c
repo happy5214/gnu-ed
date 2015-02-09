@@ -1,6 +1,6 @@
 /* undo.c: This file contains the undo routines for the ed line editor */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: undo.c,v 1.3 1994/01/22 01:20:10 alm Exp $";
+static char *rcsid = "@(#)$Id: undo.c,v 1.7 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
 
 #include "ed.h"
@@ -43,7 +43,7 @@ push_undo_stack (type, from, to)
    (t = ustack = (undo_t *) malloc ((usize = USIZE) * sizeof (undo_t))) == NULL)
     {
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "out of memory");
+      sprintf (errmsg, "Out of memory");
       return NULL;
     }
   else if (u_p >= usize &&
@@ -51,7 +51,7 @@ push_undo_stack (type, from, to)
     {
       /* out of memory - release undo stack */
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "out of memory");
+      sprintf (errmsg, "Out of memory");
       clear_undo_stack ();
       free (ustack);
       ustack = NULL;
@@ -89,7 +89,7 @@ pop_undo_stack ()
 
   if (u_current_addr == -1 || u_addr_last == -1)
     {
-      sprintf (errmsg, "nothing to undo");
+      sprintf (errmsg, "Nothing to undo");
       return ERR;
     }
   else if (u_p)

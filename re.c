@@ -1,7 +1,7 @@
 /* re.c: This file contains the regular expression interface routines for
    the ed line editor. */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: re.c,v 1.3 1994/02/20 03:27:53 alm Exp $";
+static char *rcsid = "@(#)$Id: re.c,v 1.7 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
 
 #include "ed.h"
@@ -41,13 +41,13 @@ get_compiled_pattern ()
 
   if ((delimiter = *ibufp) == ' ')
     {
-      sprintf (errmsg, "invalid pattern delimiter");
+      sprintf (errmsg, "Invalid pattern delimiter");
       return NULL;
     }
   else if (delimiter == '\n' || *++ibufp == '\n' || *ibufp == delimiter)
     {
       if (!exp)
-	sprintf (errmsg, "no previous pattern");
+	sprintf (errmsg, "No previous pattern");
       return exp;
     }
   else if ((exps = extract_pattern (delimiter)) == NULL)
@@ -58,7 +58,7 @@ get_compiled_pattern ()
   else if ((exp = (pattern_t *) malloc (sizeof (pattern_t))) == NULL)
     {
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "out of memory");
+      sprintf (errmsg, "Out of memory");
       return NULL;
     }
   patlock = 0;
@@ -92,14 +92,14 @@ extract_pattern (delimiter)
       case '[':
 	if ((nd = parse_char_class (++nd)) == NULL)
 	  {
-	    sprintf (errmsg, "unbalanced brackets ([])");
+	    sprintf (errmsg, "Unbalanced brackets ([])");
 	    return NULL;
 	  }
 	break;
       case '\\':
 	if (*++nd == '\n')
 	  {
-	    sprintf (errmsg, "trailing backslash (\\)");
+	    sprintf (errmsg, "Trailing backslash (\\)");
 	    return NULL;
 	  }
 	break;

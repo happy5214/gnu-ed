@@ -1,7 +1,7 @@
 /* buf.c: This file contains the scratch-file buffer rountines for the
    ed line editor. */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: buf.c,v 1.6 1994/04/19 06:23:59 alm Exp alm $";
+static char *rcsid = "@(#)$Id: buf.c,v 1.11 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
 
 #include "ed.h"
@@ -55,7 +55,7 @@ get_sbuf_line (lp)
       if (fseek (sfp, sfseek, SEEK_SET) < 0)
 	{
 	  fprintf (stderr, "%s\n", strerror (errno));
-	  sprintf (errmsg, "cannot seek temp file");
+	  sprintf (errmsg, "Cannot seek temp file");
 	  return NULL;
 	}
     }
@@ -64,7 +64,7 @@ get_sbuf_line (lp)
   if ((ct = fread (sfbuf, sizeof (char), len, sfp)) < 0 || ct != len)
     {
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "cannot read temp file");
+      sprintf (errmsg, "Cannot read temp file");
       return NULL;
     }
   sfseek += len;		/* update file position */
@@ -86,7 +86,7 @@ put_sbuf_line (cs)
   if ((lp = (line_t *) malloc (sizeof (line_t))) == NULL)
     {
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "out of memory");
+      sprintf (errmsg, "Out of memory");
       return NULL;
     }
   /* assert: cs is '\n' terminated */
@@ -94,7 +94,7 @@ put_sbuf_line (cs)
     ;
   if (s - cs >= LINECHARS)
     {
-      sprintf (errmsg, "line too long");
+      sprintf (errmsg, "Line too long");
       return NULL;
     }
   len = s - cs;
@@ -104,7 +104,7 @@ put_sbuf_line (cs)
       if (fseek (sfp, 0L, SEEK_END) < 0)
 	{
 	  fprintf (stderr, "%s\n", strerror (errno));
-	  sprintf (errmsg, "cannot seek temp file");
+	  sprintf (errmsg, "Cannot seek temp file");
 	  return NULL;
 	}
       sfseek = ftell (sfp);
@@ -115,7 +115,7 @@ put_sbuf_line (cs)
     {
       sfseek = -1;
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "cannot write temp file");
+      sprintf (errmsg, "Cannot write temp file");
       return NULL;
     }
   lp->len = len;
@@ -152,7 +152,7 @@ get_line_node_addr (lp)
     n++;
   if (n && cp == &buffer_head)
     {
-      sprintf (errmsg, "invalid address");
+      sprintf (errmsg, "Invalid address");
       return ERR;
     }
   return n;
@@ -209,7 +209,7 @@ open_sbuf ()
   if (mktemp (sfn) == NULL || (sfp = fopen (sfn, "w+")) == NULL)
     {
       fprintf (stderr, "%s: %s\n", sfn, strerror (errno));
-      sprintf (errmsg, "cannot open temp file");
+      sprintf (errmsg, "Cannot open temp file");
       umask(u);
       return ERR;
     }
@@ -227,7 +227,7 @@ close_sbuf ()
       if (fclose (sfp) < 0)
 	{
 	  fprintf (stderr, "%s: %s\n", sfn, strerror (errno));
-	  sprintf (errmsg, "cannot close temp file");
+	  sprintf (errmsg, "Cannot close temp file");
 	  return ERR;
 	}
       sfp = NULL;
@@ -252,6 +252,7 @@ quit (n)
 }
 
 
+extern line_t yank_buffer_head;
 extern char *old_filename;
 unsigned char ctab[256];	/* character translation table */
 
@@ -282,6 +283,7 @@ init_buffers ()
   if (open_sbuf () < 0)
     quit (2);
   REQUE (&buffer_head, &buffer_head);
+  REQUE (&yank_buffer_head, &yank_buffer_head);
   for (i = 0; i < 256; i++)
     ctab[i] = i;
 

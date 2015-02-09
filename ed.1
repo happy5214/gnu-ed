@@ -1,10 +1,10 @@
-.TH ED 1 "21 May 1993"
+.TH ED 1 "10 November 1994"
 .SH NAME
 ed, red \- text editor
 .SH SYNOPSIS
-ed [-] [-s] [-p \fIstring\fR] [\fIfile\fR]
+ed [-] [-Gs] [-p \fIstring\fR] [\fIfile\fR]
 .LP
-red [-] [-s] [-p \fIstring\fR] [\fIfile\fR]
+red [-] [-Gs] [-p \fIstring\fR] [\fIfile\fR]
 .SH DESCRIPTION
 .B ed
 is a line-oriented text editor.
@@ -98,6 +98,17 @@ default addresses are supplied.
 
 .SS OPTIONS
 .TP 8
+-G
+Forces backwards compatibility.  Affects the commands
+.IR `G' ,
+.IR `V' ,
+.IR `f' ,
+.IR `l' ,
+.IR `m' ,
+.IR `t' ,
+and
+.IR `!!' .
+.TP 8
 -s
 Suppresses diagnostics. This should be used if
 .BR ed 's
@@ -121,7 +132,7 @@ the standard output of
 executed via
 .IR sh (1).
 To read a file whose name begins with a bang, prefix the
-name with a backslash (\\).
+name with a backslash (\e).
 The default filename is set to
 .I file
 only if it is not prefixed with a bang.
@@ -157,7 +168,7 @@ This means "before the first line,"
 and is legal wherever it makes sense.
 
 An address range is two addresses separated either by a comma or
-semi-colon. The value of the first address in a range cannot exceed the
+semicolon. The value of the first address in a range cannot exceed the
 value of the the second.  If only one address is given in a range, then
 the second address is set to the given address.  If an
 .IR n- tuple
@@ -169,7 +180,7 @@ the
 If only one address is expected, then the last address is used.
 
 Each address in a comma-delimited range is interpreted relative to the
-current address.  In a semi-colon-delimited range, the first address is
+current address.  In a semicolon-delimited range, the first address is
 used to set the current address, and the second address is interpreted
 relative to the first.
 
@@ -194,15 +205,19 @@ where
 is a number in the range
 .I [0,$].
 
+.HP
+-
 .TP 8
-- or ^
+^
 The previous line.
 This is equivalent to
 .I -1
 and may be repeated with cumulative effect.
 
+.HP
+-\fIn\fR
 .TP 8
--\fIn\fR or ^\fIn\fR
+^\fIn\fR
 The
 .IR n th
 previous line, where
@@ -217,29 +232,32 @@ This is equivalent to
 .I +1
 and may be repeated with cumulative effect.
 
+.HP
++\fIn\fR
 .TP 8
-+\fIn\fR or whitespace\fIn\fR
+whitespace \fIn\fR
 The
 .IR n th
 next line, where
 .I n
 is a non-negative number.
-.I whitespace
+.I Whitespace
 followed by a number
 .I n
 is interpreted as
 .IR +n .
 
+.HP
+,
 .TP 8
-, \fRor\fB %
+%
 The first through last lines in the buffer.  This is equivalent to
 the address range
 .I 1,$.
 
 .TP 8
 ;
-The
-current through last lines in the buffer.  This is equivalent to
+The current through last lines in the buffer.  This is equivalent to
 the address range
 .I .,$.
 
@@ -305,10 +323,11 @@ not listed below, including `{', '}', `(', `)', `<' and `>',
 matches itself.
 
 .TP 8
-\fR\e\fIc\fR
-Any backslash-escaped character
-.IR c ,
-except for `{', '}', `(', `)', `<' and `>',
+\e\fIc\fR
+A backslash-escaped character
+.IR c
+other than `{', '}', `(', `)', `<', `>',
+`b', 'B', `w', `W', `+', and `?'
 matches itself.
 
 .TP 8
@@ -383,29 +402,17 @@ anchors the regular expression to the end of a line.
 Otherwise, it matches itself.
 
 .TP 8
-\fR\e<\fR
-Anchors the single character regular expression or subexpression
-immediately following it to the beginning of a word.
-(This may not be available)
-
-.TP 8
-\fR\e>\fR
-Anchors the single character regular expression or subexpression
-immediately following it to the end of a word.
-(This may not be available)
-
-.TP 8
-\fR\e(\fIre\fR\e)\fR
-Defines a subexpression
+\e(\fIre\fR\e)
+Defines a (possibly null) subexpression
 .IR re .
 Subexpressions may be nested.
-A subsequent backreference of the form \fI`\en'\fR, where
+A subsequent backreference of the form `\e\fIn\fR', where
 .I n
 is a number in the range [1,9], expands to the text matched by the
 .IR n th
 subexpression.
-For example, the regular expression `\e(.*\e)\e1' matches any string
-consisting of identical adjacent substrings.
+For example, the regular expression `\e(a.c\e)\e1' matches the
+string `abcabc', but not `abcadc'.
 Subexpressions are ordered relative to
 their left delimiter.
 
@@ -416,11 +423,15 @@ immediately preceding it zero or more times.  If '*' is the first
 character of a regular expression or subexpression, then it matches
 itself.  The `*' operator sometimes yields unexpected results.
 For example, the regular expression `b*' matches the beginning of
-the string `abbb' (as opposed to the substring `bbb'), since a null match
+the string `abbb', as opposed to the substring `bbb', since a null match
 is the only left-most match.
 
+.HP
+\fR\e{\fIn,m\fR\e}\fR
+.HP
+\fR\e{\fIn,\fR\e}\fR
 .TP 8
-\fR\e{\fIn,m\fR\e}\fR or \fR\e{\fIn,\fR\e}\fR or \fR\e{\fIn\fR\e}\fR
+\fR\e{\fIn\fR\e}\fR
 Matches the single character regular expression or subexpression
 immediately preceding it at least
 .I n
@@ -434,13 +445,64 @@ is omitted, then it matches at least
 times.
 If the comma is also omitted, then it matches exactly
 .I n
-times.
+times.  If  any of these forms occurs first in a regular expression or
+subexpression, then it is interpreted literally (i.e., the regular
+expression `\e{2\e}' matches the string `{2}', and so on).
+
+.HP
+\e<
+.TP 8
+\fR\e>\fR
+Anchors the single character regular expression or subexpression
+immediately following it to the beginning (\e<) or ending
+(\e>) of a \fIword\fR, i.e., in ASCII, a maximal string of alphanumeric
+characters, including the underscore (_).
+
 
 .LP
-Additional regular expression operators may be defined depending on the
-particular
-.IR regex (3)
-implementation.
+The following extended operators are preceded by a backslash (\e) to
+distinguish them from traditional
+.B ed
+syntax.
+
+.HP
+\fR\e`\fR
+.TP 8
+\fR\e'\fR
+Unconditionally matches the beginning (\e`) or ending (\e') of a line.
+
+.TP 8
+\fR\e?\fR
+Optionally matches the single character regular expression or subexpression
+immediately preceding it.  For example, the regular expression `a[bd]\e?c'
+matches the strings `abc', `adc' and `ac'.  If \e? occurs at the beginning
+of a regular expressions or subexpression, then it matches a literal `?'.
+
+.TP 8
+\fR\e+\fR
+Matches the single character regular expression or subexpression
+immediately preceding it one or more times.  So the regular expression
+`a+' is shorthand for `aa*'.  If \e+ occurs at the beginning of a
+regular expression or subexpression, then it matches a literal `+'.
+
+
+.TP 8
+\fR\eb\fR
+Matches the beginning or ending (null string) of a word.  Thus the regular
+expression `\ebhello\eb' is equivalent to `\e<hello\e>'.  However, `\eb\eb'
+is a valid regular expression whereas `\e<\e>' is not.
+
+.TP 8
+\fR\eB\fR
+Matches (a null string) inside a word.
+
+.TP 8
+\fR\ew\fR
+Matches any character in a word.
+
+.TP 8
+\fR\eW\fR
+Matches any character not in a word.
 
 .SS COMMANDS
 All
@@ -448,7 +510,7 @@ All
 commands are single characters, though some require additonal parameters.
 If a command's parameters extend over several lines, then
 each line except for the last
-must be terminated with a backslash (\\).
+must be terminated with a backslash (\e).
 
 In general, at most one command is allowed per line.
 However, most commands accept a print suffix, which is any of
@@ -471,9 +533,9 @@ specified (in parenthesis).
 
 .TP 8
 (.)a
-Appends text to the buffer after the addressed line.
-Text is entered in input mode.
-The current address is set to last line entered.
+Appends text to the buffer after the addressed line, which may be the
+address 0 (zero).  Text is entered in input mode.  The current address is
+set to last line entered.
 
 .TP 8
 (.,.)c
@@ -552,7 +614,7 @@ Each command in
 .I command-list
 must be on a separate line,
 and every line except for the last must be terminated by a backslash
-(\\).
+(\e).
 Any commands are allowed, except for
 .IR `g' ,
 .IR `G' ,
@@ -561,7 +623,7 @@ and
 .IR `V' .
 A newline alone in
 .I command-list
-is equivalent to a 
+is equivalent to a
 .I `p'
 command.
 
@@ -572,7 +634,7 @@ Interactively edits the addressed lines matching a regular expression
 For each matching line,
 the line is printed,
 the current address is set,
-and the user is prompted to enter a 
+and the user is prompted to enter a
 .IR command-list .
 At the end of the
 .I `G'
@@ -624,15 +686,10 @@ deleted or otherwise modified.
 
 .TP 8
 (.,.)l
-Prints the addressed lines unambiguously.
-If a single line fills for than one screen (as might be the case
-when viewing a binary file, for instance), a `--More--' 
-prompt is printed on the last line. 
+Prints the addressed lines unambiguously.  If invoked from a terminal,
 .B ed
-waits until the RETURN key is pressed
-before displaying the next screen. 
-The current address is set to the last line
-printed.
+pauses at the end of each page until a newline is entered.
+The current address is set to the last line printed.
 
 .TP 8
 (.,.)m(.)
@@ -651,7 +708,10 @@ printed.
 
 .TP 8
 (.,.)p
-Prints the addressed lines. The current address is set to the last line
+Prints the addressed lines.    If invoked from a terminal,
+.B ed
+pauses at the end of each page until a newline is entered.
+The current address is set to the last line
 printed.
 
 .TP 8
@@ -699,7 +759,6 @@ The current address is set to the last line read.
 
 .HP
 .RI (.,.)s /re/replacement/
-.PD 0
 .HP
 .RI (.,.)s  /re/replacement/\fRg\fR
 .HP
@@ -755,7 +814,7 @@ consists of a single `%', then
 from the last substitution is used.
 Newlines may be embedded in
 .I replacement
-if they are escaped with a backslash (\\).
+if they are escaped with a backslash (\e).
 
 .TP 8
 (.,.)s
@@ -811,7 +870,7 @@ are treated as a single command by undo.
 is its own inverse.
 
 .TP 8
-.RI (1,$)v /pat/command-list
+.RI (1,$)v /re/command-list
 Applies
 .I command-list
 to each of the addressed lines not matching a regular expression
@@ -868,6 +927,24 @@ command, expect that the previous contents of file is not clobbered.
 The current address is unchanged.
 
 .TP 8
+(.)x
+Copies (puts) the contents of the cut buffer to after the addressed line.
+The current address is set to the last line copied.
+
+.TP 8
+(.,.)y
+Copies (yanks) the addressed lines to the cut buffer.
+The cut buffer is overwritten by subsequent
+.IR `y' ,
+.IR `s' ,
+.IR `j' ,
+.IR `d' ,
+or
+.I `c'
+commands.
+The current address is unchanged.
+
+.TP 8
 .RI (.+1)z n
 Scrolls
 .I n
@@ -890,7 +967,7 @@ previous
 .B ed
 does not process
 .I command
-for backslash (\\) escapes.
+for backslash (\e) escapes.
 However, an unescaped
 .I `%'
 is replaced by the default filename.
@@ -900,8 +977,8 @@ The current line is unchanged.
 
 .TP 8
 (.,.)#
-Begins a comment;  the rest of the line, up to a newline, is ignored.  
-If a line address followed by a semi-colon is given, then the 
+Begins a comment;  the rest of the line, up to a newline, is ignored.
+If a line address followed by a semicolon is given, then the
 current address is set to that address.  Otherwise, the current address
 is unchanged.
 
@@ -943,7 +1020,7 @@ Addison-Wesley, 1981.
 processes
 .I file
 arguments for backslash escapes, i.e.,  in a filename,
-any characters preceded by a backslash (\\) are
+any characters preceded by a backslash (\e) are
 interpreted literally.
 
 If a text (non-binary) file is not terminated by a newline character,
@@ -957,35 +1034,22 @@ per line overhead: 4 ints
 
 .SH DIAGNOSTICS
 When an error occurs,
-.B ed
-prints a `?' and either returns to command mode
-or exits if its input is from a script.
+if
+.BR ed 's
+input is from a regular file or here document, then it
+exits, otherwise it
+prints a `?' and returns to command mode.
 An explanation of the last error can be
 printed with the
 .I `h'
 (help) command.
 
-Since the 
-.I `g'
-(global) command  masks any errors from failed searches and substitutions,
-it can be used to perform conditional operations in scripts; e.g.,
-.sp
-.RS
-g/\fIold\fR/s//\fInew\fR/
-.RE
-.sp
-replaces any occurrences of
-.I old
-with
-.IR new .
-If the
-.I `u'
-(undo) command occurs in a global command list, then
-the command list is executed only once.
-
-If diagnostics are not disabled, attempting to quit
+Attempting to quit
 .B ed
 or edit another file before writing a modified buffer
 results in an error.
 If the command is entered a second time, it succeeds,
 but any changes to the buffer are lost.
+
+.B ed
+exits with 0 if no errors occurred; otherwise >0.

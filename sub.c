@@ -1,7 +1,7 @@
 /* sub.c: This file contains the substitution routines for the ed
    line editor */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: sub.c,v 1.2 1994/02/20 03:27:53 alm Exp $";
+static char *rcsid = "@(#)$Id: sub.c,v 1.6 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
 
 #include "ed.h"
@@ -83,7 +83,7 @@ extract_subst_template ()
     {
       ibufp++;
       if (!rhbuf)
-	sprintf (errmsg, "no previous substitution");
+	sprintf (errmsg, "No previous substitution");
       return rhbuf;
     }
   while (*ibufp != delimiter)
@@ -169,7 +169,7 @@ search_and_replace (pat, gflag, kth)
     }
   if (nsubs == 0 && !(gflag & GLB))
     {
-      sprintf (errmsg, "no match");
+      sprintf (errmsg, "No match");
       return ERR;
     }
   else if ((gflag & (GPR | GLS | GNP)) &&
@@ -235,7 +235,7 @@ substitute_matching_text (pat, lp, gflag, kth)
       REALLOC (rbuf, rbufsz, off + i + 2, ERR);
       if (i > 0 && !rm[0].rm_eo && (gflag & GSG))
 	{
-	  sprintf (errmsg, "infinite substitution loop");
+	  sprintf (errmsg, "Infinite substitution loop");
 	  return ERR;
 	}
       if (isbinary)

@@ -1,6 +1,6 @@
 /* io.c: This file contains the i/o routines for the ed line editor */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: io.c,v 1.4 1994/03/19 21:55:22 alm Exp $";
+static char *rcsid = "@(#)$Id: io.c,v 1.11 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
 
 #include "ed.h"
@@ -41,7 +41,7 @@ read_file (fn, n)
   if (fp == NULL)
     {
       fprintf (stderr, "%s: %s\n", fn, strerror (errno));
-      sprintf (errmsg, "cannot open input file");
+      sprintf (errmsg, "Cannot open input file");
       return ERR;
     }
   else if ((size = read_stream (fp, n)) < 0)
@@ -49,7 +49,7 @@ read_file (fn, n)
   else if (((*fn == '!') ? pclose (fp) : fclose (fp)) < 0)
     {
       fprintf (stderr, "%s: %s\n", fn, strerror (errno));
-      sprintf (errmsg, "cannot close input file");
+      sprintf (errmsg, "Cannot close input file");
       return ERR;
     }
   fprintf (stderr, !scripted ? "%lu\n" : "", size);
@@ -72,7 +72,8 @@ read_stream (fp, n)
   unsigned long size = 0;
   int o_newline_added = newline_added;
   int o_isbinary = isbinary;
-  int appended = (n == addr_last);
+  int o_n = n;
+  int appended = n == addr_last;
   int len;
 
   isbinary = newline_added = 0;
@@ -97,10 +98,10 @@ read_stream (fp, n)
     }
   if (len < 0)
     return ERR;
-  if (appended && size && o_isbinary && o_newline_added)
-    fputs ("newline inserted\n", stderr);
+  if (o_n && appended && size && o_isbinary && o_newline_added)
+    fputs ("Newline inserted\n", stderr);
   else if (newline_added && (!appended || !isbinary && !o_isbinary))
-    fputs ("newline appended\n", stderr);
+    fputs ("Newline appended\n", stderr);
   if (isbinary && newline_added && !appended)
     size += 1;
   if (!size)
@@ -132,7 +133,7 @@ get_stream_line (fp)
   else if (ferror (fp))
     {
       fprintf (stderr, "%s\n", strerror (errno));
-      sprintf (errmsg, "cannot read input file");
+      sprintf (errmsg, "Cannot read input file");
       return ERR;
     }
   else if (i)
@@ -160,7 +161,7 @@ write_file (fn, mode, n, m)
   if (fp == NULL)
     {
       fprintf (stderr, "%s: %s\n", fn, strerror (errno));
-      sprintf (errmsg, "cannot open output file");
+      sprintf (errmsg, "Cannot open output file");
       return ERR;
     }
   else if ((size = write_stream (fp, n, m)) < 0)
@@ -168,7 +169,7 @@ write_file (fn, mode, n, m)
   else if (((*fn == '!') ? pclose (fp) : fclose (fp)) < 0)
     {
       fprintf (stderr, "%s: %s\n", fn, strerror (errno));
-      sprintf (errmsg, "cannot close output file");
+      sprintf (errmsg, "Cannot close output file");
       return ERR;
     }
   fprintf (stderr, !scripted ? "%lu\n" : "", size);
@@ -214,13 +215,13 @@ put_stream_line (fp, s, len)
     if (fputc (*s++, fp) < 0)
       {
 	fprintf (stderr, "%s\n", strerror (errno));
-	sprintf (errmsg, "cannot write file");
+	sprintf (errmsg, "Cannot write file");
 	return ERR;
       }
   return 0;
 }
 
-/* get_extended_line: get a an extended line from stdin */
+/* get_extended_line: get an extended line from stdin */
 char *
 get_extended_line (sizep, nonl)
      int *sizep;
@@ -251,7 +252,7 @@ get_extended_line (sizep, nonl)
 	return NULL;
       else if (n == 0 || ibuf[n - 1] != '\n')
 	{
-	  sprintf (errmsg, "unexpected end-of-file");
+	  sprintf (errmsg, "Unexpected end-of-file");
 	  return NULL;
 	}
       REALLOC (cvbuf, cvbufsz, l + n, NULL);
@@ -302,7 +303,7 @@ get_tty_line ()
 	if (ferror (stdin))
 	  {
 	    fprintf (stderr, "stdin: %s\n", strerror (errno));
-	    sprintf (errmsg, "cannot read stdin");
+	    sprintf (errmsg, "Cannot read stdin");
 	    clearerr (stdin);
 	    ibufp = NULL;
 	    return ERR;
@@ -328,8 +329,9 @@ get_tty_line ()
 #define ESCAPES "\a\b\f\n\r\t\v\\"
 #define ESCCHARS "abfnrtv\\"
 
-extern int rows;
+extern long rows;
 extern int cols;
+extern int dlcnt;
 
 /* put_tty_line: print text to stdout */
 int
@@ -340,7 +342,6 @@ put_tty_line (s, l, n, gflag)
      int gflag;
 {
   int col = 0;
-  int lc = 0;
   char *cp;
 
   if (gflag & GNP)
@@ -354,13 +355,13 @@ put_tty_line (s, l, n, gflag)
 	{
 	  fputs ("\\\n", stdout);
 	  col = 1;
-	  if (!traditional && !scripted && !isglobal && ++lc > rows)
+          if (!traditional && !scripted && !isglobal && ++dlcnt > rows)
 	    {
-	      lc = 0;
+	      dlcnt = 0;
 	      fputs ("Press <RETURN> to continue... ", stdout);
 	      fflush (stdout);
 	      if (get_tty_line () < 0)
-		return ERR;
+	        return ERR;
 	    }
 	}
       if (gflag & GLS)

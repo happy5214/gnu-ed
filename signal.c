@@ -1,6 +1,6 @@
 /* signal.c: This file contains the signal routines for the ed line editor. */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -19,14 +19,19 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: signal.c,v 1.4 1994/03/19 03:25:17 alm Exp $";
+static char *rcsid = "@(#)$Id: signal.c,v 1.9 1994/11/13 04:25:44 alm Exp $";
 #endif
 
 
 #include <setjmp.h>
+#include <sys/ioctl.h>
 
 #include "ed.h"
 
+
+#ifndef SIG_ERR
+# define SIG_ERR ((void (*)()) -1)
+#endif /* !SIG_ERR */
 
 void
 (*reliable_signal (sno, hndlr)) ()
@@ -119,6 +124,7 @@ handle_int (signo)
 }
 
 
+extern long rows;
 int cols = 72;			/* wrap column */
 
 void

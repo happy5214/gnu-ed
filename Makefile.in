@@ -1,6 +1,7 @@
 # Makefile for GNU ed.
-# Copyright (C) 1993 Free Software Foundation, Inc.
-# Andrew Moore <alm@netcom.com>, 1993.
+# Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+# Andrew Moore 1993, 1994.
+# All Rights Reserved
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@
 SHELL = /bin/sh
 
 srcdir = @srcdir@
-testdir = $(srcdir)/test
+testdir = $(srcdir)/testsuite
 VPATH = @srcdir@
 
 LN_S = @LN_S@
@@ -32,19 +33,19 @@ INSTALL_DATA = @INSTALL_DATA@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 
-CFLAGS = -g
+CFLAGS = @CFLAGS@
 DEFS = @DEFS@
-LDFLAGS = -g
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 
-prefix = /usr/local
-exec_prefix = $(prefix)
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 infodir = $(prefix)/info
 mandir = $(prefix)/man/man1
 manext = .1
 
-CPPFLAGS = -I. -I$(srcdir) $(DEFS)
+CPPFLAGS = -I. -I$(srcdir) $(DEFS) @CPPFLAGS@
 
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
@@ -59,19 +60,19 @@ LIBOBJS = @ALLOCA@ getopt.o getopt1.o regex.o @LIBOBJS@
 
 DISTFILES = $(HEADERS) $(LIBHDRS) $(LIBSRCS) $(SOURCES) ChangeLog COPYING \
 INSTALL Makefile.in NEWS POSIX README TODO THANKS \
-configure configure.in ed.1 ed.info ed.texinfo mkinstalldirs \
-install.sh texinfo.tex
+configure configure.in stamp-h.in config.h.in mkinstalldirs install.sh \
+ed.1 ed.info ed.texinfo texinfo.tex
 
 all: ed
 
 ed: $(OBJECTS) libed.a
 	$(CC) $(LDFLAGS) -o ed $(OBJECTS) libed.a $(LIBS)
 
-buf.o: ed.h regex.h
-ed.o: ed.h regex.h
-main.o: ed.h regex.h getopt.h pathmax.h
-re.o: ed.h regex.h
-signal.o: ed.h regex.h
+buf.o: ed.h config.h regex.h
+ed.o: ed.h config.h regex.h
+main.o: ed.h config.h regex.h getopt.h pathmax.h
+re.o: ed.h config.h regex.h
+signal.o: ed.h config.h regex.h
 
 libed.a: $(LIBOBJS)
 	rm -f libed.a
@@ -82,9 +83,10 @@ getopt.o getopt1.o: getopt.h
 regex.o: regex.h
 
 check: ed
-	objdir=`pwd`; \
+	rootme=`pwd`; srcrootme=`cd $(srcdir); pwd`;\
+	test -r mkinstalldirs || cp $(srcdir)/mkinstalldirs .;\
 	  cd $(testdir); \
-	  make check objdir=$${objdir}
+	  make check objdir=$${rootme}
 
 info: ed.info
 
@@ -110,7 +112,7 @@ install: ed ed.info installdirs
 # Make sure all installation directories, e.g. $(bindir) actually exist by
 # making them if necessary.
 installdirs:
-	$(SHELL) $(srcdir)/mkinstalldirs $(bindir) $(infodir) $(mandir)
+	$(srcdir)/mkinstalldirs $(bindir) $(infodir) $(mandir)
 
 uninstall: all
 	rm -f $(bindir)/$(binprefix)ed $(bindir)/$(binprefix)red
@@ -131,11 +133,12 @@ mostlyclean: texclean
 
 clean: mostlyclean
 	rm -f ed *.o *.a ed.0
+	rootme=`pwd`; \
 	cd $(testdir); \
-	  make clean
+	  make clean objdir=$${rootme}
 
 distclean: clean
-	rm -f tags TAGS Makefile config.status
+	rm -f tags TAGS Makefile config.h config.status config.log config.cache
 
 realclean: distclean
 	rm -f ed.info
@@ -147,22 +150,31 @@ dist: $(DISTFILES)
 	mkdir `cat .fname`
 	chmod 777 `cat .fname`
 	ln $(DISTFILES) `cat .fname`
-#	cp -rl test `cat .fname`
-# Replacement for previous cp.
-	mkdir `cat .fname`/test
-	find test -type f -exec ln {} `cat .fname`/test \;
-# End of replacement.
+	mkdir `cat .fname`/testsuite
+	find testsuite -type f -exec ln {} `cat .fname`/testsuite \;
 	chmod -R a+r `cat .fname`
-	chmod 777 `cat .fname`/test
-	tar chozf `cat .fname`.tar.gz `cat .fname`
+	chmod 777 `cat .fname`/testsuite
+	tar chof `cat .fname`.tar `cat .fname`
+	gzip `cat .fname`.tar
 	rm -rf `cat .fname` .fname
 
+# For the justification of the following Makefile rules, see node
+# `Automatic Remaking' in GNU Autoconf documentation.
 Makefile: Makefile.in config.status
-	$(SHELL) config.status
+	./config.status
 config.status: configure
-	$(SHELL) config.status --recheck
+	./config.status --recheck
 configure: configure.in
 	cd $(srcdir); autoconf
+
+config.h: stamp-h
+stamp-h: config.h.in config.status
+	./config.status
+	touch stamp-h
+config.h.in: stamp-h.in
+stamp-h.in: configure.in
+	cd $(srcdir); autoheader
+	touch $(srcdir)/stamp-h.in
 
 # Tell versions [3.59,3.63) of GNU make not to export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

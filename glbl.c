@@ -1,7 +1,7 @@
 /* glbl.c: This file contains the global command routines for the ed line
    editor */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,8 @@
 */
 
 #ifndef lint
-static char *rcsid = "@(#)$Id: glbl.c,v 1.2 1994/01/20 06:50:53 alm Exp $";
+static char *rcsid = "@(#)$Id: glbl.c,v 1.7 1994/11/13 04:25:44 alm Exp $";
 #endif /* not lint */
-
-#include <sys/ioctl.h>
 
 #include "ed.h"
 
@@ -41,7 +39,7 @@ build_active_list (isgcmd)
 
   if ((delimiter = *ibufp) == ' ' || delimiter == '\n')
     {
-      sprintf (errmsg, "invalid pattern delimiter");
+      sprintf (errmsg, "Invalid pattern delimiter");
       return ERR;
     }
   else if ((pat = get_compiled_pattern ()) == NULL)
@@ -101,7 +99,7 @@ exec_global (interact, gflag)
 	    return ERR;
 	  else if (n == 0)
 	    {
-	      sprintf (errmsg, "unexpected end-of-file");
+	      sprintf (errmsg, "Unexpected end-of-file");
 	      return ERR;
 	    }
 	  else if (n == 1 && !strcmp (ibuf, "\n"))
@@ -110,7 +108,7 @@ exec_global (interact, gflag)
 	    {
 	      if (cmd == NULL)
 		{
-		  sprintf (errmsg, "no previous command");
+		  sprintf (errmsg, "No previous command");
 		  return ERR;
 		}
 	      else
@@ -160,7 +158,7 @@ set_active_node (lp)
 			    (ti += MINBUFSZ) * sizeof (line_t **))) == NULL)
 	    {
 	      fprintf (stderr, "%s\n", strerror (errno));
-	      sprintf (errmsg, "out of memory");
+	      sprintf (errmsg, "Out of memory");
 	      SPL0 ();
 	      return ERR;
 	    }
@@ -171,7 +169,7 @@ set_active_node (lp)
 					sizeof (line_t **))) == NULL)
 	    {
 	      fprintf (stderr, "%s\n", strerror (errno));
-	      sprintf (errmsg, "out of memory");
+	      sprintf (errmsg, "Out of memory");
 	      SPL0 ();
 	      return ERR;
 	    }

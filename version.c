@@ -1,6 +1,6 @@
 /* version.c: version definition for the ed editor. */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
- 	@(#)$Id: version.c,v 1.1 1993/12/22 02:57:59 alm Exp $
 */
 
-char version_string[] = "GNU ed version 0.1";
+#ifndef lint
+static char *rcsid = "@(#)$Id: version.c,v 1.6 1994/11/13 05:45:09 alm Exp alm $";
+#endif /* not lint */
+
+char version_string[] = "GNU ed version 0.2";

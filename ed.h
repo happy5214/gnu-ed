@@ -1,6 +1,6 @@
 /* ed.h: type and constant definitions for the ed editor. */
 /* ed line editor.
-   Copyright (C) 1993 Andrew Moore, Talke Studio
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
    All Rights Reserved
 
    This program is free software; you can redistribute it and/or modify
@@ -17,8 +17,19 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
- 	@(#)$Id: ed.h,v 1.7 1994/03/22 05:31:17 alm Exp $
+ 	@(#)$Id: ed.h,v 1.14 1994/11/13 04:25:44 alm Exp $
 */
+
+#ifdef HAVE_CONFIG_H
+#if defined (CONFIG_BROKETS)
+/* We use <config.h> instead of "config.h" so that a compilation
+   using -I. -I$srcdir will use ./config.h rather than $srcdir/config.h
+   (which it would do because it found this file in $srcdir).  */
+#include <config.h>
+#else
+#include "config.h"
+#endif
+#endif
 
 #include <errno.h>
 #ifndef errno
@@ -29,12 +40,16 @@ extern int errno;
 #include <limits.h>
 #endif
 
+#include <sys/types.h>
 #include <signal.h>
 
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #else
 char *getenv ();
+char *malloc ();
+char *realloc ();
+long strtol ();
 #endif
 
 #include <stdio.h>
@@ -54,7 +69,7 @@ char *getenv ();
 #define memcmp(s1, s2, n) bcmp ((s1), (s2), (n))
 #endif /* not STDC_HEADERS and not HAVE_STRING_H */
 
-#include <sys/types.h>
+/* #include <sys/types.h> */
 
 #include "pathmax.h"
 
@@ -72,13 +87,20 @@ char *getenv ();
 #define FATAL (-4)
 
 #define ERRSZ (PATH_MAX + 40)	/* size of error message buffer */
-#define MINBUFSZ 512		/* minimum buffer size - must be > 0 */
+#define MINBUFSZ 512		/* minimum buffer size: must be > 0 */
 #define SE_MAX 30		/* max subexpressions in a regular expression */
-#ifdef INT_MAX
-#define LINECHARS INT_MAX	/* max chars per line */
-#else
-#define LINECHARS MAXINT	/* max chars per line */
+
+#ifndef LONG_MAX
+#define LONG_MAX ((long) (~(unsigned long) 0 >> (unsigned long) 1))
 #endif
+#ifndef LONG_MIN
+#define LONG_MIN (-LONG_MAX - 1)
+#endif
+
+#ifndef INT_MAX
+#define INT_MAX ((int) (~(unsigned int) 0 >> (unsigned int) 1))
+#endif
+#define LINECHARS INT_MAX	/* max chars per line */
 
 /* gflags */
 #define GLB 001			/* global command */
@@ -147,7 +169,7 @@ undo_t;
       if ((((i) = strtol ((p), &(p), 10)) == LONG_MIN 			\
           || (i) == LONG_MAX) && errno == ERANGE)			\
 	{								\
-	  sprintf (errmsg, "number out of range");			\
+	  sprintf (errmsg, "Number out of range");			\
 	  (i) = 0;							\
 	  return ERR;							\
 	}								\
@@ -169,7 +191,7 @@ undo_t;
 		  == NULL)						\
 		{							\
 		  fprintf (stderr, "%s\n", strerror (errno));		\
-		  sprintf (errmsg, "out of memory");			\
+		  sprintf (errmsg, "Out of memory");			\
 		  SPL0 ();						\
 		  return err;						\
 		}							\
@@ -180,7 +202,7 @@ undo_t;
 		  == NULL)						\
 		{							\
 		  fprintf (stderr, "%s\n", strerror (errno));		\
-		  sprintf (errmsg, "out of memory");			\
+		  sprintf (errmsg, "Out of memory");			\
 		  SPL0 ();						\
 		  return err;						\
 		}							\
@@ -196,7 +218,6 @@ undo_t;
 #define REQUE(pred, succ) \
   ((pred)->q_forw = (succ), (succ)->q_back = (pred))
 
-#ifndef HAVE_INSQUE
 /* INSQUE: insert elem in circular queue after pred */
 #define INSQUE(elem, pred) \
   do									\
@@ -206,10 +227,9 @@ undo_t;
     }									\
   while (0)
 
-/* REMQUE: remove_lines elem from circular queue */
+/* REMQUE: remove elem from circular queue */
 #define REMQUE(elem) \
   REQUE ((elem)->q_back, (elem)->q_forw)
-#endif /* not HAVE_INSQUE */
 
 /* NUL_TO_NEWLINE: overwrite ASCII NULs with newlines */
 #define NUL_TO_NEWLINE(s, l)	translit_text(s, l, '\0', '\n')
@@ -218,8 +238,10 @@ undo_t;
 #define NEWLINE_TO_NUL(s, l)	translit_text(s, l, '\n', '\0')
 
 #ifndef HAVE_STRERROR
-extern char *sys_errlist[];
-#define strerror(n) sys_errlist[n]
+extern const char *sys_errlist[];
+extern int sys_nerr;
+#define strerror(n) \
+  ((n > 0 && n < sys_nerr) ? sys_errlist[n] : "Unknown system error")
 #endif
 
 #ifndef __P
@@ -243,6 +265,7 @@ void clear_undo_stack __P ((void));
 int close_sbuf __P ((void));
 int copy_lines __P ((long));
 int delete_lines __P ((long, long));
+void delete_yank_lines __P ((void));
 int display_lines __P ((long, long, int));
 line_t *dup_line_node __P ((line_t *));
 int exec_command __P ((void));
@@ -271,6 +294,7 @@ int has_trailing_escape __P ((char *, char *));
 int hex_to_binary __P ((int, int));
 void init_buffers __P ((void));
 int is_legal_filename __P ((char *));
+int is_regular_file __P ((int));
 int join_lines __P ((long, long));
 int mark_line_node __P ((line_t *, int));
 int move_lines __P ((long));
@@ -280,6 +304,7 @@ int open_sbuf __P ((void));
 char *parse_char_class __P ((char *));
 int pop_undo_stack __P ((void));
 undo_t *push_undo_stack __P ((int, long, long));
+int put_lines __P ((long));
 char *put_sbuf_line __P ((char *));
 int put_stream_line __P ((FILE *, char *, int));
 int put_tty_line __P ((char *, int, long, int));
@@ -298,6 +323,7 @@ void unmark_line_node __P ((line_t *));
 void unset_active_nodes __P ((line_t *, line_t *));
 long write_file __P ((char *, char *, long, long));
 long write_stream __P ((FILE *, long, long));
+int yank_lines __P ((long, long));
 
 /* global buffers */
 extern char stdinbuf[];
