@@ -37,7 +37,7 @@ typedef struct line		/* Line node */
   struct line * q_forw;
   struct line * q_back;
   long pos;			/* position of text in scratch buffer */
-  int len;			/* length of line */
+  int len;			/* length of line ('\n' is not stored) */
   }
 line_t;
 

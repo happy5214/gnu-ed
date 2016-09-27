@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.11, 30 March 2015).
+This manual is for GNU ed (version 1.12, 4 July 2015).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -92,7 +92,7 @@ command is applied to whole lines at a time.
 followed by a single character command and possibly additional
 parameters; i.e., commands have the structure:
 
-     [ADDRESS [,ADDRESS]]COMMAND[PARAMETERS]
+     [ADDRESS[,ADDRESS]]COMMAND[PARAMETERS]
 
    The ADDRESSes indicate the line or range of lines to be affected by
 the command. If fewer addresses are given than the command accepts,
@@ -129,9 +129,8 @@ up to the task, it can be quite efficient.
 of input. So when we speak of "entering" a command or some text in
 'ed', <RETURN> is implied at the end of each line. Prior to typing
 <RETURN>, corrections to the line may be made by typing either
-<BACKSPACE> (sometimes labeled <DELETE> or <DEL>) to erase characters
-backwards, or <CONTROL>-u (i.e., hold the CONTROL key and type u) to
-erase the whole line.
+<BACKSPACE> to erase characters backwards, or <CONTROL>-u (i.e., hold
+the CONTROL key and type u) to erase the whole line.
 
    When 'ed' first opens, it expects to be told what to do but doesn't
 prompt us like the shell. So let's begin by telling 'ed' to do so with
@@ -186,10 +185,9 @@ shorthand for "the whole buffer":
      *
 
    Now let's write the buffer contents to a file named 'junk' with the
-<w> ("write") command. Again, we use the <,> prefix to indicate that
-it's the whole buffer we want:
+<w> ("write") command:
 
-     *,w junk
+     *w junk
      137
      *
 
@@ -200,7 +198,9 @@ exit 'ed'.
    The sample sessions below illustrate some basic concepts of line
 editing with 'ed'. We begin by creating a file, 'sonnet', with some
 help from Shakespeare. As with the shell, all input to 'ed' must be
-followed by a <newline> character. Comments begin with a '#'.
+followed by a <newline> character. Commands beginning with '#' are
+taken as comments and ignored. Input mode lines that begin with '#' are
+just more input.
 
      $ ed
      # The 'a' command is for appending text to the editor buffer.
@@ -349,7 +349,7 @@ prefixed with a bang.
 
 '-r'
 '--restricted'
-     Run in restricted mode. This mode disables edition of files out of
+     Run in restricted mode. This mode disables editing of files out of
      the current directory and execution of shell commands.
 
 '-s'
@@ -658,7 +658,7 @@ specified (in parenthesis).
      Sets the default filename to FILE. If FILE is not specified, then
      the default unescaped filename is printed.
 
-'(1,$)g /RE/COMMAND-LIST'
+'(1,$)g/RE/COMMAND-LIST'
      Global command. Applies COMMAND-LIST to each of the addressed
      lines matching a regular expression RE. The current address is set
      to the line currently matched before COMMAND-LIST is executed. At
@@ -673,7 +673,7 @@ specified (in parenthesis).
      command. If 'ed' is invoked with the command-line option '-G',
      then a newline in COMMAND-LIST is equivalent to a '.+1p' command.
 
-'(1,$)G /RE/'
+'(1,$)G/RE/'
      Interactive global command. Interactively edits the addressed lines
      matching a regular expression RE. For each matching line, the line
      is printed, the current address is set, and the user is prompted to
@@ -685,13 +685,13 @@ specified (in parenthesis).
      A newline alone acts as a null command list. A single '&' repeats
      the last non-null command list.
 
+'h'
+     Prints an explanation of the last error.
+
 'H'
      Toggles the printing of error explanations. By default,
      explanations are not printed. It is recommended that ed scripts
      begin with this command to aid in debugging.
-
-'h'
-     Prints an explanation of the last error.
 
 '(.)i'
      Inserts text in the buffer before the current line. The address '0'
@@ -754,9 +754,9 @@ specified (in parenthesis).
      '!command', (see the '!' command below). The default filename is
      unchanged. The current address is set to the last line read.
 
-'(.,.)s /RE/REPLACEMENT/'
-'(.,.)s /RE/REPLACEMENT/g'
-'(.,.)s /RE/REPLACEMENT/N'
+'(.,.)s/RE/REPLACEMENT/'
+'(.,.)s/RE/REPLACEMENT/g'
+'(.,.)s/RE/REPLACEMENT/N'
      Replaces text in the addressed lines matching a regular expression
      RE with REPLACEMENT. By default, only the first match in each line
      is replaced. If the 'g' (global) suffix is given, then every match
@@ -799,12 +799,12 @@ specified (in parenthesis).
      'V' are treated as a single command by undo. 'u' is its own
      inverse.
 
-'(1,$)v /RE/COMMAND-LIST'
+'(1,$)v/RE/COMMAND-LIST'
      This is similar to the 'g' command except that it applies
      COMMAND-LIST to each of the addressed lines not matching the
      regular expression RE.
 
-'(1,$)V /RE/'
+'(1,$)V/RE/'
      This is similar to the 'G' command except that it interactively
      edits the addressed lines not matching the regular expression RE.
 
@@ -838,7 +838,7 @@ specified (in parenthesis).
      buffer is overwritten by subsequent 'y', 's', 'j', 'd', or 'c'
      commands. The current address is unchanged.
 
-'(.+1)z N'
+'(.+1)zN'
      Scrolls N lines at a time starting at addressed line, and sets
      window size to N. If N is not specified, then the current window
      size is used. Window size defaults to screen size minus two lines,
@@ -864,7 +864,7 @@ specified (in parenthesis).
 
 '(.+1)<newline>'
      An address alone prints the addressed line. A <newline> alone is
-     equivalent to '+1p'. the current address is set to the address of
+     equivalent to '+1p'. The current address is set to the address of
      the printed line.
 
 
@@ -874,7 +874,7 @@ File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: Commands,  Up: Top
 7 Limitations
 *************
 
-If the terminal hangs up, 'ed' attempts to write the buffer to file
+If the terminal hangs up, 'ed' attempts to write the buffer to the file
 'ed.hup' or, if this fails, to '$HOME/ed.hup'.
 
    'ed' processes FILE arguments for backslash escapes, i.e., in a
@@ -1412,16 +1412,16 @@ permit their use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview2193
-Node: Introduction to line editing4250
-Node: Invoking ed11491
-Node: Line addressing13292
-Node: Regular expressions16369
-Node: Commands21713
-Node: Limitations32993
-Node: Diagnostics33634
-Node: Problems34335
-Node: GNU Free Documentation License34868
+Node: Overview2191
+Node: Introduction to line editing4247
+Node: Invoking ed11466
+Node: Line addressing13267
+Node: Regular expressions16344
+Node: Commands21688
+Node: Limitations32960
+Node: Diagnostics33605
+Node: Problems34306
+Node: GNU Free Documentation License34839
 
 End Tag Table
 

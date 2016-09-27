@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 30 March 2015
-@set VERSION 1.11
+@set UPDATED 4 July 2015
+@set VERSION 1.12
 
 @dircategory Basics
 @direntry
@@ -115,7 +115,7 @@ addresses, followed by a single character command and possibly
 additional parameters; i.e., commands have the structure:
 
 @example
-[@var{address} [,@var{address}]]@var{command}[@var{parameters}]
+[@var{address}[,@var{address}]]@var{command}[@var{parameters}]
 @end example
 
 The @var{address}es indicate the line or range of lines to be affected
@@ -159,9 +159,8 @@ As with the shell, @key{RETURN} (the carriage-return key) enters a line
 of input. So when we speak of "entering" a command or some text in
 @command{ed}, @key{RETURN} is implied at the end of each line. Prior to
 typing @key{RETURN}, corrections to the line may be made by typing
-either @key{BACKSPACE} (sometimes labeled @key{DELETE} or @key{DEL}) to
-erase characters backwards, or @key{CONTROL}-u (i.e., hold the CONTROL
-key and type u) to erase the whole line.
+either @key{BACKSPACE} to erase characters backwards, or @key{CONTROL}-u
+(i.e., hold the CONTROL key and type u) to erase the whole line.
 
 When @command{ed} first opens, it expects to be told what to do but
 doesn't prompt us like the shell. So let's begin by telling @command{ed}
@@ -225,11 +224,10 @@ Mo Tu We Th Fr Sa Su
 @end example
 
 Now let's write the buffer contents to a file named @code{junk} with the
-@key{w} (@dfn{write}) command. Again, we use the @key{,} prefix to
-indicate that it's the whole buffer we want:
+@key{w} (@dfn{write}) command:
 
 @example
-*,w junk
+*w junk
 137
 *
 @end example
@@ -241,7 +239,9 @@ since unwritten changes to the buffer will be lost when we exit
 The sample sessions below illustrate some basic concepts of line editing
 with @command{ed}. We begin by creating a file, @samp{sonnet}, with some
 help from Shakespeare. As with the shell, all input to @command{ed} must
-be followed by a @key{newline} character. Comments begin with a @samp{#}.
+be followed by a @key{newline} character. Commands beginning with
+@samp{#} are taken as comments and ignored. Input mode lines that begin
+with @samp{#} are just more input.
 
 @example
 $ ed
@@ -403,7 +403,7 @@ Specifies a command prompt. This may be toggled on and off with the
 
 @item -r
 @itemx --restricted
-Run in restricted mode. This mode disables edition of files out of the
+Run in restricted mode. This mode disables editing of files out of the
 current directory and execution of shell commands.
 
 @item -s
@@ -736,7 +736,7 @@ The current address is set to the last line read.
 Sets the default filename to @var{file}. If @var{file} is not specified,
 then the default unescaped filename is printed.
 
-@item (1,$)g /@var{re}/@var{command-list}
+@item (1,$)g/@var{re}/@var{command-list}
 Global command. Applies @var{command-list} to each of the addressed
 lines matching a regular expression @var{re}. The current address is set
 to the line currently matched before @var{command-list} is executed. At
@@ -752,7 +752,7 @@ backslash (@samp{\}). Any commands are allowed, except for @samp{g},
 is invoked with the command-line option @samp{-G}, then a newline in
 @var{command-list} is equivalent to a @samp{.+1p} command.
 
-@item (1,$)G /@var{re}/
+@item (1,$)G/@var{re}/
 Interactive global command. Interactively edits the addressed lines
 matching a regular expression @var{re}. For each matching line, the line
 is printed, the current address is set, and the user is prompted to
@@ -764,13 +764,13 @@ The format of @var{command-list} is the same as that of the @samp{g}
 command. A newline alone acts as a null command list. A single @samp{&}
 repeats the last non-null command list.
 
+@item h
+Prints an explanation of the last error.
+
 @item H
 Toggles the printing of error explanations. By default, explanations are
 not printed. It is recommended that ed scripts begin with this command
 to aid in debugging.
-
-@item h
-Prints an explanation of the last error.
 
 @item (.)i
 Inserts text in the buffer before the current line. The address @samp{0}
@@ -833,9 +833,9 @@ Reads to after the addressed line the standard output of
 @samp{!command}, (see the @samp{!} command below). The default filename
 is unchanged. The current address is set to the last line read.
 
-@item (.,.)s /@var{re}/@var{replacement}/
-@itemx (.,.)s /@var{re}/@var{replacement}/g
-@itemx (.,.)s /@var{re}/@var{replacement}/@var{n}
+@item (.,.)s/@var{re}/@var{replacement}/
+@itemx (.,.)s/@var{re}/@var{replacement}/g
+@itemx (.,.)s/@var{re}/@var{replacement}/@var{n}
 Replaces text in the addressed lines matching a regular expression
 @var{re} with @var{replacement}. By default, only the first match in
 each line is replaced. If the @samp{g} (global) suffix is given, then
@@ -879,12 +879,12 @@ before the command. The global commands @samp{g}, @samp{G}, @samp{v},
 and @samp{V} are treated as a single command by undo. @samp{u} is its
 own inverse.
 
-@item (1,$)v /@var{re}/@var{command-list}
+@item (1,$)v/@var{re}/@var{command-list}
 This is similar to the @samp{g} command except that it applies
 @var{command-list} to each of the addressed lines not matching the
 regular expression @var{re}.
 
-@item (1,$)V /@var{re}/
+@item (1,$)V/@var{re}/
 This is similar to the @samp{G} command except that it interactively
 edits the addressed lines not matching the regular expression @var{re}.
 
@@ -918,7 +918,7 @@ Copies (yanks) the addressed lines to the cut buffer. The cut buffer is
 overwritten by subsequent @samp{y}, @samp{s}, @samp{j}, @samp{d}, or
 @samp{c} commands. The current address is unchanged.
 
-@item (.+1)z @var{n}
+@item (.+1)z@var{n}
 Scrolls @var{n} lines at a time starting at addressed line, and sets
 window size to @var{n}. If @var{n} is not specified, then the current
 window size is used. Window size defaults to screen size minus two
@@ -945,7 +945,7 @@ Prints the line number of the addressed line.
 
 @item (.+1)@key{newline}
 An address alone prints the addressed line. A @key{newline} alone is
-equivalent to @samp{+1p}. the current address is set to the address of
+equivalent to @samp{+1p}. The current address is set to the address of
 the printed line.
 
 @end table
@@ -955,7 +955,7 @@ the printed line.
 @chapter Limitations
 
 If the terminal hangs up, @command{ed} attempts to write the buffer to
-file @file{ed.hup} or, if this fails, to @file{$HOME/ed.hup}.
+the file @file{ed.hup} or, if this fails, to @file{$HOME/ed.hup}.
 
 @command{ed} processes @var{file} arguments for backslash escapes, i.e.,
 in a filename, any character preceded by a backslash (@samp{\}) is

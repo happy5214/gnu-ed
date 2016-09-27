@@ -319,8 +319,8 @@ bool join_lines( const int from, const int to, const bool isglobal )
     bp = bp->q_forw;
     }
   if( !resize_buffer( &buf, &bufsz, size + 2 ) ) return false;
-  memcpy( buf + size, "\n", 2 );
-  size += 2;
+  buf[size++] = '\n';
+  buf[size++] = 0;
   if( !delete_lines( from, to, isglobal ) ) return false;
   current_addr_ = from - 1;
   disable_interrupts();

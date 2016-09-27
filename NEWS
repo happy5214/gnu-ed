@@ -1,11 +1,6 @@
-Changes in version 1.11:
+Changes in version 1.12:
 
-The "z" command has been fixed. ("zN" printed N + 1 lines). This bug was
-present since at least ed-0.2.
-
-The window size used by the "z" command has been documented in the
+Extra spaces have been removed from the synopses of some commands in the
 manual.
 
-The targets "install-compress", "install-strip-compress",
-"install-info-compress" and "install-man-compress" have been added to
-the Makefile.
+Minor documentation fixes.

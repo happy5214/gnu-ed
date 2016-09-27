@@ -19,17 +19,17 @@ objs = buffer.o carg_parser.o global.o io.o main.o main_loop.o regex.o signal.o
 all : $(progname) r$(progname)
 
 $(progname) : $(objs)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(objs)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(objs)
 
 r$(progname) : r$(progname).in
 	cat $(VPATH)/r$(progname).in > $@
 	chmod a+x $@
 
 main.o : main.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -DPROGVERSION=\"$(pkgversion)\" -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -DPROGVERSION=\"$(pkgversion)\" -c -o $@ $<
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 $(objs)       : Makefile ed.h
 carg_parser.o : carg_parser.h

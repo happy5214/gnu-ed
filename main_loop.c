@@ -614,7 +614,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( !fnp ) return ERR;
               if( system( fnp + 1 ) < 0 )
                 { set_error_msg( "Can't create shell process" ); return ERR; }
-              if( !scripted() ) printf( "!\n" );
+              if( !scripted() ) fputs( "!\n", stdout );
               break;
     case '\n': first_addr = 1;
               if( !check_addr_range( first_addr, current_addr() +
@@ -706,7 +706,7 @@ int main_loop( const bool loose )
     fflush( stdout );
     if( status < 0 && verbose )
       { fprintf( stderr, "%s\n", errmsg ); fflush( stderr ); }
-    if( prompt_on ) { printf( "%s", prompt_str ); fflush( stdout ); }
+    if( prompt_on ) { fputs( prompt_str, stdout ); fflush( stdout ); }
     ibufp = get_tty_line( &len );
     if( !ibufp ) return err_status;
     if( !len )

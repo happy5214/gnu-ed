@@ -97,8 +97,7 @@ void show_strerror( const char * const filename, const int errcode )
   {
   if( !scripted_ )
     {
-    if( filename && filename[0] != 0 )
-      fprintf( stderr, "%s: ", filename );
+    if( filename && filename[0] ) fprintf( stderr, "%s: ", filename );
     fprintf( stderr, "%s\n", strerror( errcode ) );
     }
   }
@@ -110,7 +109,7 @@ static void show_error( const char * const msg, const int errcode, const bool he
     {
     fprintf( stderr, "%s: %s", program_name, msg );
     if( errcode > 0 ) fprintf( stderr, ": %s", strerror( errcode ) );
-    fprintf( stderr, "\n" );
+    fputc( '\n', stderr );
     }
   if( help )
     fprintf( stderr, "Try '%s --help' for more information.\n",
