@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2015 Antonio Diaz Diaz.
+    Copyright (C) 2006-2016 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -261,8 +261,8 @@ int read_file( const char * const filename, const int addr )
     return -1;
     }
   size = read_stream( fp, addr );
-  if( size < 0 ) return -1;
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  if( size < 0 ) return -1;
   if( ret != 0 )
     {
     show_strerror( filename, errno );
@@ -319,8 +319,8 @@ int write_file( const char * const filename, const char * const mode,
     return -1;
     }
   size = write_stream( fp, from, to );
-  if( size < 0 ) return -1;
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  if( size < 0 ) return -1;
   if( ret != 0 )
     {
     show_strerror( filename, errno );

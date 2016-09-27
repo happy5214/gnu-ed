@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2015 Antonio Diaz Diaz.
+    Copyright (C) 2006-2016 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -439,11 +439,10 @@ bool put_lines( const int addr )
 const char * put_sbuf_line( const char * const buf, const int size,
                             const int addr )
   {
-  line_t * const lp = dup_line_node( 0 );
   const char * const p = (const char *) memchr( buf, '\n', size );
+  line_t * lp;
   int len;
 
-  if( !lp ) return 0;
   if( !p ) { set_error_msg( "Line too long" ); return 0; }
   len = p - buf;
   /* out of position */
@@ -465,6 +464,8 @@ const char * put_sbuf_line( const char * const buf, const int size,
     set_error_msg( "Cannot write temp file" );
     return 0;
     }
+  lp = dup_line_node( 0 );
+  if( !lp ) return 0;
   lp->pos = sfpos; lp->len = len;
   add_line_node( lp, addr );
   ++current_addr_;

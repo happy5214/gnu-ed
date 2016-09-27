@@ -1,6 +1,4 @@
-Changes in version 1.12:
+Changes in version 1.13:
 
-Extra spaces have been removed from the synopses of some commands in the
-manual.
-
-Minor documentation fixes.
+A memory leak and a resource leak (file not closed on error) have been
+fixed. (Both issues were reported by Cédric Picard).

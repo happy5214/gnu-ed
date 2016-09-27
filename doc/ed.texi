@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 4 July 2015
-@set VERSION 1.12
+@set UPDATED 24 January 2016
+@set VERSION 1.13
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2015
+Copyright @copyright{} 1993, 1994, 2006-2016
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -392,7 +392,7 @@ not seem familiar, then try invoking @command{ed} with this switch.
 
 @item -l
 @itemx --loose-exit-status
-Do not exit with bad status if a command happens to "fail" (for example
+Don't exit with bad status if a command happens to "fail" (for example
 if a substitution command finds nothing to replace). This can be useful
 when @command{ed} is invoked as the editor for crontab.
 

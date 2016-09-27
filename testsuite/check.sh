@@ -1,6 +1,6 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2015 Antonio Diaz Diaz.
+# Copyright (C) 2006-2016 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute and modify it.
