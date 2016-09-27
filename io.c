@@ -1,12 +1,11 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Free Software Foundation, Inc.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -128,7 +127,7 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
 
 
 /* Read a line of text from stdin.
-   Return pointer to buffer and line size (including trailing newline
+   Returns pointer to buffer and line size (including trailing newline
    if it exists) */
 const char * get_tty_line( int * const sizep )
   {
@@ -145,7 +144,8 @@ const char * get_tty_line( int * const sizep )
       {
       if( ferror( stdin ) )
         {
-        show_strerror( "stdin", errno ); set_error_msg( "Cannot read stdin" );
+        show_strerror( "stdin", errno );
+        set_error_msg( "Cannot read stdin" );
         clearerr( stdin ); if( sizep ) *sizep = 0;
         return 0;
         }
@@ -167,7 +167,7 @@ const char * get_tty_line( int * const sizep )
 
 
 /* Read a line of text from a stream.
-   Return pointer to buffer and line size (including trailing newline
+   Returns pointer to buffer and line size (including trailing newline
    if it exists and is not added now) */
 static const char * read_stream_line( FILE * const fp, int * const sizep,
                                       bool * const newline_added_nowp )

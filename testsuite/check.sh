@@ -1,7 +1,6 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-# Free Software Foundation, Inc.
+# Copyright (C) 2006-2015 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute and modify it.
@@ -12,7 +11,7 @@ objdir=`pwd`
 testdir=`cd "$1" ; pwd`
 ED="${objdir}"/ed
 
-if [ ! -x "${ED}" ] ; then
+if [ ! -f "${ED}" ] || [ ! -x "${ED}" ] ; then
 	echo "${ED}: cannot execute"
 	exit 1
 fi

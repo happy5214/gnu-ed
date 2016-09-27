@@ -1,11 +1,10 @@
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Free Software Foundation, Inc.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -92,7 +91,7 @@ static int get_marked_node_addr( int c )
   }
 
 
-/* Return pointer to copy of shell command in the command buffer */
+/* Returns pointer to copy of shell command in the command buffer */
 static const char * get_shell_command( const char ** const ibufpp )
   {
   static char * buf = 0;
@@ -159,7 +158,7 @@ static const char * skip_blanks( const char * p )
   }
 
 
-/* Return pointer to copy of filename in the command buffer */
+/* Returns pointer to copy of filename in the command buffer */
 static const char * get_filename( const char ** const ibufpp )
   {
   static char * buf = 0;
@@ -259,7 +258,7 @@ static int next_addr( const char ** const ibufpp, int * const addr_cnt )
 
 
 /* get line addresses from the command buffer until an invalid address
-   is seen. Return number of addresses read */
+   is seen. Returns the number of addresses read */
 static int extract_addr_range( const char ** const ibufpp )
   {
   int addr;
@@ -601,8 +600,9 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                 { if( parse_int( &n, *ibufpp, ibufpp ) ) set_window_lines( n );
                   else return ERR; }
               if( !get_command_suffix( ibufpp, &gflags ) ||
-                  !display_lines( second_addr, min( last_addr(), second_addr + window_lines() ),
-                                  gflags ) )
+                  !display_lines( second_addr,
+                    min( last_addr(), second_addr + window_lines() - 1 ),
+                    gflags ) )
                 return ERR;
               gflags = 0;
               break;

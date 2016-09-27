@@ -1,12 +1,11 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Free Software Foundation, Inc.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -34,7 +33,7 @@
 
 jmp_buf jmp_state;
 static int mutex = 0;			/* If > 0, signals stay pending */
-static int window_lines_ = 22;		/* scroll length: ws_row - 2 */
+static int window_lines_ = 22;		/* scroll lines set by sigwinch_handler */
 static int window_columns_ = 72;
 static bool sighup_pending = false;
 static bool sigint_pending = false;
@@ -101,7 +100,7 @@ static void sigwinch_handler( int signum )
   }
 
 
-static int set_signal( int signum, void (*handler)( int ) )
+static int set_signal( const int signum, void (*handler)( int ) )
   {
   struct sigaction new_action;
 

@@ -1,10 +1,9 @@
 /*  Arg_parser - POSIX/GNU command line argument parser. (C version)
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Antonio Diaz Diaz.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This library is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
@@ -176,7 +175,8 @@ static char parse_short_option( struct Arg_parser * const ap,
 
     if( index < 0 )
       {
-      add_error( ap, "invalid option -- " ); add_error( ap, code_str );
+      add_error( ap, "invalid option -- '" ); add_error( ap, code_str );
+      add_error( ap, "'" );
       return 1;
       }
 
@@ -191,8 +191,8 @@ static char parse_short_option( struct Arg_parser * const ap,
       {
       if( !arg || !arg[0] )
         {
-        add_error( ap, "option requires an argument -- " );
-        add_error( ap, code_str );
+        add_error( ap, "option requires an argument -- '" );
+        add_error( ap, code_str ); add_error( ap, "'" );
         return 1;
         }
       ++*argindp; cind = 0;

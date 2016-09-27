@@ -1,10 +1,9 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Free Software Foundation, Inc.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -45,7 +44,7 @@
 
 static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2014";
+static const char * const program_year = "2015";
 static const char * invocation_name = 0;
 
 static bool restricted_ = false;	/* if set, run in restricted mode */
@@ -85,9 +84,9 @@ static void show_help( void )
 
 static void show_version( void )
   {
-  printf( "%s %s\n", Program_name, PROGVERSION );
+  printf( "GNU %s %s\n", program_name, PROGVERSION );
   printf( "Copyright (C) 1994 Andrew L. Moore.\n"
-          "Copyright (C) %s Free Software Foundation, Inc.\n", program_year );
+          "Copyright (C) %s Antonio Diaz Diaz.\n", program_year );
   printf( "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
           "This is free software: you are free to change and redistribute it.\n"
           "There is NO WARRANTY, to the extent permitted by law.\n" );

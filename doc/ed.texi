@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 22 January 2014
-@set VERSION 1.10
+@set UPDATED 30 March 2015
+@set VERSION 1.11
 
 @dircategory Basics
 @direntry
@@ -15,8 +15,8 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006, 2007, 2008, 2009, 2010, 2011,
-2012, 2013, 2014 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2015
+Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -199,11 +199,11 @@ with @command{ed}'s @key{r} command (mnemonic: @dfn{read}):
 
 @example
 *r !cal -m
-143
+137
 *
 @end example
 
-Here @command{ed} is telling us that it has just read 143 characters
+Here @command{ed} is telling us that it has just read 137 characters
 into the editor buffer - i.e., the output of the @command{cal} command,
 which prints a simple ASCII calendar. To display the buffer contents we
 issue the @key{p} (@dfn{print}) command (not to be confused with the
@@ -213,13 +213,13 @@ the buffer that should be printed, we prefix the command with @key{,}
 
 @example
 *,p
-   September 2006
+      June 2006
 Mo Tu We Th Fr Sa Su
-             1  2  3
- 4  5  6  7  8  9 10
-11 12 13 14 15 16 17
-18 19 20 21 22 23 24
-25 26 27 28 29 30
+          1  2  3  4
+ 5  6  7  8  9 10 11
+12 13 14 15 16 17 18
+19 20 21 22 23 24 25
+26 27 28 29 30
 
 *
 @end example
@@ -230,7 +230,7 @@ indicate that it's the whole buffer we want:
 
 @example
 *,w junk
-143
+137
 *
 @end example
 
@@ -919,9 +919,11 @@ overwritten by subsequent @samp{y}, @samp{s}, @samp{j}, @samp{d}, or
 @samp{c} commands. The current address is unchanged.
 
 @item (.+1)z @var{n}
-Scrolls @var{n} lines at a time starting at addressed line. If @var{n}
-is not specified, then the current window size is used. The current
-address is set to the last line printed.
+Scrolls @var{n} lines at a time starting at addressed line, and sets
+window size to @var{n}. If @var{n} is not specified, then the current
+window size is used. Window size defaults to screen size minus two
+lines, or to 22 if screen size can't be determined. The current address
+is set to the last line printed.
 
 @item !@var{command}
 Executes @var{command} via @command{sh (1)}. If the first character of
@@ -994,7 +996,7 @@ for all eternity, if not longer.
 
 If you find a bug in @command{ed}, please send electronic mail to
 @email{bug-ed@@gnu.org}. Include the version number, which you can
-find by running @w{@samp{ed --version}}.
+find by running @w{@code{ed --version}}.
 
 
 @node GNU Free Documentation License

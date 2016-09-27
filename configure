@@ -1,13 +1,12 @@
 #! /bin/sh
 # configure script for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-# Antonio Diaz Diaz.
+# Copyright (C) 2006-2015 Antonio Diaz Diaz.
 #
 # This configure script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 
 pkgname=ed
-pkgversion=1.10
+pkgversion=1.11
 progname=ed
 srctrigger=doc/${pkgname}.texi
 
@@ -67,7 +66,7 @@ while [ $# != 0 ] ; do
 		echo "  --infodir=DIR         info files directory [${infodir}]"
 		echo "  --mandir=DIR          man pages directory [${mandir}]"
 		echo "  --program-prefix=NAME install program and documentation prefixed with NAME"
-		echo "  CC=COMPILER           C compiler to use [gcc]"
+		echo "  CC=COMPILER           C compiler to use [${CC}]"
 		echo "  CPPFLAGS=OPTIONS      command line options for the preprocessor [${CPPFLAGS}]"
 		echo "  CFLAGS=OPTIONS        command line options for the C compiler [${CFLAGS}]"
 		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
@@ -171,8 +170,7 @@ echo "LDFLAGS = ${LDFLAGS}"
 rm -f Makefile
 cat > Makefile << EOF
 # Makefile for GNU ed - The GNU line editor
-# Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-# Antonio Diaz Diaz.
+# Copyright (C) 2006-2015 Antonio Diaz Diaz.
 # This file was generated automatically by configure. Do not edit.
 #
 # This Makefile is free software: you have unlimited permission

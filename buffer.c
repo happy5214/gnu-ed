@@ -1,12 +1,11 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014
-    Free Software Foundation, Inc.
+    Copyright (C) 2006-2015 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 2 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -107,7 +106,7 @@ static line_t * dup_line_node( line_t * const lp )
 
 /* Insert text from stdin (or from command buffer if global) to after
    line n; stop when either a single period is read or EOF.
-   Return false if insertion fails. */
+   Returns false if insertion fails. */
 bool append_lines( const char ** const ibufpp, const int addr,
                    const bool isglobal )
   {
@@ -492,7 +491,7 @@ line_t * search_line_node( const int addr )
       }
     }
   else if( o_addr <= 2 * addr )
-         while( o_addr > addr ) { --o_addr; lp = lp->q_back; }
+    while( o_addr > addr ) { --o_addr; lp = lp->q_back; }
   else
     { lp = &buffer_head; o_addr = 0;
       while( o_addr < addr ) { ++o_addr; lp = lp->q_forw; } }
