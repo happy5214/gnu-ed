@@ -1,1 +1,3 @@
-.f f1.err
+H
+.f test.bin
+w out.ro

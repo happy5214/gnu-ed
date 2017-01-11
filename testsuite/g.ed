@@ -1,0 +1,32 @@
+H
+g/./m0
+g//a\
+hello world
+# lines beginning with a `#' should be ignored
+g/hello /# including in global commands \
+s/lo/p!/\
+a\
+order\
+.\
+# and in the command list \
+i\
+caos\
+.\
+-1s/l/L
+u
+u
+17,33g/[A-I]/-1d\
++1c\
+hello world\
+.\
+47
+;d
+# don't change current address if no match
+g/xxx/1d
+;j
+g/heLp! world//caos/d\
+-;/order/;d
+# to be undone
+g/./s//x/g
+u
+w out.o

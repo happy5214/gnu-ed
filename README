@@ -53,7 +53,7 @@ EXTENSIONS
 
   * BSD commands have been implemented wherever they do not conflict with
     the POSIX standard.  The BSD-ism's included are:
-      * 's' (i.e., s[n][rgp]*) to repeat a previous substitution,
+      * 's' (i.e., s[1-9rgp]*) to repeat a previous substitution,
       * 'W' for appending text to an existing file,
       * 'wq' for exiting after a write, and
       * 'z' for scrolling through the buffer.
@@ -65,11 +65,11 @@ EXTENSIONS
     backslash (\).
 
   * The file commands 'E', 'e', 'r', 'W' and 'w'  process a <file>
-    argument for backslash escapes; i.e.,  any character preceded by a
-    backslash is interpreted literally.  If the first unescaped character
-    of a <file> argument is a bang (!), then the rest of the line is
-    interpreted as a shell command, and no escape processing is performed
-    by GNU ed.
+    argument for backslash escapes; i.e., any character preceded by a
+    backslash is interpreted literally. If the first character of a
+    <file> argument is a bang (!), then the rest of the line is
+    interpreted as a shell command, and no escape processing is
+    performed by GNU ed.
 
   * For SunOS ed(1) compatibility, GNU ed runs in restricted mode if invoked
     as red.  This limits editing of files in the local directory only and
@@ -77,14 +77,10 @@ EXTENSIONS
 
 DEVIATIONS
 ----------
-  * For backwards compatibility, the POSIX rule that says a range of
-    addresses cannot be used where only a single address is expected has
-    been relaxed.
-
-  * To support the BSD 's' command (see EXTENSIONS above),
-    substitution patterns cannot be delimited by numbers or the characters
-    'r', 'g' and 'p'.  In contrast, POSIX specifies any character expect
-    space or newline can used as a delimiter.
+  * To support the BSD 's' command (see EXTENSIONS above), substitution
+    patterns cannot be delimited by the digits '1' to '9' or by the
+    characters 'r', 'g' and 'p'. In contrast, POSIX specifies that any
+    character except space and newline can be used as a delimiter.
 
   * Since the behavior of 'u' (undo) within a 'g' (global) command list is
     not specified by POSIX, GNU ed follows the behavior of the SunOS ed:
@@ -99,11 +95,6 @@ DEVIATIONS
     ed implementation: any moved lines are removed from the global command's
     'active' list.
 
-  * If GNU ed is invoked with a name argument prefixed by a bang (!), then
-    the remainder of the argument is interpreted as a shell command.  To invoke
-    ed on a file whose name starts with bang, prefix the name with a
-    (quoted) backslash.
-
   * For backwards compatibility, errors in piped scripts do not force ed
     to exit.  POSIX only specifies ed's response for input via regular
     files (including here documents) or tty's.
@@ -111,23 +102,23 @@ DEVIATIONS
 
 TESTSUITE
 ---------
-The files in the 'testsuite' directory with suffixes '.t', '.d', '.r',
-'.pr' and '.err' are used for testing ed. To run the tests, configure
-the package and type 'make check' from the build directory. The tests do
-not exhaustively verify POSIX compliance nor do they verify correct
-8-bit or long line support.
+The files in the 'testsuite' directory with extensions '.ed', '.r', and
+'.err' are used for testing ed. To run the tests, configure the package
+and type 'make check' from the build directory. The tests do not
+exhaustively verify POSIX compliance nor do they verify correct 8-bit or
+long line support.
 
-The test file suffixes have the following meanings:
-.t    Template - a list of ed commands from which an ed script is
-      constructed
-.d    Data - read by an ed script
+The test file extensions have the following meanings:
+.ed   Ed script - a list of ed commands.
 .r    Result - the expected output after processing data via an ed
       script.
-.pr   Result from a piped ed script.
-.err  Error - invalid ed commands that should generate an error
+.err  Error - invalid ed commands that should generate an error.
 
-The output of the tests is written to files with .o and .ro suffixes and
-compared with their corresponding .r and .pr result files.
+The output of the .ed scripts is written to files with .o extension and
+compared with their corresponding .r result files. The .err scripts
+should exit with non-zero status without altering the contents of the
+buffer.
+
 If any test fails, the error messages look like:
 
 	*** The script u.ed exited abnormally ***
@@ -136,7 +127,7 @@ or:
 
 
 Copyright (C) 1993, 1994 Andrew Moore
-Copyright (C) 2006-2016 Antonio Diaz Diaz.
+Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute and modify it.

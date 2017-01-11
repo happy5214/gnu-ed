@@ -1,0 +1,7 @@
+H
+# newlines in replacement are ambiguous; last delimiter can't be omitted
+g/./s/y/y\
+f text.bin
+# the previous s command should not set replacement
+s/./%/
+w out.ro

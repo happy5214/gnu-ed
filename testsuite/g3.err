@@ -1,1 +1,3 @@
-g
+H
+g/./s //x/
+w out.ro

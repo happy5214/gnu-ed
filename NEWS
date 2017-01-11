@@ -1,4 +1,68 @@
-Changes in version 1.13:
+Changes in version 1.14:
 
-A memory leak and a resource leak (file not closed on error) have been
-fixed. (Both issues were reported by Cédric Picard).
+Version 1.14 is the largest bug hunt ever attempted in GNU ed. Other
+goals of version 1.14 are to complete the documentation and to remove
+any gratuitous incompatibilities with the POSIX standard. Thanks to Ori
+Avtalion for initiating all this with a couple bug reports. ;-)
+
+Byte counts, informative messages, command error messages, and the '?'
+and '!' prompts are now written to stdout instead of to stderr. The
+standard error (stderr) is now used only for diagnostic messages.
+
+The current address is now correctly set to the addressed line after an
+empty insert command.
+
+Fixed inconsistent behavior of the substitute command. It incorrectly
+reported 'Invalid pattern delimiter' when the two last delimiters were
+omitted after a null regular expression. Now it consistently reports
+'Missing pattern delimiter' if the two last delimiters are omitted after
+any regular expression (null or not).
+
+'s/a/%' has been fixed. It incorrectly replaced 'a' with '%' instead of
+using the replacement from the last substitution.
+
+An infinite loop, happening when EOF was found in the middle of a
+replacement string, has been fixed.
+
+Ed no longer accepts newlines in the replacement of a 's' command if it
+is part of the command list of a global command, because in this case
+the meaning of the newline becomes ambiguous. For the same reason, the
+last delimiter can't be omitted if the 's' command is not the last
+command in the command list.
+
+The substitute command now correctly sets the current address to the
+address of the last line on which a substitution occurred, and leaves it
+unchanged if no substitution is performed.
+
+A bug in the calculation of address offsets has been fixed. '3 ---- 2'
+was calculated as address -2 instead of the correct address 1.
+
+Address ranges with the first address omitted are now accepted.
+
+The current address is now correctly set to the addressed line (or to
+the new last line if at EOF) after an empty replacement text in the
+change command.
+
+Repeated print suffixes are now rejected. It has been documented that ed
+allows any combination of non-repeated print suffixes and combines their
+effects.
+
+The substitute command now accepts suffixes in any order.
+
+The 'repeat substitution' command now rejects multiple count suffixes.
+
+The 'p' suffix of the 'repeat substitution' command now toggles all the
+print suffixes of the last substitution.
+
+End of file on standard input now behaves as a 'q' command.
+
+The modified status is no longer cleared after writing the buffer to the
+standard input of a shell command. (Reported by Jérôme Frgacic).
+
+The descriptions of the 'a', 'c', 'e', 'g', 'i', 'j', 'k', 'm', 'q',
+'r', 's', 'u' and 'w' commands in the manual have been fixed.
+
+Most tests in the testsuite have been improved. Bug reporting has been
+simplified; only the failed logs and results are kept in the test
+directory, which can then be (tarred, compressed, and) attached to the
+bug report.

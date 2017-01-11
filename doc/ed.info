@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2017 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.13, 24 January 2016).
+This manual is for GNU ed (version 1.14.1, 10 January 2017).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -43,7 +43,7 @@ superseded by full-screen editors such as GNU Emacs or GNU Moe.
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2016 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2017 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -277,8 +277,8 @@ is 's/OLD/NEW/'.
      # Move the title to its proper place.
      5m0p
       Sonnet #50
-     # The title is now the first line, and the current line has been
-     # set to this line as well.
+     # The title is now the first line, and the current address has been
+     # set to the address of this line as well.
      ,p
       Sonnet #50
      No more be grieved at that which thou hast done.
@@ -289,9 +289,9 @@ is 's/OLD/NEW/'.
      195
      $
 
-   When 'ed' opens a file, the current line is initially set to the
-last line of that file. Similarly, the move command 'm' sets the
-current line to the last line moved.
+   When 'ed' opens a file, the current address is initially set to the
+address of the last line of that file. Similarly, the move command 'm'
+sets the current address to the address of the last line moved.
 
    Related programs or routines are 'vi (1)', 'sed (1)', 'regex (3)',
 'sh (1)'. Relevant documents are:
@@ -355,13 +355,17 @@ prefixed with a bang.
 '-s'
 '--quiet'
 '--silent'
-     Suppresses diagnostics. This should be used if 'ed''s standard
-     input is from a script.
+     Suppresses the printing of byte counts by 'e', 'E', 'r', and 'w'
+     commands and of the '!' prompt after a '!' command. This option
+     may be useful if 'ed''s standard input is from a script.
 
 '-v'
 '--verbose'
-     Verbose mode. This may be toggled on and off with the 'H' command.
+     Verbose mode; prints error explanations. This may be toggled on
+     and off with the 'H' command.
 
+
+   Exit status: 0 if no errors occurred; otherwise >0.
 
 
 File: ed.info,  Node: Line addressing,  Next: Regular expressions,  Prev: Invoking ed,  Up: Top
@@ -372,25 +376,30 @@ File: ed.info,  Node: Line addressing,  Next: Regular expressions,  Prev: Invoki
 An address represents the number of a line in the buffer. 'ed'
 maintains a "current address" which is typically supplied to commands
 as the default address when none is specified. When a file is first
-read, the current address is set to the last line of the file. In
-general, the current address is set to the last line affected by a
-command.
+read, the current address is set to the address of the last line of the
+file. In general, the current address is set to the address of the last
+line affected by a command.
 
    One exception to the rule that addresses represent line numbers is
 the address '0' (zero). This means "before the first line", and is
 valid wherever it makes sense.
 
    An address range is two addresses separated either by a comma (',')
-or a semicolon (';'). The value of the first address in a range cannot
-exceed the value of the second. If only one address is given in a
-range, then the second address is set to the given address. If an
-N-tuple of addresses is given where N > 2, then the corresponding range
-is determined by the last two addresses in the N-tuple. If only one
-address is expected, then the last address is used.
+or a semicolon (';'). In a semicolon-delimited range, the current
+address ('.') is set to the first address before the second address is
+calculated. This feature can be used to set the starting line for
+searches. The value of the first address in a range cannot exceed the
+value of the second.
 
-   In a semicolon-delimited range, the current address ('.') is set to
-the first address before the second address is calculated. This feature
-can be used to set the starting line for searches.
+   Addresses can be omitted on either side of the comma or semicolon
+separator. If only the first address is given in a range, then the
+second address is set to the given address. If only the second address
+is given, the resulting address pairs are '1,addr' and '.;addr'
+respectively. If a N-tuple of addresses is given where N > 2, then the
+corresponding range is determined by the last two addresses in the
+N-tuple. If only one address is expected, then the last address is
+used. It is an error to give any number of addresses to a command that
+requires zero addresses.
 
    A line address is constructed as follows:
 
@@ -423,17 +432,17 @@ can be used to set the starting line for searches.
 
 ';'
      The current through last lines in the buffer. This is equivalent
-     to the address range '.,$'.
+     to the address range '.;$'.
 
 '/RE/'
      The next line containing the regular expression RE. The search
      wraps to the beginning of the buffer and continues down to the
-     current line, if necessary. '//' repeats the last search.
+     current line, if necessary. A null RE '//' repeats the last search.
 
 '?RE?'
      The previous line containing the regular expression RE. The search
      wraps to the end of the buffer and continues up to the current
-     line, if necessary. '??' repeats the last search.
+     line, if necessary. A null RE '??' repeats the last search.
 
 ''x'
      The apostrophe-x character pair addresses the line previously
@@ -444,14 +453,20 @@ can be used to set the starting line for searches.
    Addresses can be followed by one or more address offsets, optionally
 separated by whitespace. Offsets are constructed as follows:
 
-   * A number adds the indicated number of lines to the address.
-
    * '+' or '-' followed by a number adds or subtracts the indicated
      number of lines to or from the address.
 
    * '+' or '-' not followed by a number adds or subtracts 1 to or from
      the address.
 
+   * A number adds the indicated number of lines to the address.
+
+
+   It is not an error if an intermediate address value is negative or
+greater than the address of the last line in the buffer. It is an error
+if the final address value is negative or greater than the address of
+the last line in the buffer. It is an error if a search for a RE fails
+to find a matching line.
 
 
 File: ed.info,  Node: Regular expressions,  Next: Commands,  Prev: Line addressing,  Up: Top
@@ -612,7 +627,9 @@ each line except for the last must be terminated with a backslash ('\').
    In general, at most one command is allowed per line. However, most
 commands accept a print suffix, which is any of 'p' (print), 'l'
 (list), or 'n' (enumerate), to print the last line affected by the
-command.
+command. It is not portable to give more than one print suffix, but
+'ed' allows any combination of non-repeated print suffixes and combines
+their effects.
 
    An interrupt (typically <Control-C>) has the effect of aborting the
 current command and returning the editor to command mode.
@@ -622,64 +639,80 @@ together with the default address or address range supplied if none is
 specified (in parenthesis).
 
 '(.)a'
-     Appends text to the buffer after the addressed line, which may be
-     the address '0' (zero). Text is entered in input mode. The current
-     address is set to last line entered.
+     Appends text to the buffer after the addressed line. The address
+     '0' (zero) is valid for this command; it places the entered text at
+     the beginning of the buffer. Text is entered in input mode. The
+     current address is set to the address of the last line entered or,
+     if there were none, to the addressed line.
 
 '(.,.)c'
      Changes lines in the buffer. The addressed lines are deleted from
-     the buffer, and text is appended in their place. Text is entered
-     in input mode. The current address is set to last line entered.
+     the buffer, and text is inserted in their place. Text is entered
+     in input mode. The current address is set to the address of the
+     last line entered or, if there were none, to the new address of
+     the line after the last line deleted; if the lines deleted were
+     originally at the end of the buffer, the current address is set to
+     the address of the new last line; if no lines remain in the
+     buffer, the current address is set to zero.
 
 '(.,.)d'
-     Deletes the addressed lines from the buffer. If there is a line
-     after the deleted range, then the current address is set to this
-     line.  Otherwise the current address is set to the line before the
-     deleted range.
+     Deletes the addressed lines from the buffer. The current address
+     is set to the new address of the line after the last line deleted;
+     if the lines deleted were originally at the end of the buffer, the
+     current address is set to the address of the new last line; if no
+     lines remain in the buffer, the current address is set to zero.
 
 'e FILE'
      Edits FILE, and sets the default filename. If FILE is not
      specified, then the default filename is used. Any lines in the
      buffer are deleted before the new file is read. The current
-     address is set to the last line read.
+     address is set to the address of the last line in the buffer.
 
-'e !COMMAND'
-     Edits the standard output of '!COMMAND', (see the '!' command
-     below). The default filename is unchanged. Any lines in the buffer
-     are deleted before the output of COMMAND is read. The current
-     address is set to the last line read.
+     If FILE is prefixed with a bang (!), then it is interpreted as a
+     shell command whose output is to be read, (*note shell escape
+     command:: '!' below). In this case the default filename is
+     unchanged.
+
+     A warning is printed if any changes have been made in the buffer
+     since the last 'w' command that wrote the entire buffer to a file.
 
 'E FILE'
      Edits FILE unconditionally. This is similar to the 'e' command,
-     except that unwritten changes are discarded without warning.  The
-     current address is set to the last line read.
+     except that unwritten changes are discarded without warning.
 
 'f FILE'
      Sets the default filename to FILE. If FILE is not specified, then
      the default unescaped filename is printed.
 
 '(1,$)g/RE/COMMAND-LIST'
-     Global command. Applies COMMAND-LIST to each of the addressed
-     lines matching a regular expression RE. The current address is set
-     to the line currently matched before COMMAND-LIST is executed. At
-     the end of the 'g' command, the current address is set to the last
-     line affected by COMMAND-LIST.
+     Global command. The global command makes two passes over the file.
+     On the first pass, all the addressed lines matching a regular
+     expression RE are marked. Then, going sequentially from the
+     beginning of the file to the end of the file, the given
+     COMMAND-LIST is executed for each marked line, with the current
+     address set to the address of that line. Any line modified by the
+     COMMAND-LIST is unmarked. The final value of the current address
+     is the value assigned by the last command in the last COMMAND-LIST
+     executed. If there were no matching lines, the current address is
+     unchanged.
 
-     At least the first command of COMMAND-LIST must appear on the same
-     line as the 'g' command. All lines of a multi-line COMMAND-LIST
-     except the last line must be terminated with a backslash ('\').
-     Any commands are allowed, except for 'g', 'G', 'v', and 'V'. By
-     default, a newline alone in COMMAND-LIST is equivalent to a 'p'
-     command. If 'ed' is invoked with the command-line option '-G',
-     then a newline in COMMAND-LIST is equivalent to a '.+1p' command.
+     The first command of COMMAND-LIST must appear on the same line as
+     the 'g' command. All lines of a multi-line COMMAND-LIST except the
+     last line must be terminated with a backslash ('\'). Any commands
+     are allowed, except for 'g', 'G', 'v', and 'V'. The '.'
+     terminating the input mode of commands 'a', 'c', and 'i' can be
+     omitted if it would be the last line of COMMAND-LIST. By default,
+     a newline alone in COMMAND-LIST is equivalent to a 'p' command. If
+     'ed' is invoked with the command-line option '-G', then a newline
+     in COMMAND-LIST is equivalent to a '.+1p' command.
 
 '(1,$)G/RE/'
      Interactive global command. Interactively edits the addressed lines
      matching a regular expression RE. For each matching line, the line
      is printed, the current address is set, and the user is prompted to
-     enter a COMMAND-LIST. At the end of the 'G' command, the current
-     address is set to the last line affected by (the last)
-     COMMAND-LIST.
+     enter a COMMAND-LIST. The final value of the current address is
+     the value assigned by the last command executed. If there were no
+     matching lines, the current address is unchanged.
 
      The format of COMMAND-LIST is the same as that of the 'g' command.
      A newline alone acts as a null command list. A single '&' repeats
@@ -694,41 +727,48 @@ specified (in parenthesis).
      begin with this command to aid in debugging.
 
 '(.)i'
-     Inserts text in the buffer before the current line. The address '0'
-     (zero) is valid for this command; it is equivalent to address '1'.
-     Text is entered in input mode. The current address is set to the
-     last line entered.
+     Inserts text in the buffer before the addressed line. The address
+     '0' (zero) is valid for this command; it is equivalent to address
+     '1'. Text is entered in input mode. The current address is set to
+     the address of the last line entered or, if there were none, to the
+     addressed line.
 
 '(.,.+1)j'
-     Joins the addressed lines. The addressed lines are deleted from the
-     buffer and replaced by a single line containing their joined text.
-     The current address is set to the resultant line.
+     Joins the addressed lines, replacing them by a single line
+     containing their joined text. If only one address is given, this
+     command does nothing. If lines are joined, the current address is
+     set to the address of the joined line. Else, the current address
+     is unchanged.
 
 '(.)kx'
      Marks a line with a lower case letter 'x'. The line can then be
      addressed as ''x' (i.e., a single quote followed by 'x') in
      subsequent commands. The mark is not cleared until the line is
-     deleted or otherwise modified.
+     deleted or otherwise modified. The current address is unchanged.
 
 '(.,.)l'
-     Prints the addressed lines unambiguously. The end of each line is
-     marked with a '$', and every '$' character within the text is
-     printed with a preceding backslash. The current address is set to
-     the last line printed.
+     List command. Prints the addressed lines unambiguously. The end of
+     each line is marked with a '$', and every '$' character within the
+     text is printed with a preceding backslash. Special characters are
+     printed as escape sequences. The current address is set to the
+     address of the last line printed.
 
 '(.,.)m(.)'
      Moves lines in the buffer. The addressed lines are moved to after
-     the right-hand destination address, which may be the address '0'
-     (zero). The current address is set to the new address of the last
-     line moved.
+     the right-hand destination address. The destination address '0'
+     (zero) is valid for this command; it moves the addressed lines to
+     the beginning of the buffer. It is an error if the destination
+     address falls within the range of moved lines. The current address
+     is set to the new address of the last line moved.
 
 '(.,.)n'
-     Prints the addressed lines, preceding each line by its line number
-     and a <tab>. The current address is set to the last line printed.
+     Number command. Prints the addressed lines, preceding each line by
+     its line number and a <tab>. The current address is set to the
+     address of the last line printed.
 
 '(.,.)p'
-     Prints the addressed lines. The current address is set to the last
-     line printed.
+     Prints the addressed lines. The current address is set to the
+     address of the last line printed.
 
 'P'
      Toggles the command prompt on and off. Unless a prompt is
@@ -736,68 +776,89 @@ specified (in parenthesis).
      default turned off.
 
 'q'
-     Quits 'ed'.
+     Quits 'ed'. A warning is printed if any changes have been made in
+     the buffer since the last 'w' command that wrote the entire buffer
+     to a file.
 
 'Q'
      Quits 'ed' unconditionally. This is similar to the 'q' command,
      except that unwritten changes are discarded without warning.
 
 '($)r FILE'
-     Reads FILE to after the addressed line. If FILE is not specified,
-     then the default filename is used. If there is no default filename
-     prior to the command, then the default filename is set to FILE.
-     Otherwise, the default filename is unchanged. The current address
-     is set to the last line read.
+     Reads FILE and appends it after the addressed line. If FILE is not
+     specified, then the default filename is used. If there is no
+     default filename prior to the command, then the default filename
+     is set to FILE. Otherwise, the default filename is unchanged. The
+     address '0' (zero) is valid for this command; it reads the file at
+     the beginning of the buffer. The current address is set to the
+     address of the last line read or, if there were none, to the
+     addressed line.
 
-'($)r !COMMAND'
-     Reads to after the addressed line the standard output of
-     '!command', (see the '!' command below). The default filename is
-     unchanged. The current address is set to the last line read.
+     If FILE is prefixed with a bang (!), then it is interpreted as a
+     shell command whose output is to be read, (*note shell escape
+     command:: '!' below). In this case the default filename is
+     unchanged.
 
 '(.,.)s/RE/REPLACEMENT/'
-'(.,.)s/RE/REPLACEMENT/g'
-'(.,.)s/RE/REPLACEMENT/N'
-     Replaces text in the addressed lines matching a regular expression
-     RE with REPLACEMENT. By default, only the first match in each line
-     is replaced. If the 'g' (global) suffix is given, then every match
-     is replaced. The N suffix, where N is a postive number, causes
-     only the Nth match to be replaced. It is an error if no
-     substitutions are performed on any of the addressed lines. The
-     current address is set to the last line affected.
+     Substitute command. Replaces text in the addressed lines matching a
+     regular expression RE with REPLACEMENT. By default, only the first
+     match in each line is replaced. The 's' command accepts any
+     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'. If
+     the 'g' (global) suffix is given, then every match is replaced.
+     The 'COUNT' suffix, where COUNT is a positive number, causes only
+     the COUNTth match to be replaced. 'g' and 'COUNT' can't be
+     specified in the same command. 'l', 'n', and 'p' are the usual
+     print suffixes. It is an error if no substitutions are performed
+     on any of the addressed lines. The current address is set to the
+     address of the last line on which a substitution occurred. If a
+     line is split, a substitution is considered to have occurred on
+     each of the new lines. If no substitution is performed, the
+     current address is unchanged.
 
      RE and REPLACEMENT may be delimited by any character other than
      <space>, <newline> and the characters used by the form of the 's'
-     command shown below. If one or two of the last delimiters is
-     omitted, then the last line affected is printed as if the print
-     suffix 'p' were specified.
+     command shown below. If the last delimiter is omitted, then the
+     last line affected is printed as if the print suffix 'p' were
+     specified. The last delimiter can't be omitted if the 's' command
+     is part of a 'g' or 'v' COMMAND-LIST and is not the last command
+     in the list, because the meaning of the following escaped newline
+     becomes ambiguous.
 
      An unescaped '&' in REPLACEMENT is replaced by the currently
      matched text. The character sequence '\M' where M is a number in
      the range [1,9], is replaced by the Mth backreference expression
-     of the matched text. If REPLACEMENT consists of a single '%', then
-     REPLACEMENT from the last substitution is used. Newlines may be
-     embedded in REPLACEMENT if they are escaped with a backslash ('\').
+     of the matched text. If the corresponding backreference expression
+     does not match, then the character sequence '\M' is replaced by
+     the empty string. If REPLACEMENT consists of a single '%', then
+     REPLACEMENT from the last substitution is used.
+
+     A line can be split by including a newline escaped with a backslash
+     ('\') in REPLACEMENT, except if the 's' command is part of a 'g'
+     or 'v' COMMAND-LIST, because in this case the meaning of the
+     escaped newline becomes ambiguous. Each backslash in REPLACEMENT
+     removes the special meaning (if any) of the following character.
 
 '(.,.)s'
      Repeats the last substitution. This form of the 's' command accepts
-     a count suffix N, and any combination of the characters 'r', 'g',
-     and 'p'. If a count suffix N is given, then only the Nth match is
-     replaced. The 'r' suffix causes the regular expression of the last
-     search to be used instead of the that of the last substitution.
-     The 'g' suffix toggles the global suffix of the last substitution.
-     The 'p' suffix toggles the print suffix of the last substitution.
-     The current address is set to the last line affected.
+     the 'g' and 'COUNT' suffixes described above, and any combination
+     of the suffixes 'p' and 'r'. The 'g' suffix toggles the global
+     suffix of the last substitution and resets COUNT to 1. The 'p'
+     suffix toggles the print suffixes of the last substitution. The
+     'r' suffix causes the regular expression of the last search to be
+     used instead of that of the last substitution (if the search
+     happened after the substitution).
 
 '(.,.)t(.)'
      Copies (i.e., transfers) the addressed lines to after the
-     right-hand destination address, which may be the address '0'
-     (zero). The current address is set to the last line copied.
+     right-hand destination address. If the destination address is '0'
+     (zero), the lines are copied at the beginning of the buffer. The
+     current address is set to the address of the last line copied.
 
 'u'
-     Undoes the last command and restores the current address to what
-     it was before the command. The global commands 'g', 'G', 'v', and
-     'V' are treated as a single command by undo. 'u' is its own
-     inverse.
+     Undoes the effect of the last command that modified anything in the
+     buffer and restores the current address to what it was before the
+     command. The global commands 'g', 'G', 'v', and 'V' are treated as
+     a single command by undo. 'u' is its own inverse.
 
 '(1,$)v/RE/COMMAND-LIST'
      This is similar to the 'g' command except that it applies
@@ -815,10 +876,13 @@ specified (in parenthesis).
      filename is specified, then the default filename is used. The
      current address is unchanged.
 
-'(1,$)w !COMMAND'
-     Writes the addressed lines to the standard input of '!COMMAND',
-     (see the '!' command below). The default filename and current
-     address are unchanged.
+     If FILE is prefixed with a bang (!), then it is interpreted as a
+     shell command and the addressed lines are written to its standard
+     input, (*note shell escape command:: '!' below). In this case the
+     default filename is unchanged. Writing the buffer to a shell
+     command does not prevent the warning to the user if an attempt is
+     made to overwrite or discard the buffer via the 'e' or 'q'
+     commands.
 
 '(1,$)wq FILE'
      Writes the addressed lines to FILE, and then executes a 'q'
@@ -826,16 +890,17 @@ specified (in parenthesis).
 
 '(1,$)W FILE'
      Appends the addressed lines to the end of FILE. This is similar to
-     the 'w' command, expect that the previous contents of file is not
+     the 'w' command, except that the previous contents of file is not
      clobbered. The current address is unchanged.
 
 '(.)x'
      Copies (puts) the contents of the cut buffer to after the addressed
-     line. The current address is set to the last line copied.
+     line. The current address is set to the address of the last line
+     copied.
 
 '(.,.)y'
      Copies (yanks) the addressed lines to the cut buffer. The cut
-     buffer is overwritten by subsequent 'y', 's', 'j', 'd', or 'c'
+     buffer is overwritten by subsequent 'c', 'd', 'j', 's', or 'y'
      commands. The current address is unchanged.
 
 '(.+1)zN'
@@ -843,15 +908,16 @@ specified (in parenthesis).
      window size to N. If N is not specified, then the current window
      size is used. Window size defaults to screen size minus two lines,
      or to 22 if screen size can't be determined. The current address
-     is set to the last line printed.
+     is set to the address of the last line printed.
 
 '!COMMAND'
-     Executes COMMAND via 'sh (1)'. If the first character of COMMAND
-     is '!', then it is replaced by text of the previous '!COMMAND'.
-     'ed' does not process COMMAND for backslash ('\') escapes.
-     However, an unescaped '%' is replaced by the default filename.
-     When the shell returns from execution, a '!' is printed to the
-     standard output. The current line is unchanged.
+     Shell escape command. Executes COMMAND via 'sh (1)'. If the first
+     character of COMMAND is '!', then it is replaced by the text of
+     the previous '!COMMAND'. Thus, '!!' repeats the previous
+     '!COMMAND'. 'ed' does not process COMMAND for backslash ('\')
+     escapes. However, an unescaped '%' is replaced by the default
+     filename. When the shell returns from execution, a '!' is printed
+     to the standard output. The current address is unchanged.
 
 '(.,.)#'
      Begins a comment; the rest of the line, up to a newline, is
@@ -860,12 +926,13 @@ specified (in parenthesis).
      address is unchanged.
 
 '($)='
-     Prints the line number of the addressed line.
+     Prints the line number of the addressed line. The current address
+     is unchanged.
 
 '(.+1)<newline>'
-     An address alone prints the addressed line. A <newline> alone is
-     equivalent to '+1p'. The current address is set to the address of
-     the printed line.
+     Null command. An address alone prints the addressed line. A
+     <newline> alone is equivalent to '+1p'. The current address is set
+     to the address of the printed line.
 
 
 
@@ -904,8 +971,6 @@ command list is executed only once.
    Attempting to quit 'ed' or edit another file before writing a
 modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
-
-   Exit status: 0 if no errors occurred; otherwise >0.
 
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
@@ -1412,16 +1477,17 @@ permit their use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview2195
-Node: Introduction to line editing4251
-Node: Invoking ed11470
-Node: Line addressing13270
-Node: Regular expressions16347
-Node: Commands21691
-Node: Limitations32963
-Node: Diagnostics33608
-Node: Problems34309
-Node: GNU Free Documentation License34842
+Node: Overview2197
+Node: Introduction to line editing4253
+Node: Invoking ed11526
+Node: Line addressing13518
+Node: Regular expressions17231
+Node: Commands22575
+Ref: shell escape command36484
+Node: Limitations37506
+Node: Diagnostics38151
+Node: Problems38796
+Node: GNU Free Documentation License39329
 
 End Tag Table
 

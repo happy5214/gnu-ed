@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2016 Antonio Diaz Diaz.
+    Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,18 +24,33 @@
 #include "ed.h"
 
 
+static const line_t * unterminated_line = 0;	/* last line has no '\n' */
+int linenum_ = 0;				/* script line number */
+
+void reset_unterminated_line( void ) { unterminated_line = 0; }
+
+void unmark_unterminated_line( const line_t * const lp )
+  { if( unterminated_line == lp ) unterminated_line = 0; }
+
+static bool unterminated_last_line( void )
+  { return ( unterminated_line != 0 &&
+             unterminated_line == search_line_node( last_addr() ) ); }
+
+int linenum( void ) { return linenum_; }
+
+
 /* print text to stdout */
-static void put_tty_line( const char * p, int len, const int gflags )
+static void print_line( const char * p, int len, const int pflags )
   {
   const char escapes[] = "\a\b\f\n\r\t\v\\";
   const char escchars[] = "abfnrtv\\";
   int col = 0;
 
-  if( gflags & GNP ) { printf( "%d\t", current_addr() ); col = 8; }
+  if( pflags & GNP ) { printf( "%d\t", current_addr() ); col = 8; }
   while( --len >= 0 )
     {
     const unsigned char ch = *p++;
-    if( !( gflags & GLS ) ) putchar( ch );
+    if( !( pflags & GLS ) ) putchar( ch );
     else
       {
       if( ++col > window_columns() ) { col = 1; fputs( "\\\n", stdout ); }
@@ -55,13 +70,13 @@ static void put_tty_line( const char * p, int len, const int gflags )
         }
       }
     }
-  if( !traditional() && ( gflags & GLS ) ) putchar('$');
+  if( !traditional() && ( pflags & GLS ) ) putchar('$');
   putchar('\n');
   }
 
 
 /* print a range of lines to stdout */
-bool display_lines( int from, const int to, const int gflags )
+bool print_lines( int from, const int to, const int pflags )
   {
   line_t * const ep = search_line_node( inc_addr( to ) );
   line_t * bp = search_line_node( from );
@@ -72,7 +87,7 @@ bool display_lines( int from, const int to, const int gflags )
     const char * const s = get_sbuf_line( bp );
     if( !s ) return false;
     set_current_addr( from++ );
-    put_tty_line( s, bp->len, gflags );
+    print_line( s, bp->len, pflags );
     bp = bp->q_forw;
     }
   return true;
@@ -89,7 +104,8 @@ static bool trailing_escape( const char * const s, int len )
 
 
 /* If *ibufpp contains an escaped newline, get an extended line (one
-   with escaped newlines) from stdin */
+   with escaped newlines) from stdin.
+   Return line length in *lenp, including the trailing newline. */
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines )
   {
@@ -107,10 +123,9 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
   while( true )
     {
     int len2;
-    const char * const s = get_tty_line( &len2 );
-    if( !s ) return false;
-    if( len2 == 0 || s[len2-1] != '\n' )
-      { set_error_msg( "Unexpected end-of-file" ); return false; }
+    const char * const s = get_stdin_line( &len2 );
+    if( !s ) return false;			/* error */
+    if( len2 <= 0 ) return false;		/* EOF */
     if( !resize_buffer( &buf, &bufsz, len + len2 ) ) return false;
     memcpy( buf + len, s, len2 );
     len += len2;
@@ -127,9 +142,10 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
 
 
 /* Read a line of text from stdin.
-   Returns pointer to buffer and line size (including trailing newline
-   if it exists) */
-const char * get_tty_line( int * const sizep )
+   Incomplete lines (lacking the trailing newline) are discarded.
+   Returns pointer to buffer and line size (including trailing newline),
+   or 0 if error, or *sizep = 0 if EOF */
+const char * get_stdin_line( int * const sizep )
   {
   static char * buf = 0;
   static int bufsz = 0;
@@ -138,28 +154,28 @@ const char * get_tty_line( int * const sizep )
   while( true )
     {
     const int c = getchar();
-    if( !resize_buffer( &buf, &bufsz, i + 2 ) )
-      { if( sizep ) *sizep = 0; return 0; }
+    if( !resize_buffer( &buf, &bufsz, i + 2 ) ) { *sizep = 0; return 0; }
     if( c == EOF )
       {
       if( ferror( stdin ) )
         {
         show_strerror( "stdin", errno );
         set_error_msg( "Cannot read stdin" );
-        clearerr( stdin ); if( sizep ) *sizep = 0;
-        return 0;
+        clearerr( stdin );
+        *sizep = 0; return 0;
         }
       if( feof( stdin ) )
         {
+        set_error_msg( "Unexpected end-of-file" );
         clearerr( stdin );
-        buf[i] = 0; if( sizep ) *sizep = i;
+        buf[0] = 0; *sizep = 0; if( i > 0 ) ++linenum_;	/* discard line */
         return buf;
         }
       }
     else
       {
       buf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
-      buf[i] = 0; if( sizep ) *sizep = i;
+      ++linenum_; buf[i] = 0; *sizep = i;
       return buf;
       }
     }
@@ -170,7 +186,7 @@ const char * get_tty_line( int * const sizep )
    Returns pointer to buffer and line size (including trailing newline
    if it exists and is not added now) */
 static const char * read_stream_line( FILE * const fp, int * const sizep,
-                                      bool * const newline_added_nowp )
+                                      bool * const newline_addedp )
   {
   static char * buf = 0;
   static int bufsz = 0;
@@ -194,7 +210,7 @@ static const char * read_stream_line( FILE * const fp, int * const sizep,
       }
     else if( i )
       {
-      buf[i] = '\n'; buf[i+1] = 0; *newline_added_nowp = true;
+      buf[i] = '\n'; buf[i+1] = 0; *newline_addedp = true;
       if( !isbinary() ) ++i;
       }
     }
@@ -203,7 +219,8 @@ static const char * read_stream_line( FILE * const fp, int * const sizep,
   }
 
 
-/* read a stream into the editor buffer; return total size of data read */
+/* read a stream into the editor buffer;
+   return total size of data read, or -1 if error */
 static long read_stream( FILE * const fp, const int addr )
   {
   line_t * lp = search_line_node( addr );
@@ -211,18 +228,19 @@ static long read_stream( FILE * const fp, const int addr )
   long total_size = 0;
   const bool o_isbinary = isbinary();
   const bool appended = ( addr == last_addr() );
-  bool newline_added_now = false;
+  const bool o_unterminated_last_line = unterminated_last_line();
+  bool newline_added = false;
 
   set_current_addr( addr );
   while( true )
     {
     int size = 0;
-    const char * const s = read_stream_line( fp, &size, &newline_added_now );
+    const char * const s = read_stream_line( fp, &size, &newline_added );
     if( !s ) return -1;
-    if( size > 0 ) total_size += size;
-    else break;
+    if( size <= 0 ) break;
+    total_size += size;
     disable_interrupts();
-    if( !put_sbuf_line( s, size + newline_added_now, current_addr() ) )
+    if( !put_sbuf_line( s, size + newline_added ) )
       { enable_interrupts(); return -1; }
     lp = lp->q_forw;
     if( up ) up->tail = lp;
@@ -233,19 +251,19 @@ static long read_stream( FILE * const fp, const int addr )
       }
     enable_interrupts();
     }
-  if( addr && appended && total_size && o_isbinary && newline_added() )
-    fputs( "Newline inserted\n", stderr );
-  else if( newline_added_now && ( !appended || !isbinary() ) )
-    fputs( "Newline appended\n", stderr );
-  if( isbinary() && !o_isbinary && newline_added_now && !appended )
+  if( addr && appended && total_size && o_unterminated_last_line )
+    fputs( "Newline inserted\n", stdout );		/* before stream */
+  else if( newline_added && ( !appended || !isbinary() ) )
+    fputs( "Newline appended\n", stdout );		/* after stream */
+  if( !appended && isbinary() && !o_isbinary && newline_added )
     ++total_size;
-  if( !total_size ) newline_added_now = true;
-  if( appended && newline_added_now ) set_newline_added();
+  if( appended && isbinary() && ( newline_added || total_size == 0 ) )
+    unterminated_line = search_line_node( last_addr() );
   return total_size;
   }
 
 
-/* read a named file/pipe into the buffer; return line count */
+/* read a named file/pipe into the buffer; return line count, or -1 if error */
 int read_file( const char * const filename, const int addr )
   {
   FILE * fp;
@@ -269,7 +287,7 @@ int read_file( const char * const filename, const int addr )
     set_error_msg( "Cannot close input file" );
     return -1;
     }
-  if( !scripted() ) fprintf( stderr, "%lu\n", size );
+  if( !scripted() ) printf( "%lu\n", size );
   return current_addr() - addr;
   }
 
@@ -286,7 +304,7 @@ static long write_stream( FILE * const fp, int from, const int to )
     char * p = get_sbuf_line( lp );
     if( !p ) return -1;
     len = lp->len;
-    if( from != last_addr() || !isbinary() || !newline_added() )
+    if( from != last_addr() || !isbinary() || !unterminated_last_line() )
       p[len++] = '\n';
     size += len;
     while( --len >= 0 )
@@ -327,6 +345,6 @@ int write_file( const char * const filename, const char * const mode,
     set_error_msg( "Cannot close output file" );
     return -1;
     }
-  if( !scripted() ) fprintf( stderr, "%lu\n", size );
+  if( !scripted() ) printf( "%lu\n", size );
   return ( from && from <= to ) ? to - from + 1 : 0;
   }

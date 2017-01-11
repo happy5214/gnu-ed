@@ -6,6 +6,7 @@ INSTALL_SCRIPT = $(INSTALL) -m 755
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIR = $(INSTALL) -d -m 755
 SHELL = /bin/sh
+CAN_RUN_INSTALLINFO = $(SHELL) -c "install-info --version" > /dev/null 2>&1
 
 objs = buffer.o carg_parser.o global.o io.o main.o main_loop.o regex.o signal.o
 
@@ -71,7 +72,9 @@ install-info :
 	if [ ! -d "$(DESTDIR)$(infodir)" ] ; then $(INSTALL_DIR) "$(DESTDIR)$(infodir)" ; fi
 	-rm -f "$(DESTDIR)$(infodir)/$(pkgname).info"*
 	$(INSTALL_DATA) $(VPATH)/doc/$(pkgname).info "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"
-	-install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"
+	-if $(CAN_RUN_INSTALLINFO) ; then \
+		install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
+	fi
 
 install-info-compress : install-info
 	lzip -v -9 "$(DESTDIR)$(infodir)/$(pkgname).info"
@@ -95,7 +98,9 @@ uninstall-bin :
 	-rm -f "$(DESTDIR)$(bindir)/$(program_prefix)r$(progname)"
 
 uninstall-info :
-	-install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"
+	-if $(CAN_RUN_INSTALLINFO) ; then \
+		install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
+	fi
 	-rm -f "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"*
 
 uninstall-man :
@@ -119,14 +124,14 @@ dist : doc
 	  $(DISTNAME)/doc/$(pkgname).texi \
 	  $(DISTNAME)/doc/fdl.texi \
 	  $(DISTNAME)/r$(progname).in \
-	  $(DISTNAME)/testsuite/check.sh \
-	  $(DISTNAME)/testsuite/*.t \
-	  $(DISTNAME)/testsuite/*.d \
-	  $(DISTNAME)/testsuite/*.r \
-	  $(DISTNAME)/testsuite/*.pr \
-	  $(DISTNAME)/testsuite/*.err \
 	  $(DISTNAME)/*.h \
-	  $(DISTNAME)/*.c
+	  $(DISTNAME)/*.c \
+	  $(DISTNAME)/testsuite/check.sh \
+	  $(DISTNAME)/testsuite/test.bin \
+	  $(DISTNAME)/testsuite/test.txt \
+	  $(DISTNAME)/testsuite/*.ed \
+	  $(DISTNAME)/testsuite/*.r \
+	  $(DISTNAME)/testsuite/*.err
 	rm -f $(DISTNAME)
 	lzip -v -9 $(DISTNAME).tar
 

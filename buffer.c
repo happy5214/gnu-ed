@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2016 Antonio Diaz Diaz.
+    Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ static int current_addr_ = 0;	/* current address in editor buffer */
 static int last_addr_ = 0;	/* last address in editor buffer */
 static bool isbinary_ = false;	/* if set, buffer contains ASCII NULs */
 static bool modified_ = false;	/* if set, buffer modified since last write */
-static bool newline_added_ = false; /* if set, newline appended to input file */
 
 static bool seek_write = false;	/* seek before writing */
 static FILE * sfp = 0;		/* scratch file pointer */
@@ -55,9 +54,6 @@ void set_binary( void ) { isbinary_ = true; }
 
 bool modified( void ) { return modified_; }
 void set_modified( const bool m ) { modified_ = m; }
-
-bool newline_added( void ) { return newline_added_; }
-void set_newline_added( void ) { newline_added_ = true; }
 
 
 int inc_addr( int addr )
@@ -81,10 +77,11 @@ static void insert_node( line_t * const lp, line_t * const prev )
 
 
 /* add a line node in the editor buffer after the given line */
-static void add_line_node( line_t * const lp, const int addr )
+static void add_line_node( line_t * const lp )
   {
-  line_t * const prev = search_line_node( addr );
+  line_t * const prev = search_line_node( current_addr_ );
   insert_node( lp, prev );
+  ++current_addr_;
   ++last_addr_;
   }
 
@@ -108,7 +105,7 @@ static line_t * dup_line_node( line_t * const lp )
    line n; stop when either a single period is read or EOF.
    Returns false if insertion fails. */
 bool append_lines( const char ** const ibufpp, const int addr,
-                   const bool isglobal )
+                   bool insert, const bool isglobal )
   {
   int size = 0;
   undo_t * up = 0;
@@ -118,10 +115,9 @@ bool append_lines( const char ** const ibufpp, const int addr,
     {
     if( !isglobal )
       {
-      *ibufpp = get_tty_line( &size );
-      if( !*ibufpp ) return false;
-      if( size == 0 || (*ibufpp)[size-1] != '\n' )
-        { clearerr( stdin ); return ( size == 0 ); }
+      *ibufpp = get_stdin_line( &size );
+      if( !*ibufpp ) return false;			/* error */
+      if( size <= 0 ) return true;			/* EOF */
       }
     else
       {
@@ -130,7 +126,8 @@ bool append_lines( const char ** const ibufpp, const int addr,
       }
     if( size == 2 && **ibufpp == '.' ) { *ibufpp += size; return true; }
     disable_interrupts();
-    if( !put_sbuf_line( *ibufpp, size, current_addr_ ) )
+    if( insert ) { insert = false; if( current_addr_ > 0 ) --current_addr_; }
+    if( !put_sbuf_line( *ibufpp, size ) )
       { enable_interrupts(); return false; }
     if( up ) up->tail = search_line_node( current_addr_ );
     else
@@ -202,7 +199,7 @@ bool copy_lines( const int first_addr, const int second_addr, const int addr )
       disable_interrupts();
       lp = dup_line_node( np );
       if( !lp ) { enable_interrupts(); return false; }
-      add_line_node( lp, current_addr_++ );
+      add_line_node( lp );
       if( up ) up->tail = lp;
       else
         {
@@ -230,7 +227,7 @@ bool delete_lines( const int from, const int to, const bool isglobal )
   if( isglobal ) unset_active_nodes( p->q_forw, n );
   link_nodes( p, n );
   last_addr_ -= to - from + 1;
-  current_addr_ = from - 1;
+  current_addr_ = min( from, last_addr_ );
   modified_ = true;
   enable_interrupts();
   return true;
@@ -324,7 +321,7 @@ bool join_lines( const int from, const int to, const bool isglobal )
   if( !delete_lines( from, to, isglobal ) ) return false;
   current_addr_ = from - 1;
   disable_interrupts();
-  if( !put_sbuf_line( buf, size, current_addr_ ) ||
+  if( !put_sbuf_line( buf, size ) ||
       !push_undo_atom( UADD, current_addr_, current_addr_ ) )
     { enable_interrupts(); return false; }
   modified_ = true;
@@ -381,7 +378,7 @@ bool move_lines( const int first_addr, const int second_addr, const int addr,
 /* open scratch file */
 bool open_sbuf( void )
   {
-  isbinary_ = newline_added_ = false;
+  isbinary_ = false; reset_unterminated_line();
   sfp = tmpfile();
   if( !sfp )
     {
@@ -419,7 +416,7 @@ bool put_lines( const int addr )
     disable_interrupts();
     p = dup_line_node( lp );
     if( !p ) { enable_interrupts(); return false; }
-    add_line_node( p, current_addr_++ );
+    add_line_node( p );
     if( up ) up->tail = p;
     else
       {
@@ -435,9 +432,8 @@ bool put_lines( const int addr )
 
 
 /* write a line of text to the scratch file and add a line node to the
-   editor buffer; return a pointer to the end of the text */
-const char * put_sbuf_line( const char * const buf, const int size,
-                            const int addr )
+   editor buffer; return a pointer to the end of the text, or 0 if error */
+const char * put_sbuf_line( const char * const buf, const int size )
   {
   const char * const p = (const char *) memchr( buf, '\n', size );
   line_t * lp;
@@ -467,8 +463,7 @@ const char * put_sbuf_line( const char * const buf, const int size,
   lp = dup_line_node( 0 );
   if( !lp ) return 0;
   lp->pos = sfpos; lp->len = len;
-  add_line_node( lp, addr );
-  ++current_addr_;
+  add_line_node( lp );
   sfpos += len;				/* update file position */
   return p + 1;
   }
@@ -542,6 +537,7 @@ void clear_undo_stack( void )
         {
         line_t * const lp = bp->q_forw;
         unmark_line_node( bp );
+        unmark_unterminated_line( bp );
         free( bp );
         bp = lp;
         }

@@ -1,3 +1,32 @@
+2017-01-10  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.14.1 released.
+	* Print counts, messages, '?' and '!' to stdout instead of stderr.
+	* buffer.c (append_lines): Fixed current address after empty 'i'.
+	* regex.c (set_subst_regex): Treat missing delimiters consistently.
+	  (extract_replacement): Don't replace 'a' with '%' in 's/a/%'.
+	  Fixed infinite loop with EOF in the middle of a replacement.
+	  Don't accept newlines in replacement in a global command.
+	  Last delimiter can't be omitted if not last in command list.
+	  (search_and_replace): Set current address to last line modified.
+	* main_loop.c (extract_addresses): Fixed address offsets;
+	  '3 ---- 2' was calculated as -2 instead of 1.
+	  Accept ranges with the first address omitted.
+	  (exec_command): Fixed current address after empty replacement
+	  text in 'c' command.
+	  Don't clear the modified status after writing the buffer to a
+	  shell command. (Reported by Jérôme Frgacic).
+	  (get_command_suffix): Don't allow repeated print suffixes.
+	  (command_s): Accept suffixes in any order.
+	  Don't allow multiple count suffixes.
+	  'sp' now toggles all print suffixes.
+	  (main_loop): Make EOF on stdin behave as a 'q' command.
+	* ed.texi: Fixed the description of commands 'acegijkmqrsuw'.
+	  Documented that ed allows any combination of print suffixes.
+	* testsuite: Improved most tests. Simplified bug reporting.
+	* configure: Avoid warning on some shells when testing for gcc.
+	* Makefile.in: Detect the existence of install-info.
+
 2016-01-24  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.13 released.
@@ -231,7 +260,7 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew Moore
-Copyright (C) 2006-2016 Antonio Diaz Diaz.
+Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable,
 but just in case, you have unlimited permission to copy, distribute and

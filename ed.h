@@ -1,7 +1,7 @@
 /*  Global declarations for the ed editor.  */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2016 Antonio Diaz Diaz.
+    Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,13 +22,11 @@ enum Bool { false = 0, true = 1 };
 typedef enum Bool bool;
 #endif
 
-enum Gflags
+enum Pflags			/* print suffixes */
   {
-  GLB = 0x01,			/* global command */
-  GLS = 0x02,			/* list after command */
-  GNP = 0x04,			/* enumerate after command */
-  GPR = 0x08,			/* print after command */
-  GSG = 0x10			/* global substitute */
+  GLS = 0x01,			/* list after command */
+  GNP = 0x02,			/* enumerate after command */
+  GPR = 0x04			/* print after command */
   };
 
 
@@ -60,7 +58,7 @@ undo_t;
 
 /* defined in buffer.c */
 bool append_lines( const char ** const ibufpp, const int addr,
-                   const bool isglobal );
+                   bool insert, const bool isglobal );
 bool close_sbuf( void );
 bool copy_lines( const int first_addr, const int second_addr, const int addr );
 int current_addr( void );
@@ -77,17 +75,14 @@ int last_addr( void );
 bool modified( void );
 bool move_lines( const int first_addr, const int second_addr, const int addr,
                  const bool isglobal );
-bool newline_added( void );
 bool open_sbuf( void );
 int path_max( const char * filename );
 bool put_lines( const int addr );
-const char * put_sbuf_line( const char * const buf, const int size,
-                            const int addr );
+const char * put_sbuf_line( const char * const buf, const int size );
 line_t * search_line_node( const int addr );
 void set_binary( void );
 void set_current_addr( const int addr );
 void set_modified( const bool m );
-void set_newline_added( void );
 bool yank_lines( const int from, const int to );
 void clear_undo_stack( void );
 undo_t * push_undo_atom( const int type, const int from, const int to );
@@ -101,20 +96,22 @@ bool set_active_node( const line_t * const lp );
 void unset_active_nodes( const line_t * bp, const line_t * const ep );
 
 /* defined in io.c */
-bool display_lines( int from, const int to, const int gflags );
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines );
-const char * get_tty_line( int * const sizep );
+const char * get_stdin_line( int * const sizep );
+int linenum( void );
+bool print_lines( int from, const int to, const int pflags );
 int read_file( const char * const filename, const int addr );
 int write_file( const char * const filename, const char * const mode,
                 const int from, const int to );
+void reset_unterminated_line( void );
+void unmark_unterminated_line( const line_t * const lp );
 
 /* defined in main.c */
 bool is_regular_file( const int fd );
 bool may_access_filename( const char * const name );
 bool restricted( void );
 bool scripted( void );
-void show_strerror( const char * const filename, const int errcode );
 bool traditional( void );
 
 /* defined in main_loop.c */
@@ -123,18 +120,18 @@ void set_def_filename( const char * const s );
 void set_error_msg( const char * msg );
 void set_prompt( const char * const s );
 void set_verbose( void );
+void show_strerror( const char * const filename, const int errcode );
 void unmark_line_node( const line_t * const lp );
 
 /* defined in regex.c */
 bool build_active_list( const char ** const ibufpp, const int first_addr,
                         const int second_addr, const bool match );
-bool extract_subst_tail( const char ** const ibufpp, int * const gflagsp,
-                         int * const snump, const bool isglobal );
+bool extract_replacement( const char ** const ibufpp, const bool isglobal );
 int next_matching_node_addr( const char ** const ibufpp, const bool forward );
-bool new_compiled_pattern( const char ** const ibufpp );
-bool prev_pattern( void );
 bool search_and_replace( const int first_addr, const int second_addr,
-                         const int gflags, const int snum, const bool isglobal );
+                         const int snum, const bool isglobal );
+bool set_subst_regex( const char ** const ibufpp );
+bool subst_regex( void );
 
 /* defined in signal.c */
 void disable_interrupts( void );

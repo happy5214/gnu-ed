@@ -1,7 +1,7 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2016 Antonio Diaz Diaz.
+    Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -161,7 +161,7 @@ bool parse_int( int * const i, const char * const str, const char ** const tail 
     *i = 0;
     return false;
     }
-  if( errno == ERANGE || li > INT_MAX || li < INT_MIN )
+  if( errno == ERANGE || li > INT_MAX || li < -INT_MAX )
     {
     set_error_msg( "Numerical result out of range" );
     *i = 0;

@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 24 January 2016
-@set VERSION 1.13
+@set UPDATED 10 January 2017
+@set VERSION 1.14.1
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2016
+Copyright @copyright{} 1993, 1994, 2006-2017
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -324,8 +324,8 @@ And loathsome canker lives in sweetest bud.
 # Move the title to its proper place.
 5m0p
  Sonnet #50
-# The title is now the first line, and the current line has been
-# set to this line as well.
+# The title is now the first line, and the current address has been
+# set to the address of this line as well.
 ,p
  Sonnet #50
 No more be grieved at that which thou hast done.
@@ -337,9 +337,9 @@ wq sonnet
 $
 @end example
 
-When @command{ed} opens a file, the current line is initially set to the
-last line of that file. Similarly, the move command @samp{m} sets the
-current line to the last line moved.
+When @command{ed} opens a file, the current address is initially set to
+the address of the last line of that file. Similarly, the move command
+@samp{m} sets the current address to the address of the last line moved.
 
 Related programs or routines are @command{vi (1)}, @command{sed (1)},
 @command{regex (3)},  @command{sh (1)}. Relevant documents
@@ -409,14 +409,19 @@ current directory and execution of shell commands.
 @item -s
 @itemx --quiet
 @itemx --silent
-Suppresses diagnostics. This should be used if @command{ed}'s standard
-input is from a script.
+Suppresses the printing of byte counts by @samp{e}, @samp{E}, @samp{r},
+and @samp{w} commands and of the @samp{!} prompt after a @samp{!}
+command. This option may be useful if @command{ed}'s standard input is
+from a script.
 
 @item -v
 @itemx --verbose
-Verbose mode. This may be toggled on and off with the @samp{H} command.
+Verbose mode; prints error explanations. This may be toggled on and off
+with the @samp{H} command.
 
 @end table
+
+Exit status: 0 if no errors occurred; otherwise >0.
 
 
 @node Line addressing
@@ -425,26 +430,30 @@ Verbose mode. This may be toggled on and off with the @samp{H} command.
 An address represents the number of a line in the buffer. @command{ed}
 maintains a @dfn{current address} which is typically supplied to
 commands as the default address when none is specified. When a file is
-first read, the current address is set to the last line of the file. In
-general, the current address is set to the last line affected by a
-command.
+first read, the current address is set to the address of the last line
+of the file. In general, the current address is set to the address of
+the last line affected by a command.
 
 One exception to the rule that addresses represent line numbers is the
 address @samp{0} (zero). This means "before the first line", and is
 valid wherever it makes sense.
 
 An address range is two addresses separated either by a comma (@samp{,})
-or a semicolon (@samp{;}). The value of the first address in a range
-cannot exceed the value of the second. If only one address is given in a
-range, then the second address is set to the given address. If an
-@var{n}-tuple of addresses is given where @var{n} > 2, then the
-corresponding range is determined by the last two addresses in the
-@var{n}-tuple. If only one address is expected, then the last address is
-used.
+or a semicolon (@samp{;}). In a semicolon-delimited range, the current
+address (@samp{.}) is set to the first address before the second address
+is calculated. This feature can be used to set the starting line for
+searches. The value of the first address in a range cannot exceed the
+value of the second.
 
-In a semicolon-delimited range, the current address (@samp{.}) is set to
-the first address before the second address is calculated. This feature
-can be used to set the starting line for searches.
+Addresses can be omitted on either side of the comma or semicolon
+separator. If only the first address is given in a range, then the
+second address is set to the given address. If only the second address
+is given, the resulting address pairs are @samp{1,addr} and
+@samp{.;addr} respectively. If a @var{n}-tuple of addresses is given
+where @var{n} > 2, then the corresponding range is determined by the
+last two addresses in the @var{n}-tuple. If only one address is
+expected, then the last address is used. It is an error to give any
+number of addresses to a command that requires zero addresses.
 
 A line address is constructed as follows:
 
@@ -479,17 +488,17 @@ address range @samp{1,$}.
 
 @item ;
 The current through last lines in the buffer. This is equivalent to the
-address range @samp{.,$}.
+address range @samp{.;$}.
 
 @item /@var{re}/
 The next line containing the regular expression @var{re}. The search
 wraps to the beginning of the buffer and continues down to the current
-line, if necessary. @samp{//} repeats the last search.
+line, if necessary. A null @var{re} @samp{//} repeats the last search.
 
 @item ?@var{re}?
 The previous line containing the regular expression @var{re}. The search
 wraps to the end of the buffer and continues up to the current line, if
-necessary. @samp{??} repeats the last search.
+necessary. A null @var{re} @samp{??} repeats the last search.
 
 @item 'x
 The apostrophe-x character pair addresses the line previously marked by
@@ -503,9 +512,6 @@ separated by whitespace. Offsets are constructed as follows:
 
 @itemize @bullet
 @item
-A number adds the indicated number of lines to the address.
-
-@item
 @samp{+} or @samp{-} followed by a number adds or subtracts the
 indicated number of lines to or from the address.
 
@@ -513,7 +519,16 @@ indicated number of lines to or from the address.
 @samp{+} or @samp{-} not followed by a number adds or subtracts 1 to or
 from the address.
 
+@item
+A number adds the indicated number of lines to the address.
+
 @end itemize
+
+It is not an error if an intermediate address value is negative or
+greater than the address of the last line in the buffer. It is an error
+if the final address value is negative or greater than the address of
+the last line in the buffer. It is an error if a search for a @var{re}
+fails to find a matching line.
 
 
 @node Regular expressions
@@ -688,7 +703,9 @@ backslash (@samp{\}).
 In general, at most one command is allowed per line. However, most
 commands accept a print suffix, which is any of @samp{p} (print),
 @samp{l} (list), or @samp{n} (enumerate), to print the last line
-affected by the command.
+affected by the command. It is not portable to give more than one print
+suffix, but @command{ed} allows any combination of non-repeated print
+suffixes and combines their effects.
 
 An interrupt (typically @key{Control-C}) has the effect of aborting the
 current command and returning the editor to command mode.
@@ -700,65 +717,78 @@ specified (in parenthesis).
 @table @code
 
 @item (.)a
-Appends text to the buffer after the addressed line, which may be the
-address @samp{0} (zero). Text is entered in input mode. The current
-address is set to last line entered.
+Appends text to the buffer after the addressed line. The address
+@samp{0} (zero) is valid for this command; it places the entered text at
+the beginning of the buffer. Text is entered in input mode. The current
+address is set to the address of the last line entered or, if there were
+none, to the addressed line.
 
 @item (.,.)c
 Changes lines in the buffer. The addressed lines are deleted from the
-buffer, and text is appended in their place. Text is entered in input
-mode. The current address is set to last line entered.
+buffer, and text is inserted in their place. Text is entered in input
+mode. The current address is set to the address of the last line entered
+or, if there were none, to the new address of the line after the last
+line deleted; if the lines deleted were originally at the end of the
+buffer, the current address is set to the address of the new last line;
+if no lines remain in the buffer, the current address is set to zero.
 
 @item (.,.)d
-Deletes the addressed lines from the buffer. If there is a line after
-the deleted range, then the current address is set to this line.
-Otherwise the current address is set to the line before the deleted
-range.
+Deletes the addressed lines from the buffer. The current address is set
+to the new address of the line after the last line deleted; if the lines
+deleted were originally at the end of the buffer, the current address is
+set to the address of the new last line; if no lines remain in the
+buffer, the current address is set to zero.
 
 @item e @var{file}
 Edits @var{file}, and sets the default filename. If @var{file} is not
 specified, then the default filename is used. Any lines in the buffer
 are deleted before the new file is read. The current address is set to
-the last line read.
+the address of the last line in the buffer.
 
-@item e !@var{command}
-Edits the standard output of @samp{!@var{command}}, (see the @samp{!}
-command below). The default filename is unchanged. Any lines in the
-buffer are deleted before the output of @var{command} is read. The
-current address is set to the last line read.
+If @var{file} is prefixed with a bang (!), then it is interpreted as a
+shell command whose output is to be read, (@pxref{shell escape command}
+@samp{!} below). In this case the default filename is unchanged.
+
+A warning is printed if any changes have been made in the buffer since
+the last @samp{w} command that wrote the entire buffer to a file.
 
 @item E @var{file}
 Edits @var{file} unconditionally. This is similar to the @samp{e}
 command, except that unwritten changes are discarded without warning.
-The current address is set to the last line read.
 
 @item f @var{file}
 Sets the default filename to @var{file}. If @var{file} is not specified,
 then the default unescaped filename is printed.
 
 @item (1,$)g/@var{re}/@var{command-list}
-Global command. Applies @var{command-list} to each of the addressed
-lines matching a regular expression @var{re}. The current address is set
-to the line currently matched before @var{command-list} is executed. At
-the end of the @samp{g} command, the current address is set to the last
-line affected by @var{command-list}.
+Global command. The global command makes two passes over the file. On
+the first pass, all the addressed lines matching a regular expression
+@var{re} are marked. Then, going sequentially from the beginning of the
+file to the end of the file, the given @var{command-list} is executed
+for each marked line, with the current address set to the address of
+that line. Any line modified by the @var{command-list} is unmarked. The
+final value of the current address is the value assigned by the last
+command in the last @var{command-list} executed. If there were no
+matching lines, the current address is unchanged.
 
-At least the first command of @var{command-list} must appear on the same
-line as the @samp{g} command. All lines of a multi-line
-@var{command-list} except the last line must be terminated with a
-backslash (@samp{\}). Any commands are allowed, except for @samp{g},
-@samp{G}, @samp{v}, and @samp{V}. By default, a newline alone in
-@var{command-list} is equivalent to a @samp{p} command. If @command{ed}
-is invoked with the command-line option @samp{-G}, then a newline in
-@var{command-list} is equivalent to a @samp{.+1p} command.
+The first command of @var{command-list} must appear on the same line as
+the @samp{g} command. All lines of a multi-line @var{command-list}
+except the last line must be terminated with a backslash (@samp{\}). Any
+commands are allowed, except for @samp{g}, @samp{G}, @samp{v}, and
+@samp{V}. The @samp{.} terminating the input mode of commands @samp{a},
+@samp{c}, and @samp{i} can be omitted if it would be the last line of
+@var{command-list}. By default, a newline alone in @var{command-list} is
+equivalent to a @samp{p} command. If @command{ed} is invoked with the
+command-line option @samp{-G}, then a newline in @var{command-list} is
+equivalent to a @samp{.+1p} command.
 
 @item (1,$)G/@var{re}/
 Interactive global command. Interactively edits the addressed lines
 matching a regular expression @var{re}. For each matching line, the line
 is printed, the current address is set, and the user is prompted to
-enter a @var{command-list}. At the end of the @samp{G} command, the
-current address is set to the last line affected by (the last)
-@var{command-list}.
+enter a @var{command-list}. The final value of the current address is
+the value assigned by the last command executed. If there were no
+matching lines, the current address is unchanged.
 
 The format of @var{command-list} is the same as that of the @samp{g}
 command. A newline alone acts as a null command list. A single @samp{&}
@@ -773,41 +803,47 @@ not printed. It is recommended that ed scripts begin with this command
 to aid in debugging.
 
 @item (.)i
-Inserts text in the buffer before the current line. The address @samp{0}
-(zero) is valid for this command; it is equivalent to address @samp{1}.
-Text is entered in input mode. The current address is set to the last
-line entered.
+Inserts text in the buffer before the addressed line. The address
+@samp{0} (zero) is valid for this command; it is equivalent to address
+@samp{1}. Text is entered in input mode. The current address is set to
+the address of the last line entered or, if there were none, to the
+addressed line.
 
 @item (.,.+1)j
-Joins the addressed lines. The addressed lines are deleted from the
-buffer and replaced by a single line containing their joined text. The
-current address is set to the resultant line.
+Joins the addressed lines, replacing them by a single line containing
+their joined text. If only one address is given, this command does
+nothing. If lines are joined, the current address is set to the address
+of the joined line. Else, the current address is unchanged.
 
 @item (.)kx
 Marks a line with a lower case letter @samp{x}. The line can then be
 addressed as @samp{'x} (i.e., a single quote followed by @samp{x}) in
 subsequent commands. The mark is not cleared until the line is deleted
-or otherwise modified.
+or otherwise modified. The current address is unchanged.
 
 @item (.,.)l
-Prints the addressed lines unambiguously. The end of each line is marked
-with a @samp{$}, and every @samp{$} character within the text is printed
-with a preceding backslash. The current address is set to the last line
-printed.
+List command. Prints the addressed lines unambiguously. The end of each
+line is marked with a @samp{$}, and every @samp{$} character within the
+text is printed with a preceding backslash. Special characters are
+printed as escape sequences. The current address is set to the address
+of the last line printed.
 
 @item (.,.)m(.)
 Moves lines in the buffer. The addressed lines are moved to after the
-right-hand destination address, which may be the address @samp{0}
-(zero). The current address is set to the new address of the last line
-moved.
+right-hand destination address. The destination address @samp{0} (zero)
+is valid for this command; it moves the addressed lines to the beginning
+of the buffer. It is an error if the destination address falls within
+the range of moved lines. The current address is set to the new address
+of the last line moved.
 
 @item (.,.)n
-Prints the addressed lines, preceding each line by its line number and a
-@key{tab}. The current address is set to the last line printed.
+Number command. Prints the addressed lines, preceding each line by its
+line number and a @key{tab}. The current address is set to the address
+of the last line printed.
 
 @item (.,.)p
-Prints the addressed lines. The current address is set to the last line
-printed.
+Prints the addressed lines. The current address is set to the address of
+the last line printed.
 
 @item P
 Toggles the command prompt on and off. Unless a prompt is specified with
@@ -815,69 +851,89 @@ command-line option @samp{-p}, the command prompt is by default turned
 off.
 
 @item q
-Quits @command{ed}.
+Quits @command{ed}. A warning is printed if any changes have been made
+in the buffer since the last @samp{w} command that wrote the entire
+buffer to a file.
 
 @item Q
 Quits @command{ed} unconditionally. This is similar to the @code{q}
 command, except that unwritten changes are discarded without warning.
 
 @item ($)r @var{file}
-Reads @var{file} to after the addressed line. If @var{file} is not
-specified, then the default filename is used. If there is no default
-filename prior to the command, then the default filename is set to
-@var{file}. Otherwise, the default filename is unchanged. The current
-address is set to the last line read.
+Reads @var{file} and appends it after the addressed line. If @var{file}
+is not specified, then the default filename is used. If there is no
+default filename prior to the command, then the default filename is set
+to @var{file}. Otherwise, the default filename is unchanged. The address
+@samp{0} (zero) is valid for this command; it reads the file at the
+beginning of the buffer. The current address is set to the address of
+the last line read or, if there were none, to the addressed line.
 
-@item ($)r !@var{command}
-Reads to after the addressed line the standard output of
-@samp{!command}, (see the @samp{!} command below). The default filename
-is unchanged. The current address is set to the last line read.
+If @var{file} is prefixed with a bang (!), then it is interpreted as a
+shell command whose output is to be read, (@pxref{shell escape command}
+@samp{!} below). In this case the default filename is unchanged.
 
 @item (.,.)s/@var{re}/@var{replacement}/
-@itemx (.,.)s/@var{re}/@var{replacement}/g
-@itemx (.,.)s/@var{re}/@var{replacement}/@var{n}
-Replaces text in the addressed lines matching a regular expression
-@var{re} with @var{replacement}. By default, only the first match in
-each line is replaced. If the @samp{g} (global) suffix is given, then
-every match is replaced. The @var{n} suffix, where @var{n} is a postive
-number, causes only the @var{n}th match to be replaced. It is an error
-if no substitutions are performed on any of the addressed lines. The
-current address is set to the last line affected.
+Substitute command. Replaces text in the addressed lines matching a
+regular expression @var{re} with @var{replacement}. By default, only the
+first match in each line is replaced. The @samp{s} command accepts any
+combination of the suffixes @samp{g}, @samp{@var{count}}, @samp{l},
+@samp{n}, and @samp{p}. If the @samp{g} (global) suffix is given, then
+every match is replaced. The @samp{@var{count}} suffix, where
+@var{count} is a positive number, causes only the @var{count}th match to
+be replaced. @samp{g} and @samp{@var{count}} can't be specified in the
+same command. @samp{l}, @samp{n}, and @samp{p} are the usual print
+suffixes. It is an error if no substitutions are performed on any of the
+addressed lines. The current address is set to the address of the last
+line on which a substitution occurred. If a line is split, a
+substitution is considered to have occurred on each of the new lines. If
+no substitution is performed, the current address is unchanged.
 
 @var{re} and @var{replacement} may be delimited by any character other
 than @key{space}, @key{newline} and the characters used by the form of
-the @samp{s} command shown below. If one or two of the last delimiters
-is omitted, then the last line affected is printed as if the print
-suffix @samp{p} were specified.
+the @samp{s} command shown below. If the last delimiter is omitted, then
+the last line affected is printed as if the print suffix @samp{p} were
+specified. The last delimiter can't be omitted if the @samp{s} command
+is part of a @samp{g} or @samp{v} @var{command-list} and is not the last
+command in the list, because the meaning of the following escaped
+newline becomes ambiguous.
 
 An unescaped @samp{&} in @var{replacement} is replaced by the currently
 matched text. The character sequence @samp{\@var{m}} where @var{m} is a
 number in the range [1,9], is replaced by the @var{m}th backreference
-expression of the matched text. If @var{replacement} consists of a
+expression of the matched text. If the corresponding backreference
+expression does not match, then the character sequence @samp{\@var{m}}
+is replaced by the empty string. If @var{replacement} consists of a
 single @samp{%}, then @var{replacement} from the last substitution is
-used. Newlines may be embedded in @var{replacement} if they are escaped
-with a backslash (@samp{\}).
+used.
+
+A line can be split by including a newline escaped with a backslash
+(@samp{\}) in @var{replacement}, except if the @samp{s} command is part
+of a @samp{g} or @samp{v} @var{command-list}, because in this case the
+meaning of the escaped newline becomes ambiguous. Each backslash in
+@var{replacement} removes the special meaning (if any) of the following
+character.
 
 @item (.,.)s
 Repeats the last substitution. This form of the @samp{s} command accepts
-a count suffix @var{n}, and any combination of the characters @samp{r},
-@samp{g}, and @samp{p}. If a count suffix @var{n} is given, then only
-the @var{n}th match is replaced. The @samp{r} suffix causes the regular
-expression of the last search to be used instead of the that of the last
-substitution. The @samp{g} suffix toggles the global suffix of the last
-substitution. The @samp{p} suffix toggles the print suffix of the last
-substitution. The current address is set to the last line affected.
+the @samp{g} and @samp{@var{count}} suffixes described above, and any
+combination of the suffixes @samp{p} and @samp{r}. The @samp{g} suffix
+toggles the global suffix of the last substitution and resets
+@var{count} to 1. The @samp{p} suffix toggles the print suffixes of the
+last substitution. The @samp{r} suffix causes the regular expression of
+the last search to be used instead of that of the last substitution (if
+the search happened after the substitution).
 
 @item (.,.)t(.)
 Copies (i.e., transfers) the addressed lines to after the right-hand
-destination address, which may be the address @samp{0} (zero). The
-current address is set to the last line copied.
+destination address. If the destination address is @samp{0} (zero), the
+lines are copied at the beginning of the buffer. The current address is
+set to the address of the last line copied.
 
 @item u
-Undoes the last command and restores the current address to what it was
-before the command. The global commands @samp{g}, @samp{G}, @samp{v},
-and @samp{V} are treated as a single command by undo. @samp{u} is its
-own inverse.
+Undoes the effect of the last command that modified anything in the
+buffer and restores the current address to what it was before the
+command. The global commands @samp{g}, @samp{G}, @samp{v}, and @samp{V}
+are treated as a single command by undo. @samp{u} is its own inverse.
 
 @item (1,$)v/@var{re}/@var{command-list}
 This is similar to the @samp{g} command except that it applies
@@ -895,10 +951,12 @@ then the default filename is set to @var{file}, otherwise it is
 unchanged. If no filename is specified, then the default filename is
 used. The current address is unchanged.
 
-@item (1,$)w !@var{command}
-Writes the addressed lines to the standard input of
-@samp{!@var{command}}, (see the @samp{!} command below). The default
-filename and current address are unchanged.
+If @var{file} is prefixed with a bang (!), then it is interpreted as a
+shell command and the addressed lines are written to its standard input,
+(@pxref{shell escape command} @samp{!} below). In this case the default
+filename is unchanged. Writing the buffer to a shell command does not
+prevent the warning to the user if an attempt is made to overwrite or
+discard the buffer via the @samp{e} or @samp{q} commands.
 
 @item (1,$)wq @var{file}
 Writes the addressed lines to @var{file}, and then executes a @samp{q}
@@ -906,33 +964,35 @@ command.
 
 @item (1,$)W @var{file}
 Appends the addressed lines to the end of @var{file}. This is similar to
-the @samp{w} command, expect that the previous contents of file is not
+the @samp{w} command, except that the previous contents of file is not
 clobbered. The current address is unchanged.
 
 @item (.)x
 Copies (puts) the contents of the cut buffer to after the addressed
-line. The current address is set to the last line copied.
+line. The current address is set to the address of the last line copied.
 
 @item (.,.)y
 Copies (yanks) the addressed lines to the cut buffer. The cut buffer is
-overwritten by subsequent @samp{y}, @samp{s}, @samp{j}, @samp{d}, or
-@samp{c} commands. The current address is unchanged.
+overwritten by subsequent @samp{c}, @samp{d}, @samp{j}, @samp{s}, or
+@samp{y} commands. The current address is unchanged.
 
 @item (.+1)z@var{n}
 Scrolls @var{n} lines at a time starting at addressed line, and sets
 window size to @var{n}. If @var{n} is not specified, then the current
 window size is used. Window size defaults to screen size minus two
 lines, or to 22 if screen size can't be determined. The current address
-is set to the last line printed.
+is set to the address of the last line printed.
 
+@anchor{shell escape command}
 @item !@var{command}
-Executes @var{command} via @command{sh (1)}. If the first character of
-@var{command} is @samp{!}, then it is replaced by text of the previous
-@samp{!@var{command}}. @command{ed} does not process @var{command} for
-backslash (@samp{\}) escapes. However, an unescaped @samp{%} is replaced
-by the default filename. When the shell returns from execution, a
-@samp{!} is printed to the standard output. The current line is
-unchanged.
+Shell escape command. Executes @var{command} via @command{sh (1)}. If
+the first character of @var{command} is @samp{!}, then it is replaced by
+the text of the previous @samp{!@var{command}}. Thus, @samp{!!} repeats
+the previous @samp{!@var{command}}. @command{ed} does not process
+@var{command} for backslash (@samp{\}) escapes. However, an unescaped
+@samp{%} is replaced by the default filename. When the shell returns
+from execution, a @samp{!} is printed to the standard output. The
+current address is unchanged.
 
 @item (.,.)#
 Begins a comment; the rest of the line, up to a newline, is ignored. If
@@ -941,12 +1001,13 @@ address is set to that address. Otherwise, the current address is
 unchanged.
 
 @item ($)=
-Prints the line number of the addressed line.
+Prints the line number of the addressed line. The current address is
+unchanged.
 
 @item (.+1)@key{newline}
-An address alone prints the addressed line. A @key{newline} alone is
-equivalent to @samp{+1p}. The current address is set to the address of
-the printed line.
+Null command. An address alone prints the addressed line. A
+@key{newline} alone is equivalent to @samp{+1p}. The current address is
+set to the address of the printed line.
 
 @end table
 
@@ -982,8 +1043,6 @@ command list is executed only once.
 Attempting to quit @command{ed} or edit another file before writing a
 modified buffer results in an error. If the command is entered a second
 time, it succeeds, but any changes to the buffer are lost.
-
-Exit status: 0 if no errors occurred; otherwise >0.
 
 
 @node Problems
