@@ -6,7 +6,7 @@
 # to copy, distribute and modify it.
 
 pkgname=ed
-pkgversion=1.14.1
+pkgversion=1.14.2
 progname=ed
 srctrigger=doc/${pkgname}.texi
 
@@ -27,11 +27,11 @@ CFLAGS='-Wall -W -O2'
 LDFLAGS=
 
 # checking whether we are using GNU C.
-if /bin/sh -c "${CC} --version" > /dev/null 2>&1 ; then true
-else
+/bin/sh -c "${CC} --version" > /dev/null 2>&1 ||
+	{
 	CC=cc
-	CFLAGS='-W -O2'
-fi
+	CFLAGS=-O2
+	}
 
 # Loop over all args
 args=
@@ -53,7 +53,10 @@ while [ $# != 0 ] ; do
 	# Process the options
 	case ${option} in
 	--help | -h)
-		echo "Usage: configure [options]"
+		echo "Usage: $0 [OPTION]... [VAR=VALUE]..."
+		echo
+		echo "To assign makefile variables (e.g., CC, CFLAGS...), specify them as"
+		echo "arguments to configure in the form VAR=VALUE."
 		echo
 		echo "Options: [defaults in brackets]"
 		echo "  -h, --help            display this help and exit"

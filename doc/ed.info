@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.14.1, 10 January 2017).
+This manual is for GNU ed (version 1.14.2, 22 February 2017).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
@@ -355,9 +355,9 @@ prefixed with a bang.
 '-s'
 '--quiet'
 '--silent'
-     Suppresses the printing of byte counts by 'e', 'E', 'r', and 'w'
-     commands and of the '!' prompt after a '!' command. This option
-     may be useful if 'ed''s standard input is from a script.
+     Suppresses diagnostics, the printing of byte counts by 'e', 'E',
+     'r' and 'w' commands, and the '!' prompt after a '!' command. This
+     option may be useful if 'ed''s standard input is from a script.
 
 '-v'
 '--verbose'
@@ -1477,17 +1477,17 @@ permit their use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview2197
-Node: Introduction to line editing4253
-Node: Invoking ed11526
-Node: Line addressing13518
-Node: Regular expressions17231
-Node: Commands22575
-Ref: shell escape command36484
-Node: Limitations37506
-Node: Diagnostics38151
-Node: Problems38796
-Node: GNU Free Documentation License39329
+Node: Overview2198
+Node: Introduction to line editing4254
+Node: Invoking ed11527
+Node: Line addressing13529
+Node: Regular expressions17242
+Node: Commands22586
+Ref: shell escape command36495
+Node: Limitations37517
+Node: Diagnostics38162
+Node: Problems38807
+Node: GNU Free Documentation License39340
 
 End Tag Table
 

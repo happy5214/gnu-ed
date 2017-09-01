@@ -112,6 +112,7 @@ bool is_regular_file( const int fd );
 bool may_access_filename( const char * const name );
 bool restricted( void );
 bool scripted( void );
+void show_strerror( const char * const filename, const int errcode );
 bool traditional( void );
 
 /* defined in main_loop.c */
@@ -120,7 +121,6 @@ void set_def_filename( const char * const s );
 void set_error_msg( const char * msg );
 void set_prompt( const char * const s );
 void set_verbose( void );
-void show_strerror( const char * const filename, const int errcode );
 void unmark_line_node( const line_t * const lp );
 
 /* defined in regex.c */

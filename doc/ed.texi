@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 10 January 2017
-@set VERSION 1.14.1
+@set UPDATED 22 February 2017
+@set VERSION 1.14.2
 
 @dircategory Basics
 @direntry
@@ -409,10 +409,10 @@ current directory and execution of shell commands.
 @item -s
 @itemx --quiet
 @itemx --silent
-Suppresses the printing of byte counts by @samp{e}, @samp{E}, @samp{r},
-and @samp{w} commands and of the @samp{!} prompt after a @samp{!}
-command. This option may be useful if @command{ed}'s standard input is
-from a script.
+Suppresses diagnostics, the printing of byte counts by @samp{e},
+@samp{E}, @samp{r} and @samp{w} commands, and the @samp{!} prompt after
+a @samp{!} command. This option may be useful if @command{ed}'s standard
+input is from a script.
 
 @item -v
 @itemx --verbose

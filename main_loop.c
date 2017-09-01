@@ -683,16 +683,6 @@ static void script_error( void )
   }
 
 
-void show_strerror( const char * const filename, const int errcode )
-  {
-  if( verbose )
-    {
-    if( filename && filename[0] ) fprintf( stderr, "%s: ", filename );
-    fprintf( stderr, "%s\n", strerror( errcode ) );
-    }
-  }
-
-
 int main_loop( const bool loose )
   {
   extern jmp_buf jmp_state;
