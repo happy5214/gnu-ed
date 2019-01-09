@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006-2017 Antonio Diaz Diaz.
+    Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,9 +42,8 @@
 #include "ed.h"
 
 
-static const char * const Program_name = "GNU Ed";
 static const char * const program_name = "ed";
-static const char * const program_year = "2017";
+static const char * const program_year = "2019";
 static const char * invocation_name = 0;
 
 static bool restricted_ = false;	/* if set, run in restricted mode */
@@ -60,8 +59,14 @@ bool traditional( void ) { return traditional_; }
 
 static void show_help( void )
   {
-  printf( "%s - The GNU line editor.\n", Program_name );
-  printf( "\nUsage: %s [options] [file]\n", invocation_name );
+  printf( "GNU ed is a line-oriented text editor. It is used to create, display,\n"
+          "modify and otherwise manipulate text files, both interactively and via\n"
+          "shell scripts. A restricted version of ed, red, can only edit files in\n"
+          "the current directory and cannot execute shell commands. Ed is the\n"
+          "'standard' text editor in the sense that it is the original editor for\n"
+          "Unix, and thus widely available. For most purposes, however, it is\n"
+          "superseded by full-screen editors such as GNU Emacs or GNU Moe.\n"
+          "\nUsage: %s [options] [file]\n", invocation_name );
   printf( "\nOptions:\n"
           "  -h, --help                 display this help and exit\n"
           "  -V, --version              output version information and exit\n"
@@ -107,11 +112,9 @@ void show_strerror( const char * const filename, const int errcode )
 static void show_error( const char * const msg, const int errcode, const bool help )
   {
   if( msg && msg[0] )
-    {
-    fprintf( stderr, "%s: %s", program_name, msg );
-    if( errcode > 0 ) fprintf( stderr, ": %s", strerror( errcode ) );
-    fputc( '\n', stderr );
-    }
+    fprintf( stderr, "%s: %s%s%s\n", program_name, msg,
+             ( errcode > 0 ) ? ": " : "",
+             ( errcode > 0 ) ? strerror( errcode ) : "" );
   if( help )
     fprintf( stderr, "Try '%s --help' for more information.\n",
              invocation_name );

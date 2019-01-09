@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 22 February 2017
-@set VERSION 1.14.2
+@set UPDATED 1 January 2019
+@set VERSION 1.15
 
 @dircategory Basics
 @direntry
@@ -15,8 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2017
-Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2019 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -50,7 +49,7 @@ GNU ed is a line-oriented text editor. It is used to create, display,
 modify and otherwise manipulate text files, both interactively and via
 shell scripts. A restricted version of ed, red, can only edit files in
 the current directory and cannot execute shell commands. Ed is the
-"standard" text editor in the sense that it is the original editor for
+'standard' text editor in the sense that it is the original editor for
 Unix, and thus widely available. For most purposes, however, it is
 superseded by full-screen editors such as GNU Emacs or GNU Moe.
 @end ifnottex
@@ -382,6 +381,7 @@ Print an informative help message describing the options and exit.
 @item -V
 @itemx --version
 Print the version number of @command{ed} on the standard output and exit.
+This version number should be included in all bug reports.
 
 @item -G
 @itemx --traditional
@@ -435,8 +435,8 @@ of the file. In general, the current address is set to the address of
 the last line affected by a command.
 
 One exception to the rule that addresses represent line numbers is the
-address @samp{0} (zero). This means "before the first line", and is
-valid wherever it makes sense.
+address @samp{0} (zero). This means "at the beginning of the buffer",
+and is valid wherever it makes sense.
 
 An address range is two addresses separated either by a comma (@samp{,})
 or a semicolon (@samp{;}). In a semicolon-delimited range, the current
@@ -493,12 +493,12 @@ address range @samp{.;$}.
 @item /@var{re}/
 The next line containing the regular expression @var{re}. The search
 wraps to the beginning of the buffer and continues down to the current
-line, if necessary. A null @var{re} @samp{//} repeats the last search.
+line, if necessary.
 
 @item ?@var{re}?
 The previous line containing the regular expression @var{re}. The search
 wraps to the end of the buffer and continues up to the current line, if
-necessary. A null @var{re} @samp{??} repeats the last search.
+necessary.
 
 @item 'x
 The apostrophe-x character pair addresses the line previously marked by
@@ -546,11 +546,15 @@ prints all lines containing @var{string}. Regular expressions are also
 used by the @samp{s} command for selecting old text to be replaced with
 new text.
 
-In addition to a specifying string literals, regular expressions can
+In addition to specifying string literals, regular expressions can
 represent classes of strings. Strings thus represented are said to be
 matched by the corresponding regular expression. If it is possible for a
 regular expression to match several strings in a line, then the
-left-most longest match is the one selected.
+left-most match is the one selected. If the regular expression permits a
+variable number of matching characters, the longest sequence starting at
+that point is matched.
+
+A null @var{re} is equivalent to the last @var{re} encountered.
 
 The following symbols are used in constructing regular expressions:
 
@@ -623,8 +627,9 @@ the @var{n}th subexpression. For example, the regular expression
 delimiter.
 
 @item *
-Matches the single character regular expression or subexpression
-immediately preceding it zero or more times. If @samp{*} is the first
+Matches zero or more repetitions of the regular expression immediately
+preceding it. The regular expression can be either a single character
+regular expression or a subexpression. If @samp{*} is the first
 character of a regular expression or subexpression, then it matches
 itself. The @samp{*} operator sometimes yields unexpected results. For
 example, the regular expression @samp{b*} matches the beginning of the
@@ -670,7 +675,7 @@ expressions or subexpression, then it matches a literal @samp{?}.
 @item \+
 Matches the single character regular expression or subexpression
 immediately preceding it one or more times. So the regular expression
-@samp{a+} is shorthand for @samp{aa*}. If @samp{\+} occurs at the
+@samp{a\+} is shorthand for @samp{aa*}. If @samp{\+} occurs at the
 beginning of a regular expression or subexpression, then it matches a
 literal @samp{+}.
 
@@ -705,7 +710,8 @@ commands accept a print suffix, which is any of @samp{p} (print),
 @samp{l} (list), or @samp{n} (enumerate), to print the last line
 affected by the command. It is not portable to give more than one print
 suffix, but @command{ed} allows any combination of non-repeated print
-suffixes and combines their effects.
+suffixes and combines their effects. If any suffix letter is given, it
+must immediately follow the command.
 
 An interrupt (typically @key{Control-C}) has the effect of aborting the
 current command and returning the editor to command mode.
@@ -804,10 +810,10 @@ to aid in debugging.
 
 @item (.)i
 Inserts text in the buffer before the addressed line. The address
-@samp{0} (zero) is valid for this command; it is equivalent to address
-@samp{1}. Text is entered in input mode. The current address is set to
-the address of the last line entered or, if there were none, to the
-addressed line.
+@samp{0} (zero) is valid for this command; it places the entered text at
+the beginning of the buffer. Text is entered in input mode. The current
+address is set to the address of the last line entered or, if there were
+none, to the addressed line.
 
 @item (.,.+1)j
 Joins the addressed lines, replacing them by a single line containing
@@ -895,7 +901,7 @@ the last line affected is printed as if the print suffix @samp{p} were
 specified. The last delimiter can't be omitted if the @samp{s} command
 is part of a @samp{g} or @samp{v} @var{command-list} and is not the last
 command in the list, because the meaning of the following escaped
-newline becomes ambiguous.
+newline would become ambiguous.
 
 An unescaped @samp{&} in @var{replacement} is replaced by the currently
 matched text. The character sequence @samp{\@var{m}} where @var{m} is a
@@ -907,11 +913,8 @@ single @samp{%}, then @var{replacement} from the last substitution is
 used.
 
 A line can be split by including a newline escaped with a backslash
-(@samp{\}) in @var{replacement}, except if the @samp{s} command is part
-of a @samp{g} or @samp{v} @var{command-list}, because in this case the
-meaning of the escaped newline becomes ambiguous. Each backslash in
-@var{replacement} removes the special meaning (if any) of the following
-character.
+(@samp{\}) in @var{replacement}. Each backslash in @var{replacement}
+removes the special meaning (if any) of the following character.
 
 @item (.,.)s
 Repeats the last substitution. This form of the @samp{s} command accepts
@@ -919,8 +922,8 @@ the @samp{g} and @samp{@var{count}} suffixes described above, and any
 combination of the suffixes @samp{p} and @samp{r}. The @samp{g} suffix
 toggles the global suffix of the last substitution and resets
 @var{count} to 1. The @samp{p} suffix toggles the print suffixes of the
-last substitution. The @samp{r} suffix causes the regular expression of
-the last search to be used instead of that of the last substitution (if
+last substitution. The @samp{r} suffix causes the @var{re} of the last
+search to be used instead of the @var{re} of the last substitution (if
 the search happened after the substitution).
 
 @item (.,.)t(.)

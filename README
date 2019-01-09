@@ -4,7 +4,7 @@ GNU ed is a line-oriented text editor. It is used to create, display,
 modify and otherwise manipulate text files, both interactively and via
 shell scripts. A restricted version of ed, red, can only edit files in
 the current directory and cannot execute shell commands. Ed is the
-"standard" text editor in the sense that it is the original editor for
+'standard' text editor in the sense that it is the original editor for
 Unix, and thus widely available. For most purposes, however, it is
 superseded by full-screen editors such as GNU Emacs or GNU Moe.
 
@@ -12,7 +12,7 @@ Extensions to and deviations from the POSIX standard are described below.
 
 See the file INSTALL for compilation and installation instructions.
 
-Try "ed --help" for usage instructions.
+Try 'ed --help' for usage instructions.
 
 Report bugs to bug-ed@gnu.org
 
@@ -127,7 +127,7 @@ or:
 
 
 Copyright (C) 1993, 1994 Andrew Moore
-Copyright (C) 2006-2017 Antonio Diaz Diaz.
+Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute and modify it.

@@ -1,3 +1,15 @@
+2019-01-01  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.15 released.
+	* io.c (print_line): Make 'l' command print '\\' before every
+	  '$' within the text. (Reported by Ori Avtalion).
+	* main_loop.c (extract_addresses): Fixed address ',,' to mean
+	  '$,$' instead of '1,$'. (Reported by Matthieu Felix).
+	* regex.c (extract_replacement): Allow newlines even if global.
+	* main_loop.c (exec_command): Make 'c' command reject address 0.
+	* ed.texi: Minor fixes.
+	* configure: Accept appending to CFLAGS, 'CFLAGS+=OPTIONS'.
+
 2017-02-22  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.14.2 released.
@@ -111,10 +123,10 @@
 	  them in the list were ignored).
 	* main_loop.c (exec_command): Fixed 'e' command.
 	  (It quitted when invoked a second time with a modified buffer).
-	* main.c: Added new option '--restricted'.
+	* main.c: Added new option '-r, --restricted'.
 	* 'red' has been converted to a script invoking 'ed --restricted'.
 	* Description of ed in the manual has been changed.
-	* testsuite: Modified some tests and removed obsolete posix tests.
+	* testsuite: Modified some tests and removed obsolete POSIX tests.
 	* main_loop.c: 'ibufp' variable made local to main_loop.
 	* Defined type bool to make clear which functions and variables
 	  are Boolean.
@@ -205,10 +217,11 @@
 	* Version 0.3 released.
 	* buffer.c (open_sbuf): Fixed symlink vulnerability using 'tmpfile'.
 	* signal.c: Fixed signal handling for SIGINT.
-	* main_loop.c (exec_command): Fixed 'c' and 'i' commands with
-	  address 0.
+	* main_loop.c (exec_command): Modified 'c' and 'i' commands to
+	  treat address 0 a synonym for address 1, as per POSIX.
 	* The pause mode has been removed.
-	* main.c: Added new options '--loose-exit-status' and '--verbose'.
+	* main.c: Added new option '-l, --loose-exit-status'.
+	* main.c: Added new option '-v, --verbose'.
 	* carg_parser.c: New argument parser that replaces 'getopt_long'.
 	* 'configure' and 'Makefile.in' have been replaced.
 	* Removed recursive make for testsuite.
@@ -266,7 +279,7 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew Moore
-Copyright (C) 2006-2017 Antonio Diaz Diaz.
+Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable,
 but just in case, you have unlimited permission to copy, distribute and

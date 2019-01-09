@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2019 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -18,14 +18,14 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.14.2, 22 February 2017).
+This manual is for GNU ed (version 1.15, 1 January 2019).
 
 
    GNU ed is a line-oriented text editor. It is used to create, display,
 modify and otherwise manipulate text files, both interactively and via
 shell scripts. A restricted version of ed, red, can only edit files in
 the current directory and cannot execute shell commands. Ed is the
-"standard" text editor in the sense that it is the original editor for
+'standard' text editor in the sense that it is the original editor for
 Unix, and thus widely available. For most purposes, however, it is
 superseded by full-screen editors such as GNU Emacs or GNU Moe.
 
@@ -43,7 +43,7 @@ superseded by full-screen editors such as GNU Emacs or GNU Moe.
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2017 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2019 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -328,6 +328,7 @@ prefixed with a bang.
 '-V'
 '--version'
      Print the version number of 'ed' on the standard output and exit.
+     This version number should be included in all bug reports.
 
 '-G'
 '--traditional'
@@ -381,8 +382,8 @@ file. In general, the current address is set to the address of the last
 line affected by a command.
 
    One exception to the rule that addresses represent line numbers is
-the address '0' (zero). This means "before the first line", and is
-valid wherever it makes sense.
+the address '0' (zero). This means "at the beginning of the buffer",
+and is valid wherever it makes sense.
 
    An address range is two addresses separated either by a comma (',')
 or a semicolon (';'). In a semicolon-delimited range, the current
@@ -437,12 +438,12 @@ requires zero addresses.
 '/RE/'
      The next line containing the regular expression RE. The search
      wraps to the beginning of the buffer and continues down to the
-     current line, if necessary. A null RE '//' repeats the last search.
+     current line, if necessary.
 
 '?RE?'
      The previous line containing the regular expression RE. The search
      wraps to the end of the buffer and continues up to the current
-     line, if necessary. A null RE '??' repeats the last search.
+     line, if necessary.
 
 ''x'
      The apostrophe-x character pair addresses the line previously
@@ -482,11 +483,15 @@ the 'ed' command
 prints all lines containing STRING. Regular expressions are also used
 by the 's' command for selecting old text to be replaced with new text.
 
-   In addition to a specifying string literals, regular expressions can
+   In addition to specifying string literals, regular expressions can
 represent classes of strings. Strings thus represented are said to be
 matched by the corresponding regular expression. If it is possible for a
 regular expression to match several strings in a line, then the
-left-most longest match is the one selected.
+left-most match is the one selected. If the regular expression permits a
+variable number of matching characters, the longest sequence starting at
+that point is matched.
+
+   A null RE is equivalent to the last RE encountered.
 
    The following symbols are used in constructing regular expressions:
 
@@ -548,13 +553,14 @@ left-most longest match is the one selected.
      ordered relative to their left delimiter.
 
 '*'
-     Matches the single character regular expression or subexpression
-     immediately preceding it zero or more times. If '*' is the first
-     character of a regular expression or subexpression, then it matches
-     itself. The '*' operator sometimes yields unexpected results. For
-     example, the regular expression 'b*' matches the beginning of the
-     string 'abbb', as opposed to the substring 'bbb', since a null
-     match is the only left-most match.
+     Matches zero or more repetitions of the regular expression
+     immediately preceding it. The regular expression can be either a
+     single character regular expression or a subexpression. If '*' is
+     the first character of a regular expression or subexpression, then
+     it matches itself. The '*' operator sometimes yields unexpected
+     results. For example, the regular expression 'b*' matches the
+     beginning of the string 'abbb', as opposed to the substring 'bbb',
+     since a null match is the only left-most match.
 
 '\{N,M\}'
 '\{N,\}'
@@ -594,7 +600,7 @@ distinguish them from traditional 'ed' syntax.
 '\+'
      Matches the single character regular expression or subexpression
      immediately preceding it one or more times. So the regular
-     expression 'a+' is shorthand for 'aa*'. If '\+' occurs at the
+     expression 'a\+' is shorthand for 'aa*'. If '\+' occurs at the
      beginning of a regular expression or subexpression, then it
      matches a literal '+'.
 
@@ -629,7 +635,8 @@ commands accept a print suffix, which is any of 'p' (print), 'l'
 (list), or 'n' (enumerate), to print the last line affected by the
 command. It is not portable to give more than one print suffix, but
 'ed' allows any combination of non-repeated print suffixes and combines
-their effects.
+their effects. If any suffix letter is given, it must immediately
+follow the command.
 
    An interrupt (typically <Control-C>) has the effect of aborting the
 current command and returning the editor to command mode.
@@ -728,10 +735,10 @@ specified (in parenthesis).
 
 '(.)i'
      Inserts text in the buffer before the addressed line. The address
-     '0' (zero) is valid for this command; it is equivalent to address
-     '1'. Text is entered in input mode. The current address is set to
-     the address of the last line entered or, if there were none, to the
-     addressed line.
+     '0' (zero) is valid for this command; it places the entered text at
+     the beginning of the buffer. Text is entered in input mode. The
+     current address is set to the address of the last line entered or,
+     if there were none, to the addressed line.
 
 '(.,.+1)j'
      Joins the addressed lines, replacing them by a single line
@@ -822,7 +829,7 @@ specified (in parenthesis).
      specified. The last delimiter can't be omitted if the 's' command
      is part of a 'g' or 'v' COMMAND-LIST and is not the last command
      in the list, because the meaning of the following escaped newline
-     becomes ambiguous.
+     would become ambiguous.
 
      An unescaped '&' in REPLACEMENT is replaced by the currently
      matched text. The character sequence '\M' where M is a number in
@@ -833,10 +840,8 @@ specified (in parenthesis).
      REPLACEMENT from the last substitution is used.
 
      A line can be split by including a newline escaped with a backslash
-     ('\') in REPLACEMENT, except if the 's' command is part of a 'g'
-     or 'v' COMMAND-LIST, because in this case the meaning of the
-     escaped newline becomes ambiguous. Each backslash in REPLACEMENT
-     removes the special meaning (if any) of the following character.
+     ('\') in REPLACEMENT. Each backslash in REPLACEMENT removes the
+     special meaning (if any) of the following character.
 
 '(.,.)s'
      Repeats the last substitution. This form of the 's' command accepts
@@ -844,9 +849,9 @@ specified (in parenthesis).
      of the suffixes 'p' and 'r'. The 'g' suffix toggles the global
      suffix of the last substitution and resets COUNT to 1. The 'p'
      suffix toggles the print suffixes of the last substitution. The
-     'r' suffix causes the regular expression of the last search to be
-     used instead of that of the last substitution (if the search
-     happened after the substitution).
+     'r' suffix causes the RE of the last search to be used instead of
+     the RE of the last substitution (if the search happened after the
+     substitution).
 
 '(.,.)t(.)'
      Copies (i.e., transfers) the addressed lines to after the
@@ -1477,17 +1482,17 @@ permit their use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview2198
-Node: Introduction to line editing4254
-Node: Invoking ed11527
-Node: Line addressing13529
-Node: Regular expressions17242
-Node: Commands22586
-Ref: shell escape command36495
-Node: Limitations37517
-Node: Diagnostics38162
-Node: Problems38807
-Node: GNU Free Documentation License39340
+Node: Overview2194
+Node: Introduction to line editing4250
+Node: Invoking ed11523
+Node: Line addressing13589
+Node: Regular expressions17231
+Node: Commands22829
+Ref: shell escape command36677
+Node: Limitations37699
+Node: Diagnostics38344
+Node: Problems38989
+Node: GNU Free Documentation License39522
 
 End Tag Table
 

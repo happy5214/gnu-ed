@@ -1,6 +1,6 @@
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2017 Antonio Diaz Diaz.
+    Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -237,6 +237,7 @@ static int extract_addresses( const char ** const ibufpp )
                   if( first_addr < 0 )
                     { first_addr = ( ( ch == ';' ) ? current_addr() : 1 );
                       second_addr = last_addr(); }
+                  else first_addr = second_addr;
                   }
                 else
                   {
@@ -354,7 +355,7 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
   {
   static int pflags = 0;	/* print suffixes */
   static int gmask = GPR;	/* the print suffixes to be toggled */
-  static int snum = 1;	/* > 0 count, <= 0 global substitute */
+  static int snum = 1;		/* > 0 count, <= 0 global substitute */
   enum Sflags {
     SGG = 0x01,		/* complement previous global substitute suffix */
     SGP = 0x02,		/* complement previous print suffix */
@@ -433,9 +434,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( !append_lines( ibufpp, second_addr, false, isglobal ) )
                 return ERR;
               break;
-    case 'c': if( first_addr == 0 ) first_addr = 1;
-              if( second_addr == 0 ) second_addr = 1;
-              if( !check_addr_range2( addr_cnt ) ||
+    case 'c': if( !check_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags, 0 ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
               if( !delete_lines( first_addr, second_addr, isglobal ) ||
@@ -614,7 +613,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                    !print_lines( second_addr, second_addr, 0 ) )
                 return ERR;
               break;
-    case '#': while( *(*ibufpp)++ != '\n' ) ;
+    case '#': while( *(*ibufpp)++ != '\n' ) {}
               break;
     default : set_error_msg( "Unknown command" ); return ERR;
     }

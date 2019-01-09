@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2017 Antonio Diaz Diaz.
+    Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ int linenum( void ) { return linenum_; }
 /* print text to stdout */
 static void print_line( const char * p, int len, const int pflags )
   {
-  const char escapes[] = "\a\b\f\n\r\t\v\\";
-  const char escchars[] = "abfnrtv\\";
+  const char escapes[] = "\a\b\f\n\r\t\v";
+  const char escchars[] = "abfnrtv";
   int col = 0;
 
   if( pflags & GNP ) { printf( "%d\t", current_addr() ); col = 8; }
@@ -54,7 +54,9 @@ static void print_line( const char * p, int len, const int pflags )
     else
       {
       if( ++col > window_columns() ) { col = 1; fputs( "\\\n", stdout ); }
-      if( ch >= 32 && ch <= 126 && ch != '\\' ) putchar( ch );
+      if( ch >= 32 && ch <= 126 )
+        { if( ch == '$' || ch == '\\' ) { ++col; putchar('\\'); }
+          putchar( ch ); }
       else
         {
         char * const p = strchr( escapes, ch );
@@ -105,6 +107,7 @@ static bool trailing_escape( const char * const s, int len )
 
 /* If *ibufpp contains an escaped newline, get an extended line (one
    with escaped newlines) from stdin.
+   The backslashes escaping the newlines are stripped.
    Return line length in *lenp, including the trailing newline. */
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines )
@@ -116,7 +119,7 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
   for( len = 0; (*ibufpp)[len++] != '\n'; ) ;
   if( len < 2 || !trailing_escape( *ibufpp, len - 1 ) )
     { if( lenp ) *lenp = len; return true; }
-  if( !resize_buffer( &buf, &bufsz, len ) ) return false;
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return false;
   memcpy( buf, *ibufpp, len );
   --len; buf[len-1] = '\n';			/* strip trailing esc */
   if( strip_escaped_newlines ) --len;		/* strip newline */
@@ -126,14 +129,13 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
     const char * const s = get_stdin_line( &len2 );
     if( !s ) return false;			/* error */
     if( len2 <= 0 ) return false;		/* EOF */
-    if( !resize_buffer( &buf, &bufsz, len + len2 ) ) return false;
+    if( !resize_buffer( &buf, &bufsz, len + len2 + 1 ) ) return false;
     memcpy( buf + len, s, len2 );
     len += len2;
     if( len2 < 2 || !trailing_escape( buf, len - 1 ) ) break;
     --len; buf[len-1] = '\n';			/* strip trailing esc */
     if( strip_escaped_newlines ) --len;		/* strip newline */
     }
-  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return false;
   buf[len] = 0;
   *ibufpp = buf;
   if( lenp ) *lenp = len;

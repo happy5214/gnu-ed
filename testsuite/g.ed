@@ -26,6 +26,12 @@ g/xxx/1d
 ;j
 g/heLp! world//caos/d\
 -;/order/;d
+# split lines
+g/./s/hello world/hello\
+world/
+# use replacement from last substitution
+g/./s/animated/%/
+g/./s/difficulty/%
 # to be undone
 g/./s//x/g
 u

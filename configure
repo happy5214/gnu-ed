@@ -1,12 +1,12 @@
 #! /bin/sh
 # configure script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2017 Antonio Diaz Diaz.
+# Copyright (C) 2006-2019 Antonio Diaz Diaz.
 #
 # This configure script is free software: you have unlimited permission
 # to copy, distribute and modify it.
 
 pkgname=ed
-pkgversion=1.14.2
+pkgversion=1.15
 progname=ed
 srctrigger=doc/${pkgname}.texi
 
@@ -58,7 +58,7 @@ while [ $# != 0 ] ; do
 		echo "To assign makefile variables (e.g., CC, CFLAGS...), specify them as"
 		echo "arguments to configure in the form VAR=VALUE."
 		echo
-		echo "Options: [defaults in brackets]"
+		echo "Options and variables: [defaults in brackets]"
 		echo "  -h, --help            display this help and exit"
 		echo "  -V, --version         output version information and exit"
 		echo "  --srcdir=DIR          find the sources in DIR [. or ..]"
@@ -72,6 +72,7 @@ while [ $# != 0 ] ; do
 		echo "  CC=COMPILER           C compiler to use [${CC}]"
 		echo "  CPPFLAGS=OPTIONS      command line options for the preprocessor [${CPPFLAGS}]"
 		echo "  CFLAGS=OPTIONS        command line options for the C compiler [${CFLAGS}]"
+		echo "  CFLAGS+=OPTIONS       append options to the current value of CFLAGS"
 		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
 		echo
 		exit 0 ;;
@@ -97,10 +98,11 @@ while [ $# != 0 ] ; do
 	--program-prefix=*) program_prefix=${optarg} ;;
 	--no-create)              no_create=yes ;;
 
-	CC=*)             CC=${optarg} ;;
-	CPPFLAGS=*) CPPFLAGS=${optarg} ;;
-	CFLAGS=*)     CFLAGS=${optarg} ;;
-	LDFLAGS=*)   LDFLAGS=${optarg} ;;
+	CC=*)              CC=${optarg} ;;
+	CPPFLAGS=*)  CPPFLAGS=${optarg} ;;
+	CFLAGS=*)      CFLAGS=${optarg} ;;
+	CFLAGS+=*)     CFLAGS="${CFLAGS} ${optarg}" ;;
+	LDFLAGS=*)    LDFLAGS=${optarg} ;;
 
 	--*)
 		echo "configure: WARNING: unrecognized option: '${option}'" 1>&2 ;;
@@ -173,7 +175,7 @@ echo "LDFLAGS = ${LDFLAGS}"
 rm -f Makefile
 cat > Makefile << EOF
 # Makefile for GNU ed - The GNU line editor
-# Copyright (C) 2006-2017 Antonio Diaz Diaz.
+# Copyright (C) 2006-2019 Antonio Diaz Diaz.
 # This file was generated automatically by configure. Don't edit.
 #
 # This Makefile is free software: you have unlimited permission

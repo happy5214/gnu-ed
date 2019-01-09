@@ -1,7 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2017 Antonio Diaz Diaz.
+    Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 
 #include <stddef.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,7 +209,8 @@ int next_matching_node_addr( const char ** const ibufpp, const bool forward )
   }
 
 
-/* extract substitution replacement from the command buffer */
+/* Extract substitution replacement from the command buffer.
+   If isglobal, newlines in command-list are unescaped. */
 bool extract_replacement( const char ** const ibufpp, const bool isglobal )
   {
   static char * buf = 0;		/* temporary buffer */
@@ -221,7 +221,9 @@ bool extract_replacement( const char ** const ibufpp, const bool isglobal )
   if( delimiter == '\n' )
     { set_error_msg( "Missing pattern delimiter" ); return false; }
   ++*ibufpp;
-  if( **ibufpp == '%' && ( (*ibufpp)[1] == delimiter || (*ibufpp)[1] == '\n' ) )
+  if( **ibufpp == '%' &&		/* replacement is a single '%' */
+      ( (*ibufpp)[1] == delimiter ||
+        ( (*ibufpp)[1] == '\n' && ( !isglobal || (*ibufpp)[2] == 0 ) ) ) )
     {
     ++*ibufpp;
     if( !rbuf ) { set_error_msg( "No previous substitution" ); return false; }
@@ -229,12 +231,7 @@ bool extract_replacement( const char ** const ibufpp, const bool isglobal )
     }
   while( **ibufpp != delimiter )
     {
-    if( **ibufpp == '\n' )
-      {
-      if( isglobal && (*ibufpp)[1] != 0 )
-        { set_error_msg( "Invalid newline substitution" ); return false; }
-      break;
-      }
+    if( **ibufpp == '\n' && ( !isglobal || (*ibufpp)[1] == 0 ) ) break;
     if( !resize_buffer( &buf, &bufsz, i + 2 ) ) return false;
     if( ( buf[i++] = *(*ibufpp)++ ) == '\\' &&
         ( buf[i++] = *(*ibufpp)++ ) == '\n' && !isglobal )
@@ -264,28 +261,28 @@ static int replace_matched_text( char ** txtbufp, int * const txtbufszp,
                                  const regmatch_t * const rm, int offset,
                                  const int re_nsub )
   {
-  const char * sub = rbuf;
+  int i;
 
-  for( ; sub - rbuf < rlen; ++sub )
+  for( i = 0 ; i < rlen; ++i )
     {
     int n;
-    if( *sub == '&' )
+    if( rbuf[i] == '&' )
       {
       int j = rm[0].rm_so; int k = rm[0].rm_eo;
       if( !resize_buffer( txtbufp, txtbufszp, offset + k - j ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
-    else if( *sub == '\\' && *++sub >= '1' && *sub <= '9' &&
-             ( n = *sub - '0' ) <= re_nsub )
+    else if( rbuf[i] == '\\' && rbuf[++i] >= '1' && rbuf[i] <= '9' &&
+             ( n = rbuf[i] - '0' ) <= re_nsub )
       {
       int j = rm[n].rm_so; int k = rm[n].rm_eo;
       if( !resize_buffer( txtbufp, txtbufszp, offset + k - j ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
-    else
+    else		/* preceding 'if' skipped escaping backslashes */
       {
       if( !resize_buffer( txtbufp, txtbufszp, offset + 1 ) ) return -1;
-      (*txtbufp)[offset++] = *sub;
+      (*txtbufp)[offset++] = rbuf[i];
       }
     }
   if( !resize_buffer( txtbufp, txtbufszp, offset + 1 ) ) return -1;

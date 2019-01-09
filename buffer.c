@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2017 Antonio Diaz Diaz.
+    Copyright (C) 2006-2019 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ static line_t * dup_line_node( line_t * const lp )
 
 
 /* Insert text from stdin (or from command buffer if global) to after
-   line n; stop when either a single period is read or EOF.
+   line n; stop when either a single period is read or at EOF.
    Returns false if insertion fails. */
 bool append_lines( const char ** const ibufpp, const int addr,
                    bool insert, const bool isglobal )

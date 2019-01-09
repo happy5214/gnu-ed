@@ -1,68 +1,24 @@
-Changes in version 1.14:
+Changes in version 1.15:
 
-Version 1.14 is the largest bug hunt ever attempted in GNU ed. Other
-goals of version 1.14 are to complete the documentation and to remove
-any gratuitous incompatibilities with the POSIX standard. Thanks to Ori
-Avtalion for initiating all this with a couple bug reports. ;-)
+The list command has been fixed to print a backslash before every '$'
+character within the text. (Reported by Ori Avtalion).
 
-Byte counts, informative messages, command error messages, and the '?'
-and '!' prompts are now written to stdout instead of to stderr. The
-standard error (stderr) is now used only for diagnostic messages.
+Address ',,' has been fixed to mean '$,$' instead of '1,$'.
+(Reported by Matthieu Felix).
 
-The current address is now correctly set to the addressed line after an
-empty insert command.
+A 's' command that is part of a 'g' or 'v' command-list can again split
+a line by including a newline escaped with a backslash '\' in the
+replacement string. For this to work, the closing delimiter of the
+replacement string can't be omitted unless the 's' command is the last
+command in the list, because otherwise the meaning of the escaped
+newline would become ambiguous.
 
-Fixed inconsistent behavior of the substitute command. It incorrectly
-reported 'Invalid pattern delimiter' when the two last delimiters were
-omitted after a null regular expression. Now it consistently reports
-'Missing pattern delimiter' if the two last delimiters are omitted after
-any regular expression (null or not).
+Following a recent change in the POSIX standard, the 'c' command no
+longer accepts an address of 0, and the documentation for the 'i'
+command now explains that it treats address 0 as meaning "at the
+beginning of the buffer", instead of as a synonym for address 1.
 
-'s/a/%' has been fixed. It incorrectly replaced 'a' with '%' instead of
-using the replacement from the last substitution.
+Minor fixes have been made to the manual.
 
-An infinite loop, happening when EOF was found in the middle of a
-replacement string, has been fixed.
-
-Ed no longer accepts newlines in the replacement of a 's' command if it
-is part of the command list of a global command, because in this case
-the meaning of the newline becomes ambiguous. For the same reason, the
-last delimiter can't be omitted if the 's' command is not the last
-command in the command list.
-
-The substitute command now correctly sets the current address to the
-address of the last line on which a substitution occurred, and leaves it
-unchanged if no substitution is performed.
-
-A bug in the calculation of address offsets has been fixed. '3 ---- 2'
-was calculated as address -2 instead of the correct address 1.
-
-Address ranges with the first address omitted are now accepted.
-
-The current address is now correctly set to the addressed line (or to
-the new last line if at EOF) after an empty replacement text in the
-change command.
-
-Repeated print suffixes are now rejected. It has been documented that ed
-allows any combination of non-repeated print suffixes and combines their
-effects.
-
-The substitute command now accepts suffixes in any order.
-
-The 'repeat substitution' command now rejects multiple count suffixes.
-
-The 'p' suffix of the 'repeat substitution' command now toggles all the
-print suffixes of the last substitution.
-
-End of file on standard input now behaves as a 'q' command.
-
-The modified status is no longer cleared after writing the buffer to the
-standard input of a shell command. (Reported by Jérôme Frgacic).
-
-The descriptions of the 'a', 'c', 'e', 'g', 'i', 'j', 'k', 'm', 'q',
-'r', 's', 'u' and 'w' commands in the manual have been fixed.
-
-Most tests in the testsuite have been improved. Bug reporting has been
-simplified; only the failed logs and results are kept in the test
-directory, which can then be (tarred, compressed, and) attached to the
-bug report.
+The configure script now accepts appending options to CFLAGS using the
+syntax 'CFLAGS+=OPTIONS'.
