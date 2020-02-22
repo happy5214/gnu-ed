@@ -1,6 +1,6 @@
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2019 Antonio Diaz Diaz.
+    Copyright (C) 2006-2020 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,32 +27,41 @@
 
 enum Status { QUIT = -1, ERR = -2, EMOD = -3, FATAL = -4 };
 
-static char def_filename[1024] = "";	/* default filename */
+static const char * def_filename = "";	/* default filename */
 static char errmsg[80] = "";		/* error message buffer */
-static char prompt_str[80] = "*";	/* command prompt */
+static const char * prompt_str = "*";	/* command prompt */
 static int first_addr = 0, second_addr = 0;
 static bool prompt_on = false;		/* if set, show command prompt */
 static bool verbose = false;		/* if set, print all error messages */
 
 
-void set_def_filename( const char * const s )
+bool set_def_filename( const char * const s )
   {
-  strncpy( def_filename, s, sizeof def_filename );
-  def_filename[sizeof(def_filename)-1] = 0;
+  static char * buf = 0;		/* filename buffer */
+  static int bufsz = 0;			/* filename buffer size */
+  const int len = strlen( s );
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return false;
+  memcpy( buf, s, len + 1 );
+  def_filename = buf;
+  return true;
   }
 
-void set_error_msg( const char * msg )
+void set_error_msg( const char * const msg )
   {
-  if( !msg ) msg = "";
   strncpy( errmsg, msg, sizeof errmsg );
   errmsg[sizeof(errmsg)-1] = 0;
   }
 
-void set_prompt( const char * const s )
+bool set_prompt( const char * const s )
   {
+  static char * buf = 0;		/* prompt buffer */
+  static int bufsz = 0;			/* prompt buffer size */
+  const int len = strlen( s );
+  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return false;
+  memcpy( buf, s, len + 1 );
+  prompt_str = buf;
   prompt_on = true;
-  strncpy( prompt_str, s, sizeof prompt_str );
-  prompt_str[sizeof(prompt_str)-1] = 0;
+  return true;
   }
 
 void set_verbose( void ) { verbose = true; }
@@ -445,7 +454,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
     case 'd': if( !check_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags, 0 ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
-              if( !delete_lines( first_addr, second_addr, isglobal ) ) return ERR;
+              if( !delete_lines( first_addr, second_addr, isglobal ) )
+                return ERR;
               break;
     case 'e': if( modified() && prev_status != EMOD ) return EMOD;
               /* fall through */
@@ -455,9 +465,9 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( !fnp || !delete_lines( 1, last_addr(), isglobal ) ||
                   !close_sbuf() ) return ERR;
               if( !open_sbuf() ) return FATAL;
-              if( fnp[0] && fnp[0] != '!' ) set_def_filename( fnp );
-              if( read_file( fnp[0] ? fnp : def_filename, 0 ) < 0 )
+              if( fnp[0] && fnp[0] != '!' && !set_def_filename( fnp ) )
                 return ERR;
+              if( read_file( fnp[0] ? fnp : def_filename, 0 ) < 0 ) return ERR;
               reset_undo_state(); set_modified( false );
               break;
     case 'f': if( unexpected_address( addr_cnt ) ||
@@ -466,7 +476,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( !fnp ) return ERR;
               if( fnp[0] == '!' )
                 { set_error_msg( "Invalid redirection" ); return ERR; }
-              if( fnp[0] ) set_def_filename( fnp );
+              if( fnp[0] && !set_def_filename( fnp ) ) return ERR;
               printf( "%s\n", strip_escapes( def_filename ) );
               break;
     case 'g':
@@ -480,8 +490,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                 return ERR;
               n = ( c == 'G' || c == 'V' );		/* interactive */
               if( ( n && !get_command_suffix( ibufpp, &pflags, 0 ) ) ||
-                  !exec_global( ibufpp, pflags, n ) )
-                return ERR;
+                  !exec_global( ibufpp, pflags, n ) ) return ERR;
               break;
     case 'h':
     case 'H': if( unexpected_address( addr_cnt ) ||
@@ -538,7 +547,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( addr_cnt == 0 ) second_addr = last_addr();
               fnp = get_filename( ibufpp, false );
               if( !fnp ) return ERR;
-              if( !def_filename[0] && fnp[0] != '!' ) set_def_filename( fnp );
+              if( !def_filename[0] && fnp[0] != '!' && !set_def_filename( fnp ) )
+                return ERR;
               if( !isglobal ) clear_undo_stack();
               addr = read_file( fnp[0] ? fnp : def_filename, second_addr );
               if( addr < 0 ) return ERR;
@@ -567,7 +577,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                 first_addr = second_addr = 0;
               else if( !check_addr_range( 1, last_addr(), addr_cnt ) )
                 return ERR;
-              if( !def_filename[0] && fnp[0] != '!' ) set_def_filename( fnp );
+              if( !def_filename[0] && fnp[0] != '!' && !set_def_filename( fnp ) )
+                return ERR;
               addr = write_file( fnp[0] ? fnp : def_filename,
                      ( c == 'W' ) ? "a" : "w", first_addr, second_addr );
               if( addr < 0 ) return ERR;
@@ -594,8 +605,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               if( !get_command_suffix( ibufpp, &pflags, 0 ) ||
                   !print_lines( second_addr,
                     min( last_addr(), second_addr + window_lines() - 1 ),
-                    pflags ) )
-                return ERR;
+                    pflags ) ) return ERR;
               pflags = 0;
               break;
     case '=': if( !get_command_suffix( ibufpp, &pflags, 0 ) ) return ERR;
@@ -610,8 +620,7 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
               break;
     case '\n': if( !check_second_addr( current_addr() +
                      ( traditional() || !isglobal ), addr_cnt ) ||
-                   !print_lines( second_addr, second_addr, 0 ) )
-                return ERR;
+                   !print_lines( second_addr, second_addr, 0 ) ) return ERR;
               break;
     case '#': while( *(*ibufpp)++ != '\n' ) {}
               break;

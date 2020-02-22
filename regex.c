@@ -1,7 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /*  GNU ed - The GNU line editor.
     Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2019 Antonio Diaz Diaz.
+    Copyright (C) 2006-2020 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -310,6 +310,7 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
   if( !regexec( subst_regex_, txt, se_max, rm, 0 ) )
     {
     int matchno = 0;
+    bool infloop = false;
     do {
       if( global || snum == ++matchno )
         {
@@ -329,13 +330,14 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
         memcpy( *txtbufp + offset, txt, i ); offset += i;
         }
       txt += rm[0].rm_eo;
+      if( global && rm[0].rm_eo == 0 )
+        { if( !infloop ) infloop = true;	/* 's/^/#/g' is valid */
+          else { set_error_msg( "Infinite substitution loop" ); return -1; } }
       }
-    while( *txt && ( !changed || ( global && rm[0].rm_eo ) ) &&
+    while( *txt && ( !changed || global ) &&
            !regexec( subst_regex_, txt, se_max, rm, REG_NOTBOL ) );
     i = eot - txt;
     if( !resize_buffer( txtbufp, txtbufszp, offset + i + 2 ) ) return -1;
-    if( global && i > 0 && !rm[0].rm_eo )
-      { set_error_msg( "Infinite substitution loop" ); return -1; }
     if( isbinary() ) newline_to_nul( txt, i );
     memcpy( *txtbufp + offset, txt, i );		/* tail copy */
     memcpy( *txtbufp + offset + i, "\n", 2 );

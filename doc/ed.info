@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2019 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2020 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -18,16 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.15, 1 January 2019).
-
-
-   GNU ed is a line-oriented text editor. It is used to create, display,
-modify and otherwise manipulate text files, both interactively and via
-shell scripts. A restricted version of ed, red, can only edit files in
-the current directory and cannot execute shell commands. Ed is the
-'standard' text editor in the sense that it is the original editor for
-Unix, and thus widely available. For most purposes, however, it is
-superseded by full-screen editors such as GNU Emacs or GNU Moe.
+This manual is for GNU ed (version 1.16, 20 February 2020).
 
 * Menu:
 
@@ -43,7 +34,7 @@ superseded by full-screen editors such as GNU Emacs or GNU Moe.
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2019 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2020 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -56,10 +47,17 @@ File: ed.info,  Node: Overview,  Next: Introduction to line editing,  Prev: Top,
 1 Overview
 **********
 
-'ed' is a line-oriented text editor. It is used to create, display,
-modify and otherwise manipulate text files. 'red' is a restricted 'ed':
-it can only edit files in the current directory and cannot execute
-shell commands.
+GNU ed is a line-oriented text editor. It is used to create, display,
+modify and otherwise manipulate text files, both interactively and via
+shell scripts. A restricted version of ed, red, can only edit files in
+the current directory and cannot execute shell commands. Ed is the
+'standard' text editor in the sense that it is the original editor for
+Unix, and thus widely available. For most purposes, however, it is
+superseded by full-screen editors such as GNU Emacs or GNU Moe.
+
+   GNU ed is based on the editor algorithm described in Brian W.
+Kernighan and P. J. Plauger's book "Software Tools in Pascal",
+Addison-Wesley, 1981.
 
    If invoked with a FILE argument, then a copy of FILE is read into
 the editor's buffer. Changes are made to this copy and not directly to
@@ -345,8 +343,8 @@ prefixed with a bang.
 
 '-p STRING'
 '--prompt=STRING'
-     Specifies a command prompt. This may be toggled on and off with the
-     'P' command.
+     Specifies a command prompt string and turns prompting on. Showing
+     the prompt string may be toggled on and off with the 'P' command.
 
 '-r'
 '--restricted'
@@ -389,8 +387,8 @@ and is valid wherever it makes sense.
 or a semicolon (';'). In a semicolon-delimited range, the current
 address ('.') is set to the first address before the second address is
 calculated. This feature can be used to set the starting line for
-searches. The value of the first address in a range cannot exceed the
-value of the second.
+searches if the second address contains a regular expression. The value
+of the first address in a range cannot exceed the value of the second.
 
    Addresses can be omitted on either side of the comma or semicolon
 separator. If only the first address is given in a range, then the
@@ -448,7 +446,7 @@ requires zero addresses.
 ''x'
      The apostrophe-x character pair addresses the line previously
      marked by a 'k' (mark) command, where 'x' is a lower case letter
-     from the portable character set.
+     from the portable character set '[a-z]'.
 
 
    Addresses can be followed by one or more address offsets, optionally
@@ -527,7 +525,7 @@ that point is matched.
           [=COL-ELM=]
 
      where COL-ELM is a "collating element" are interpreted according
-     to 'locale (5)'. See 'regex (3)' for an explanation of these
+     to 'locale (5)'. See 'regex (7)' for an explanation of these
      constructs.
 
 '[^CHAR-CLASS]'
@@ -582,8 +580,10 @@ that point is matched.
      underscore (_).
 
 
-   The following extended operators are preceded by a backslash '\' to
-distinguish them from traditional 'ed' syntax.
+   The following extended regular expression operators are preceded by a
+backslash '\' to distinguish them from traditional 'ed' syntax.  They
+may be unavailable depending on the particular regex implementation in
+your system.
 
 '\`'
 '\''
@@ -638,6 +638,10 @@ command. It is not portable to give more than one print suffix, but
 their effects. If any suffix letter is given, it must immediately
 follow the command.
 
+   The 'e', 'E', 'f', 'r', and 'w' commands take an optional FILE
+parameter, separated from the command letter by one or more whitespace
+characters.
+
    An interrupt (typically <Control-C>) has the effect of aborting the
 current command and returning the editor to command mode.
 
@@ -655,12 +659,13 @@ specified (in parenthesis).
 '(.,.)c'
      Changes lines in the buffer. The addressed lines are deleted from
      the buffer, and text is inserted in their place. Text is entered
-     in input mode. The current address is set to the address of the
+     in input mode.  The current address is set to the address of the
      last line entered or, if there were none, to the new address of
      the line after the last line deleted; if the lines deleted were
      originally at the end of the buffer, the current address is set to
      the address of the new last line; if no lines remain in the
-     buffer, the current address is set to zero.
+     buffer, the current address is set to zero. The lines deleted are
+     copied to the cut buffer.
 
 '(.,.)d'
      Deletes the addressed lines from the buffer. The current address
@@ -668,6 +673,7 @@ specified (in parenthesis).
      if the lines deleted were originally at the end of the buffer, the
      current address is set to the address of the new last line; if no
      lines remain in the buffer, the current address is set to zero.
+     The lines deleted are copied to the cut buffer.
 
 'e FILE'
      Edits FILE, and sets the default filename. If FILE is not
@@ -704,12 +710,13 @@ specified (in parenthesis).
      unchanged.
 
      The first command of COMMAND-LIST must appear on the same line as
-     the 'g' command. All lines of a multi-line COMMAND-LIST except the
+     the 'g' command. The other commands of COMMAND-LIST must appear on
+     separate lines. All lines of a multi-line COMMAND-LIST except the
      last line must be terminated with a backslash ('\'). Any commands
      are allowed, except for 'g', 'G', 'v', and 'V'. The '.'
      terminating the input mode of commands 'a', 'c', and 'i' can be
-     omitted if it would be the last line of COMMAND-LIST. By default,
-     a newline alone in COMMAND-LIST is equivalent to a 'p' command. If
+     omitted if it would be the last line of COMMAND-LIST. By default, a
+     newline alone in COMMAND-LIST is equivalent to a 'p' command. If
      'ed' is invoked with the command-line option '-G', then a newline
      in COMMAND-LIST is equivalent to a '.+1p' command.
 
@@ -726,7 +733,7 @@ specified (in parenthesis).
      the last non-null command list.
 
 'h'
-     Prints an explanation of the last error.
+     Help. Prints an explanation of the last error.
 
 'H'
      Toggles the printing of error explanations. By default,
@@ -743,9 +750,9 @@ specified (in parenthesis).
 '(.,.+1)j'
      Joins the addressed lines, replacing them by a single line
      containing their joined text. If only one address is given, this
-     command does nothing. If lines are joined, the current address is
-     set to the address of the joined line. Else, the current address
-     is unchanged.
+     command does nothing. If lines are joined, the lines replaced are
+     copied to the cut buffer and the current address is set to the
+     address of the joined line. Else, the current address is unchanged.
 
 '(.)kx'
      Marks a line with a lower case letter 'x'. The line can then be
@@ -765,8 +772,8 @@ specified (in parenthesis).
      the right-hand destination address. The destination address '0'
      (zero) is valid for this command; it moves the addressed lines to
      the beginning of the buffer. It is an error if the destination
-     address falls within the range of moved lines. The current address
-     is set to the new address of the last line moved.
+     address falls within the range of lines to be moved. The current
+     address is set to the new address of the last line moved.
 
 '(.,.)n'
      Number command. Prints the addressed lines, preceding each line by
@@ -778,9 +785,10 @@ specified (in parenthesis).
      address of the last line printed.
 
 'P'
-     Toggles the command prompt on and off. Unless a prompt is
-     specified with command-line option '-p', the command prompt is by
-     default turned off.
+     Toggles the command prompt on and off. Unless a prompt string is
+     specified with the command-line option '-p', the command prompt is
+     by default turned off. The default prompt string is an asterisk
+     ('*').
 
 'q'
      Quits 'ed'. A warning is printed if any changes have been made in
@@ -807,20 +815,21 @@ specified (in parenthesis).
      unchanged.
 
 '(.,.)s/RE/REPLACEMENT/'
-     Substitute command. Replaces text in the addressed lines matching a
-     regular expression RE with REPLACEMENT. By default, only the first
-     match in each line is replaced. The 's' command accepts any
-     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'. If
-     the 'g' (global) suffix is given, then every match is replaced.
-     The 'COUNT' suffix, where COUNT is a positive number, causes only
-     the COUNTth match to be replaced. 'g' and 'COUNT' can't be
-     specified in the same command. 'l', 'n', and 'p' are the usual
-     print suffixes. It is an error if no substitutions are performed
-     on any of the addressed lines. The current address is set to the
-     address of the last line on which a substitution occurred. If a
-     line is split, a substitution is considered to have occurred on
-     each of the new lines. If no substitution is performed, the
-     current address is unchanged.
+     Substitute command. Replaces text in the addressed lines matching
+     a regular expression RE with REPLACEMENT. By default, only the
+     first match in each line is replaced. The 's' command accepts any
+     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'.  If
+     the 'g' (global) suffix is given, then every match is replaced. The
+     'COUNT' suffix, where COUNT is a positive number, causes only the
+     COUNTth match to be replaced. 'g' and 'COUNT' can't be specified
+     in the same command. 'l', 'n', and 'p' are the usual print
+     suffixes. It is an error if no substitutions are performed on any
+     of the addressed lines. The current address is set to the address
+     of the last line on which a substitution occurred. If a line is
+     split, a substitution is considered to have occurred on each of
+     the new lines. If no substitution is performed, the current
+     address is unchanged. The last line modified is copied to the cut
+     buffer.
 
      RE and REPLACEMENT may be delimited by any character other than
      <space>, <newline> and the characters used by the form of the 's'
@@ -860,10 +869,11 @@ specified (in parenthesis).
      current address is set to the address of the last line copied.
 
 'u'
-     Undoes the effect of the last command that modified anything in the
-     buffer and restores the current address to what it was before the
-     command. The global commands 'g', 'G', 'v', and 'V' are treated as
-     a single command by undo. 'u' is its own inverse.
+     Undoes the effect of the last command that modified anything in
+     the buffer and restores the current address to what it was before
+     the command. The global commands 'g', 'G', 'v', and 'V' are
+     treated as a single command by undo. 'u' is its own inverse; it
+     can undo only the last command.
 
 '(1,$)v/RE/COMMAND-LIST'
      This is similar to the 'g' command except that it applies
@@ -876,9 +886,9 @@ specified (in parenthesis).
 
 '(1,$)w FILE'
      Writes the addressed lines to FILE. Any previous contents of FILE
-     is lost without warning. If there is no default filename, then the
-     default filename is set to FILE, otherwise it is unchanged. If no
-     filename is specified, then the default filename is used. The
+     are lost without warning. If there is no default filename, then
+     the default filename is set to FILE, otherwise it is unchanged. If
+     no filename is specified, then the default filename is used. The
      current address is unchanged.
 
      If FILE is prefixed with a bang (!), then it is interpreted as a
@@ -895,7 +905,7 @@ specified (in parenthesis).
 
 '(1,$)W FILE'
      Appends the addressed lines to the end of FILE. This is similar to
-     the 'w' command, except that the previous contents of file is not
+     the 'w' command, except that the previous contents of FILE are not
      clobbered. The current address is unchanged.
 
 '(.)x'
@@ -909,11 +919,11 @@ specified (in parenthesis).
      commands. The current address is unchanged.
 
 '(.+1)zN'
-     Scrolls N lines at a time starting at addressed line, and sets
-     window size to N. If N is not specified, then the current window
-     size is used. Window size defaults to screen size minus two lines,
-     or to 22 if screen size can't be determined. The current address
-     is set to the address of the last line printed.
+     Scroll. Prints N lines at a time starting at addressed line, and
+     sets window size to N. If N is not specified, then the current
+     window size is used. Window size defaults to screen size minus two
+     lines, or to 22 if screen size can't be determined. The current
+     address is set to the address of the last line printed.
 
 '!COMMAND'
      Shell escape command. Executes COMMAND via 'sh (1)'. If the first
@@ -951,13 +961,21 @@ If the terminal hangs up, 'ed' attempts to write the buffer to the file
 
    'ed' processes FILE arguments for backslash escapes, i.e., in a
 filename, any character preceded by a backslash ('\') is interpreted
-literally.
+literally. For example, 'ed 'hello\tworld'' will edit the file
+'hellotworld'.
 
-   If a text (non-binary) file is not terminated by a newline character,
-then 'ed' appends one on reading/writing it. In the case of a binary
-file, 'ed' does not append a newline on reading/writing.
+   If a text (non-binary) file is not terminated by a newline
+character, then 'ed' appends one on reading/writing it. In the case of
+a binary file, 'ed' does not append a newline on reading/writing. A
+binary file is one containing at least one ASCII NUL character. If the
+last line has been modified, reading an empty file, for example
+/dev/null, prior to writing prevents appending a newline to a binary
+file.
 
-   Per line overhead: 2 'pointer's, 1 'long int', and 1 'int'.
+   In order to keep track of the text lines in the buffer, 'ed' uses a
+doubly linked list of structures containing the position and size of
+each line. This results in a per line overhead of 2 'pointer's, 1 'long
+int', and 1 'int'.
 
 
 File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
@@ -1482,17 +1500,17 @@ permit their use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview2194
-Node: Introduction to line editing4250
-Node: Invoking ed11523
-Node: Line addressing13589
-Node: Regular expressions17231
-Node: Commands22829
-Ref: shell escape command36677
-Node: Limitations37699
-Node: Diagnostics38344
-Node: Problems38989
-Node: GNU Free Documentation License39522
+Node: Overview1710
+Node: Introduction to line editing4175
+Node: Invoking ed11448
+Node: Line addressing13565
+Node: Regular expressions17267
+Node: Commands22974
+Ref: shell escape command37385
+Node: Limitations38407
+Node: Diagnostics39499
+Node: Problems40144
+Node: GNU Free Documentation License40677
 
 End Tag Table
 

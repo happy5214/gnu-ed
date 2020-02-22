@@ -1,12 +1,24 @@
+2020-02-20  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.16 released.
+	* regex.c (line_replace): Accept 's/^/#/g' as valid.
+	  (Reported by Bjoern Wibben).
+	* main_loop.c: Removed length limit of prompt string.
+	  (Reported by Tim Chase).
+	* main.c: Set a valid invocation_name even if argc == 0.
+	* ed.texi: Extended operators depend on regex implementation.
+	  (Reported by Brian Zwahr).
+	* ed.texi: Several fixes and improvements.
+
 2019-01-01  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.15 released.
-	* io.c (print_line): Make 'l' command print '\\' before every
+	* io.c (print_line): Make command 'l' print '\\' before every
 	  '$' within the text. (Reported by Ori Avtalion).
 	* main_loop.c (extract_addresses): Fixed address ',,' to mean
 	  '$,$' instead of '1,$'. (Reported by Matthieu Felix).
 	* regex.c (extract_replacement): Allow newlines even if global.
-	* main_loop.c (exec_command): Make 'c' command reject address 0.
+	* main_loop.c (exec_command): Make command 'c' reject address 0.
 	* ed.texi: Minor fixes.
 	* configure: Accept appending to CFLAGS, 'CFLAGS+=OPTIONS'.
 
@@ -31,14 +43,14 @@
 	  '3 ---- 2' was calculated as -2 instead of 1.
 	  Accept ranges with the first address omitted.
 	  (exec_command): Fixed current address after empty replacement
-	  text in 'c' command.
+	  text in command 'c'.
 	  Don't clear the modified status after writing the buffer to a
 	  shell command. (Reported by Jérôme Frgacic).
 	  (get_command_suffix): Don't allow repeated print suffixes.
 	  (command_s): Accept suffixes in any order.
 	  Don't allow multiple count suffixes.
 	  'sp' now toggles all print suffixes.
-	  (main_loop): Make EOF on stdin behave as a 'q' command.
+	  (main_loop): Make EOF on stdin behave as command 'q'.
 	* ed.texi: Fixed the description of commands 'acegijkmqrsuw'.
 	  Documented that ed allows any combination of print suffixes.
 	* testsuite: Improved most tests. Simplified bug reporting.
@@ -60,9 +72,9 @@
 2015-03-30  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.11 released.
-	* main_loop.c (exec_command): Fixed 'z' command.
+	* main_loop.c (exec_command): Fixed command 'z'.
 	  (zN printed N + 1 lines).
-	* ed.texi: Documented the window size used by the 'z' command.
+	* ed.texi: Documented the window size used by the command 'z'.
 	* Makefile.in: Added new targets 'install*-compress'.
 	* Restored original copyright notices in the code. I assigned to
 	  the FSF the copyright on changes made to the part of ed already
@@ -97,8 +109,8 @@
 2012-01-01  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.6 released.
-	* io.c (put_tty_line): Null characters where incorrectly
-	  shown by the 'l' command. (Reported by Martin Guy).
+	* io.c (put_tty_line): Null characters where incorrectly shown
+	  by the command 'l'. (Reported by Martin Guy).
 	* io.c (read_stream): Corrected the condition deciding when to
 	  show the message "Newline appended".
 	* main_loop.c (exec_command): The 'modified' flag is now set
@@ -118,16 +130,16 @@
 2010-08-30  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.5 released.
-	* buffer.c (append_lines): Fixed 'a', 'c' and 'i' commands.
+	* buffer.c (append_lines): Fixed commands 'a', 'c' and 'i'.
 	  (When used in a global command list, the commands following
 	  them in the list were ignored).
-	* main_loop.c (exec_command): Fixed 'e' command.
+	* main_loop.c (exec_command): Fixed command 'e'.
 	  (It quitted when invoked a second time with a modified buffer).
 	* main.c: Added new option '-r, --restricted'.
 	* 'red' has been converted to a script invoking 'ed --restricted'.
 	* Description of ed in the manual has been changed.
 	* testsuite: Modified some tests and removed obsolete POSIX tests.
-	* main_loop.c: 'ibufp' variable made local to main_loop.
+	* main_loop.c: Variable 'ibufp' made local to main_loop.
 	* Defined type bool to make clear which functions and variables
 	  are Boolean.
 	* Added 'const' to all pointer declarations accepting it.
@@ -143,8 +155,8 @@
 	* buffer.c, main_loop.c: Undo now restores the modified status.
 	* regex.c (search_and_replace): Fixed a race condition with user
 	  interrupt.
-	* signal.c: Added functions resize_line_buffer and
-	  resize_undo_buffer to definitively fix the aliasing warnings.
+	* signal.c: Added new functions 'resize_line_buffer' and
+	  'resize_undo_buffer' to definitively fix the aliasing warnings.
 	* Some minor corrections have been made to the manual.
 
 2009-05-24  Antonio Diaz Diaz  <ant_diaz@teleline.es>
@@ -217,7 +229,7 @@
 	* Version 0.3 released.
 	* buffer.c (open_sbuf): Fixed symlink vulnerability using 'tmpfile'.
 	* signal.c: Fixed signal handling for SIGINT.
-	* main_loop.c (exec_command): Modified 'c' and 'i' commands to
+	* main_loop.c (exec_command): Modified commands 'c' and 'i' to
 	  treat address 0 a synonym for address 1, as per POSIX.
 	* The pause mode has been removed.
 	* main.c: Added new option '-l, --loose-exit-status'.
@@ -279,8 +291,8 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew Moore
-Copyright (C) 2006-2019 Antonio Diaz Diaz.
+Copyright (C) 2006-2020 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable,
-but just in case, you have unlimited permission to copy, distribute and
+but just in case, you have unlimited permission to copy, distribute, and
 modify it.

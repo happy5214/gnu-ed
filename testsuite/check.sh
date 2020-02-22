@@ -1,9 +1,9 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2019 Antonio Diaz Diaz.
+# Copyright (C) 2006-2020 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
-# to copy, distribute and modify it.
+# to copy, distribute, and modify it.
 
 LC_ALL=C
 export LC_ALL

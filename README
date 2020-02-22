@@ -35,8 +35,9 @@ EXTENSIONS
   * Though GNU ed is not a stream editor, it can be used to edit binary files.
     To assist in binary editing, when a file containing at least one ASCII
     NUL character is written, a newline is not appended if it did not
-    already contain one upon reading.  In particular, reading /dev/null
-    prior to writing prevents appending a newline to a binary file.
+    already contain one upon reading. If the last line has been modified,
+    reading an empty file, for example /dev/null, prior to writing prevents
+    appending a newline to a binary file.
 
     For example, to create a file with GNU ed containing a single NUL character:
       $ ed file
@@ -92,7 +93,7 @@ DEVIATIONS
     to use.
 
   * The 'm' (move) command within a 'g' command list also follows the SunOS
-    ed implementation: any moved lines are removed from the global command's
+    ed implementation: any lines moved are removed from the global command's
     'active' list.
 
   * For backwards compatibility, errors in piped scripts do not force ed
@@ -127,10 +128,10 @@ or:
 
 
 Copyright (C) 1993, 1994 Andrew Moore
-Copyright (C) 2006-2019 Antonio Diaz Diaz.
+Copyright (C) 2006-2020 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
-distribute and modify it.
+distribute, and modify it.
 
 The file Makefile.in is a data file used by configure to produce the
 Makefile. It has the same copyright owner and permissions that configure

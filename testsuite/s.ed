@@ -52,6 +52,12 @@ s0e0103
 (nature)/
 +12s/ (for)/$\
 (for)/
+6s/^/#/g
+6s/$/!\
+\
+/g
+7s,^,// line 7,g
+8s,^$,// line 8,g
 # to be undone
 ,s/./x/g
 u

@@ -1,24 +1,13 @@
-Changes in version 1.15:
+Changes in version 1.16:
 
-The list command has been fixed to print a backslash before every '$'
-character within the text. (Reported by Ori Avtalion).
+The substitute command no longer complains about an 'Infinite substitution
+loop' with a substitution like 's/^/#/g'. (Reported by Bjoern Wibben).
 
-Address ',,' has been fixed to mean '$,$' instead of '1,$'.
-(Reported by Matthieu Felix).
+The length limit of the prompt string has been removed.
+(Reported by Tim Chase).
 
-A 's' command that is part of a 'g' or 'v' command-list can again split
-a line by including a newline escaped with a backslash '\' in the
-replacement string. For this to work, the closing delimiter of the
-replacement string can't be omitted unless the 's' command is the last
-command in the list, because otherwise the meaning of the escaped
-newline would become ambiguous.
+It has been documented in the manual that extended regular expression
+operators may be unavailable depending on the particular regex
+implementation in the system running ed. (Reported by Brian Zwahr).
 
-Following a recent change in the POSIX standard, the 'c' command no
-longer accepts an address of 0, and the documentation for the 'i'
-command now explains that it treats address 0 as meaning "at the
-beginning of the buffer", instead of as a synonym for address 1.
-
-Minor fixes have been made to the manual.
-
-The configure script now accepts appending options to CFLAGS using the
-syntax 'CFLAGS+=OPTIONS'.
+Several fixes and improvements have been made to the manual.

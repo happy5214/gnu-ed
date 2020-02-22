@@ -1,5 +1,5 @@
 /*  GNU ed - The GNU line editor.
-    Copyright (C) 2006-2019 Antonio Diaz Diaz.
+    Copyright (C) 2006-2020 Antonio Diaz Diaz.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@
 
 
 static const char * const program_name = "ed";
-static const char * const program_year = "2019";
-static const char * invocation_name = 0;
+static const char * const program_year = "2020";
+static const char * invocation_name = "ed";		/* default value */
 
 static bool restricted_ = false;	/* if set, run in restricted mode */
 static bool scripted_ = false;		/* if set, suppress diagnostics,
@@ -76,7 +76,7 @@ static void show_help( void )
           "  -r, --restricted           run in restricted mode\n"
           "  -s, --quiet, --silent      suppress diagnostics, byte counts and '!' prompt\n"
           "  -v, --verbose              be verbose; equivalent to the 'H' command\n"
-          "Start edit by reading in 'file' if given.\n"
+          "\nStart edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
           "\nExit status: 0 for a normal exit, 1 for environmental problems (file\n"
           "not found, invalid flags, I/O errors, etc), 2 to indicate a corrupt or\n"
@@ -159,7 +159,7 @@ int main( const int argc, const char * const argv[] )
     {  0 ,  0,                  ap_no } };
 
   struct Arg_parser parser;
-  invocation_name = argv[0];
+  if( argc > 0 ) invocation_name = argv[0];
 
   if( !ap_init( &parser, argc, argv, options, 0 ) )
     { show_error( "Memory exhausted.", 0, false ); return 1; }
@@ -176,7 +176,7 @@ int main( const int argc, const char * const argv[] )
       case 'G': traditional_ = true; break;	/* backward compatibility */
       case 'h': show_help(); return 0;
       case 'l': loose = true; break;
-      case 'p': set_prompt( arg ); break;
+      case 'p': if( set_prompt( arg ) ) break; else return 1;
       case 'r': restricted_ = true; break;
       case 's': scripted_ = true; break;
       case 'v': set_verbose(); break;
@@ -197,7 +197,7 @@ int main( const int argc, const char * const argv[] )
       {
       if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )
         return 2;
-      else if( arg[0] != '!' ) set_def_filename( arg );
+      else if( arg[0] != '!' && !set_def_filename( arg ) ) return 1;
       }
     else
       {
