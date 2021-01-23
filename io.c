@@ -1,20 +1,20 @@
 /* io.c: i/o routines for the ed line editor */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <errno.h>
@@ -25,7 +25,9 @@
 
 
 static const line_t * unterminated_line = 0;	/* last line has no '\n' */
-int linenum_ = 0;				/* script line number */
+static int linenum_ = 0;			/* script line number */
+
+int linenum( void ) { return linenum_; }
 
 void reset_unterminated_line( void ) { unterminated_line = 0; }
 
@@ -35,8 +37,6 @@ void unmark_unterminated_line( const line_t * const lp )
 static bool unterminated_last_line( void )
   { return ( unterminated_line != 0 &&
              unterminated_line == search_line_node( last_addr() ) ); }
-
-int linenum( void ) { return linenum_; }
 
 
 /* print text to stdout */
@@ -83,7 +83,7 @@ bool print_lines( int from, const int to, const int pflags )
   line_t * const ep = search_line_node( inc_addr( to ) );
   line_t * bp = search_line_node( from );
 
-  if( !from ) { set_error_msg( "Invalid address" ); return false; }
+  if( !from ) { invalid_address(); return false; }
   while( bp != ep )
     {
     const char * const s = get_sbuf_line( bp );
@@ -187,7 +187,8 @@ const char * get_stdin_line( int * const sizep )
 /* Read a line of text from a stream.
    Returns pointer to buffer and line size (including trailing newline
    if it exists and is not added now) */
-static const char * read_stream_line( FILE * const fp, int * const sizep,
+static const char * read_stream_line( const char * const filename,
+                                      FILE * const fp, int * const sizep,
                                       bool * const newline_addedp )
   {
   static char * buf = 0;
@@ -206,7 +207,7 @@ static const char * read_stream_line( FILE * const fp, int * const sizep,
     {
     if( ferror( fp ) )
       {
-      show_strerror( 0, errno );
+      show_strerror( filename, errno );
       set_error_msg( "Cannot read input file" );
       return 0;
       }
@@ -223,7 +224,8 @@ static const char * read_stream_line( FILE * const fp, int * const sizep,
 
 /* read a stream into the editor buffer;
    return total size of data read, or -1 if error */
-static long read_stream( FILE * const fp, const int addr )
+static long read_stream( const char * const filename, FILE * const fp,
+                         const int addr )
   {
   line_t * lp = search_line_node( addr );
   undo_t * up = 0;
@@ -237,7 +239,8 @@ static long read_stream( FILE * const fp, const int addr )
   while( true )
     {
     int size = 0;
-    const char * const s = read_stream_line( fp, &size, &newline_added );
+    const char * const s =
+      read_stream_line( filename, fp, &size, &newline_added );
     if( !s ) return -1;
     if( size <= 0 ) break;
     total_size += size;
@@ -280,7 +283,7 @@ int read_file( const char * const filename, const int addr )
     set_error_msg( "Cannot open input file" );
     return -1;
     }
-  size = read_stream( fp, addr );
+  size = read_stream( filename, fp, addr );
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -1;
   if( ret != 0 )
@@ -295,7 +298,8 @@ int read_file( const char * const filename, const int addr )
 
 
 /* write a range of lines to a stream */
-static long write_stream( FILE * const fp, int from, const int to )
+static long write_stream( const char * const filename, FILE * const fp,
+                          int from, const int to )
   {
   line_t * lp = search_line_node( from );
   long size = 0;
@@ -312,7 +316,7 @@ static long write_stream( FILE * const fp, int from, const int to )
     while( --len >= 0 )
       if( fputc( *p++, fp ) == EOF )
         {
-        show_strerror( 0, errno );
+        show_strerror( filename, errno );
         set_error_msg( "Cannot write file" );
         return -1;
         }
@@ -338,7 +342,7 @@ int write_file( const char * const filename, const char * const mode,
     set_error_msg( "Cannot open output file" );
     return -1;
     }
-  size = write_stream( fp, from, to );
+  size = write_stream( filename, fp, from, to );
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -1;
   if( ret != 0 )

@@ -1,22 +1,24 @@
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +29,9 @@
 
 enum Status { QUIT = -1, ERR = -2, EMOD = -3, FATAL = -4 };
 
+static const char * const inv_com_suf = "Invalid command suffix";
+static const char * const inv_mark_ch = "Invalid mark character";
+static const char * const no_cur_fn = "No current filename";
 static const char * def_filename = "";	/* default filename */
 static char errmsg[80] = "";		/* error message buffer */
 static const char * prompt_str = "*";	/* command prompt */
@@ -34,6 +39,8 @@ static int first_addr = 0, second_addr = 0;
 static bool prompt_on = false;		/* if set, show command prompt */
 static bool verbose = false;		/* if set, print all error messages */
 
+
+void invalid_address( void ) { set_error_msg( "Invalid address" ); }
 
 bool set_def_filename( const char * const s )
   {
@@ -73,8 +80,7 @@ static int markno;				/* line marker count */
 static bool mark_line_node( const line_t * const lp, int c )
   {
   c -= 'a';
-  if( c < 0 || c >= 26 )
-    { set_error_msg( "Invalid mark character" ); return false; }
+  if( c < 0 || c >= 26 ) { set_error_msg( inv_mark_ch ); return false; }
   if( !mark[c] ) ++markno;
   mark[c] = lp;
   return true;
@@ -94,8 +100,7 @@ void unmark_line_node( const line_t * const lp )
 static int get_marked_node_addr( int c )
   {
   c -= 'a';
-  if( c < 0 || c >= 26 )
-    { set_error_msg( "Invalid mark character" ); return -1; }
+  if( c < 0 || c >= 26 ) { set_error_msg( inv_mark_ch ); return -1; }
   return get_line_node_addr( mark[c] );
   }
 
@@ -127,8 +132,7 @@ static const char * get_shell_command( const char ** const ibufpp )
     if( **ibufpp == '%' )
       {
       const char * p;
-      if( !def_filename[0] )
-        { set_error_msg( "No current filename" ); return 0; }
+      if( !def_filename[0] ) { set_error_msg( no_cur_fn ); return 0; }
       p = strip_escapes( def_filename );
       len = strlen( p );
       if( !resize_buffer( &buf, &bufsz, i + len ) ) return 0;
@@ -177,7 +181,7 @@ static const char * get_filename( const char ** const ibufpp,
       { set_error_msg( "Filename too long" ); return 0; }
     }
   else if( !traditional_f_command && !def_filename[0] )
-    { set_error_msg( "No current filename" ); return 0; }
+    { set_error_msg( no_cur_fn ); return 0; }
   if( !resize_buffer( &buf, &bufsz, pmax + 1 ) ) return 0;
   for( n = 0; **ibufpp != '\n'; ++n, ++*ibufpp ) buf[n] = **ibufpp;
   buf[n] = 0;
@@ -186,7 +190,30 @@ static const char * get_filename( const char ** const ibufpp,
   }
 
 
-static void invalid_address( void ) { set_error_msg( "Invalid address" ); }
+/* convert a string to int with out_of_range detection */
+static bool parse_int( int * const i, const char * const str,
+                       const char ** const tail )
+  {
+  char * tmp;
+  long li;
+
+  errno = 0;
+  *i = li = strtol( str, &tmp, 10 );
+  if( tail ) *tail = tmp;
+  if( tmp == str )
+    {
+    set_error_msg( "Bad numerical result" );
+    *i = 0;
+    return false;
+    }
+  if( errno == ERANGE || li > INT_MAX || li < -INT_MAX )
+    {
+    set_error_msg( "Numerical result out of range" );
+    *i = 0;
+    return false;
+    }
+  return true;
+  }
 
 
 /* Get line addresses from the command buffer until an invalid address
@@ -340,7 +367,7 @@ static bool get_command_suffix( const char ** const ibufpp,
     ++*ibufpp;
     }
   if( error || *(*ibufpp)++ != '\n' )
-    { set_error_msg( "Invalid command suffix" ); return false; }
+    { set_error_msg( inv_com_suf ); return false; }
   return true;
   }
 
@@ -395,7 +422,7 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
                 else { sflags |= SGR; ++*ibufpp; } break;
       default : if( sflags ) error = true;
       }
-    if( error ) { set_error_msg( "Invalid command suffix" ); return false; }
+    if( error ) { set_error_msg( inv_com_suf ); return false; }
     }
   while( sflags && **ibufpp != '\n' );
   if( sflags && !subst_regex() )
@@ -421,8 +448,8 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
   }
 
 
-static bool exec_global( const char ** const ibufpp, const int pflags,
-                         const bool interactive );
+static int exec_global( const char ** const ibufpp, const int pflags,
+                        const bool interactive );
 
 /* execute the next command in command buffer; return error status */
 static int exec_command( const char ** const ibufpp, const int prev_status,
@@ -489,8 +516,8 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
                   !build_active_list( ibufpp, first_addr, second_addr, n ) )
                 return ERR;
               n = ( c == 'G' || c == 'V' );		/* interactive */
-              if( ( n && !get_command_suffix( ibufpp, &pflags, 0 ) ) ||
-                  !exec_global( ibufpp, pflags, n ) ) return ERR;
+              if( n && !get_command_suffix( ibufpp, &pflags, 0 ) ) return ERR;
+              n = exec_global( ibufpp, pflags, n ); if( n != 0 ) return n;
               break;
     case 'h':
     case 'H': if( unexpected_address( addr_cnt ) ||
@@ -632,10 +659,10 @@ static int exec_command( const char ** const ibufpp, const int prev_status,
   }
 
 
-/* apply command list in the command buffer to the active lines in a
-   range; return false if error */
-static bool exec_global( const char ** const ibufpp, const int pflags,
-                         const bool interactive )
+/* Apply command list in the command buffer to the active lines in a range.
+   Stop at first error. Return status of last command executed. */
+static int exec_global( const char ** const ibufpp, const int pflags,
+                        const bool interactive )
   {
   static char * buf = 0;
   static int bufsz = 0;
@@ -647,7 +674,7 @@ static bool exec_global( const char ** const ibufpp, const int pflags,
       cmd = "p\n";			/* null cmd_list == 'p' */
     else
       {
-      if( !get_extended_line( ibufpp, 0, false ) ) return false;
+      if( !get_extended_line( ibufpp, 0, false ) ) return ERR;
       cmd = *ibufpp;
       }
     }
@@ -657,31 +684,34 @@ static bool exec_global( const char ** const ibufpp, const int pflags,
     const line_t * const lp = next_active_node();
     if( !lp ) break;
     set_current_addr( get_line_node_addr( lp ) );
-    if( current_addr() < 0 ) return false;
+    if( current_addr() < 0 ) return ERR;
     if( interactive )
       {
       /* print current_addr; get a command in global syntax */
       int len = 0;
-      if( !print_lines( current_addr(), current_addr(), pflags ) )
-        return false;
+      if( !print_lines( current_addr(), current_addr(), pflags ) ) return ERR;
       *ibufpp = get_stdin_line( &len );
-      if( !*ibufpp ) return false;			/* error */
-      if( len <= 0 ) return false;			/* EOF */
+      if( !*ibufpp ) return ERR;			/* error */
+      if( len <= 0 ) return ERR;			/* EOF */
       if( len == 1 && strcmp( *ibufpp, "\n" ) == 0 ) continue;
       if( len == 2 && strcmp( *ibufpp, "&\n" ) == 0 )
-        { if( !cmd ) { set_error_msg( "No previous command" ); return false; } }
+        { if( !cmd ) { set_error_msg( "No previous command" ); return ERR; } }
       else
         {
         if( !get_extended_line( ibufpp, &len, false ) ||
-            !resize_buffer( &buf, &bufsz, len + 1 ) ) return false;
+            !resize_buffer( &buf, &bufsz, len + 1 ) ) return ERR;
         memcpy( buf, *ibufpp, len + 1 );
         cmd = buf;
         }
       }
     *ibufpp = cmd;
-    while( **ibufpp ) if( exec_command( ibufpp, 0, true ) < 0 ) return false;
+    while( **ibufpp )
+      {
+      const int status = exec_command( ibufpp, 0, true );
+      if( status != 0 ) return status;
+      }
     }
-  return true;
+  return 0;
   }
 
 

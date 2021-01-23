@@ -1,20 +1,20 @@
-/*  Global declarations for the ed editor.  */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* Global declarations for the ed editor.  */
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef __cplusplus
@@ -55,6 +55,7 @@ undo_t;
 #define min( a,b ) ( (( a ) < ( b )) ? ( a ) : ( b ) )
 #endif
 
+static const char * const mem_msg = "Memory exhausted";
 
 /* defined in buffer.c */
 bool append_lines( const char ** const ibufpp, const int addr,
@@ -108,6 +109,7 @@ void reset_unterminated_line( void );
 void unmark_unterminated_line( const line_t * const lp );
 
 /* defined in main.c */
+bool extended_regexp( void );
 bool is_regular_file( const int fd );
 bool may_access_filename( const char * const name );
 bool restricted( void );
@@ -116,6 +118,7 @@ void show_strerror( const char * const filename, const int errcode );
 bool traditional( void );
 
 /* defined in main_loop.c */
+void invalid_address( void );
 int main_loop( const bool loose );
 bool set_def_filename( const char * const s );
 void set_error_msg( const char * const msg );
@@ -136,12 +139,7 @@ bool subst_regex( void );
 /* defined in signal.c */
 void disable_interrupts( void );
 void enable_interrupts( void );
-bool parse_int( int * const i, const char * const str, const char ** const tail );
 bool resize_buffer( char ** const buf, int * const size, const int min_size );
-bool resize_line_buffer( const line_t *** const buf, int * const size,
-                         const int min_size );
-bool resize_undo_buffer( undo_t ** const buf, int * const size,
-                         const int min_size );
 void set_signals( void );
 void set_window_lines( const int lines );
 const char * strip_escapes( const char * p );

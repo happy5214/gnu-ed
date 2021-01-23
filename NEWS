@@ -1,13 +1,10 @@
-Changes in version 1.16:
+Changes in version 1.17:
 
-The substitute command no longer complains about an 'Infinite substitution
-loop' with a substitution like 's/^/#/g'. (Reported by Bjoern Wibben).
+The commands 'q' and 'Q' now work in a global command.
+(Reported by J. A. Harris).
 
-The length limit of the prompt string has been removed.
-(Reported by Tim Chase).
+The new option '-E, --extended-regexp' has been added. It tells ed to use
+extended regular expressions instead of the basic regular expressions
+mandated by POSIX. (Suggested by Shawn Wagner).
 
-It has been documented in the manual that extended regular expression
-operators may be unavailable depending on the particular regex
-implementation in the system running ed. (Reported by Brian Zwahr).
-
-Several fixes and improvements have been made to the manual.
+Print the file name in case of read or write error. (Reported by Dan Jacobson).

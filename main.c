@@ -1,24 +1,24 @@
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 /*
-    Exit status: 0 for a normal exit, 1 for environmental problems
-    (file not found, invalid flags, I/O errors, etc), 2 to indicate a
-    corrupt or invalid input file, 3 for an internal consistency error
-    (eg, bug) which caused ed to panic.
+   Exit status: 0 for a normal exit, 1 for environmental problems
+   (file not found, invalid flags, I/O errors, etc), 2 to indicate a
+   corrupt or invalid input file, 3 for an internal consistency error
+   (eg, bug) which caused ed to panic.
 */
 /*
  * CREDITS
@@ -43,15 +43,17 @@
 
 
 static const char * const program_name = "ed";
-static const char * const program_year = "2020";
+static const char * const program_year = "2021";
 static const char * invocation_name = "ed";		/* default value */
 
+static bool extended_regexp_ = false;	/* if set, use EREs */
 static bool restricted_ = false;	/* if set, run in restricted mode */
 static bool scripted_ = false;		/* if set, suppress diagnostics,
 					   byte counts and '!' prompt */
 static bool traditional_ = false;	/* if set, be backwards compatible */
 
-
+/* Access functions for command line flags. */
+bool extended_regexp( void ) { return extended_regexp_; }
 bool restricted( void ) { return restricted_; }
 bool scripted( void ) { return scripted_; }
 bool traditional( void ) { return traditional_; }
@@ -70,6 +72,7 @@ static void show_help( void )
   printf( "\nOptions:\n"
           "  -h, --help                 display this help and exit\n"
           "  -V, --version              output version information and exit\n"
+          "  -E, --extended-regexp      use extended regular expressions\n"
           "  -G, --traditional          run in compatibility mode\n"
           "  -l, --loose-exit-status    exit with 0 status even if a command fails\n"
           "  -p, --prompt=STRING        use STRING as an interactive prompt\n"
@@ -147,6 +150,7 @@ int main( const int argc, const char * const argv[] )
   bool loose = false;
   const struct ap_Option options[] =
     {
+    { 'E', "extended-regexp",   ap_no  },
     { 'G', "traditional",       ap_no  },
     { 'h', "help",              ap_no  },
     { 'l', "loose-exit-status", ap_no  },
@@ -173,6 +177,7 @@ int main( const int argc, const char * const argv[] )
     if( !code ) break;					/* no more options */
     switch( code )
       {
+      case 'E': extended_regexp_ = true; break;
       case 'G': traditional_ = true; break;	/* backward compatibility */
       case 'h': show_help(); return 0;
       case 'l': loose = true; break;

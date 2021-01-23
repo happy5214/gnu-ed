@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 20 February 2020
-@set VERSION 1.16
+@set UPDATED 6 January 2021
+@set VERSION 1.17
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2020 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2021 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -43,7 +43,6 @@ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 @top The GNU ed line editor
 
 This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
-@end ifnottex
 
 @menu
 * Overview::                        Overview of the @command{ed} command
@@ -60,18 +59,20 @@ This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 
 @sp 1
 @insertcopying
+@end ifnottex
 
 
 @node Overview
 @chapter Overview
 
-@uref{http://www.gnu.org/software/ed/ed.html,,GNU ed} is a line-oriented
-text editor. It is used to create, display, modify and otherwise manipulate
-text files, both interactively and via shell scripts. A restricted version
-of ed, red, can only edit files in the current directory and cannot execute
-shell commands. Ed is the 'standard' text editor in the sense that it is the
-original editor for Unix, and thus widely available. For most purposes,
-however, it is superseded by full-screen editors such as GNU Emacs or GNU Moe.
+@uref{http://www.gnu.org/software/ed/ed.html,,GNU ed}
+is a line-oriented text editor. It is used to create, display, modify
+and otherwise manipulate text files, both interactively and via shell
+scripts. A restricted version of ed, red, can only edit files in the current
+directory and cannot execute shell commands. Ed is the 'standard' text
+editor in the sense that it is the original editor for Unix, and thus widely
+available. For most purposes, however, it is superseded by full-screen
+editors such as GNU Emacs or GNU Moe.
 
 GNU ed is based on the editor algorithm described in Brian W. Kernighan and
 P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
@@ -288,7 +289,7 @@ $
 @end example
 
 Since @command{ed} is line-oriented, we have to tell it which line, or
-range of lines we want to edit. In the above example, we do this by
+range of lines we want to edit. In the example above, we do this by
 specifying the line's number, or sequence in the buffer. Alternatively,
 we could have specified a unique string in the line, e.g.,
 @samp{/filvers/}, where the @samp{/}s delimit the string in question.
@@ -365,7 +366,11 @@ via @command{sh (1)}. To read a file whose name begins with a bang,
 prefix the name with a backslash (@kbd{\}). The default filename is set
 to @var{file} only if it is not prefixed with a bang.
 
-@command{ed} supports the following options:
+@command{ed} supports the following
+@uref{http://www.nongnu.org/arg-parser/manual/arg_parser_manual.html#Argument-syntax,,options}:
+@ifnothtml
+@xref{Argument syntax,,,arg_parser}.
+@end ifnothtml
 
 @table @code
 @item -h
@@ -376,6 +381,11 @@ Print an informative help message describing the options and exit.
 @itemx --version
 Print the version number of @command{ed} on the standard output and exit.
 This version number should be included in all bug reports.
+
+@item -E
+@itemx --extended-regexp
+Use extended regular expressions instead of the basic regular expressions
+mandated by POSIX.
 
 @item -G
 @itemx --traditional
@@ -506,8 +516,8 @@ separated by whitespace. Offsets are constructed as follows:
 
 @itemize @bullet
 @item
-@samp{+} or @samp{-} followed by a number adds or subtracts the
-indicated number of lines to or from the address.
+@samp{+} or @samp{-} followed by a number adds or subtracts the indicated
+number of lines to or from the address.
 
 @item
 @samp{+} or @samp{-} not followed by a number adds or subtracts 1 to or
@@ -550,7 +560,8 @@ that point is matched.
 
 A null @var{re} is equivalent to the last @var{re} encountered.
 
-The following symbols are used in constructing regular expressions:
+The following symbols are used in constructing regular expressions
+using POSIX basic regular expression syntax:
 
 @table @code
 
@@ -605,18 +616,16 @@ anchors the regular expression to the beginning of a line. Otherwise,
 it matches itself.
 
 @item $
-If @samp{$} is the last character of a regular expression, it anchors
-the regular expression to the end of a line. Otherwise, it matches
-itself.
+If @samp{$} is the last character of a regular expression, it anchors the
+regular expression to the end of a line. Otherwise, it matches itself.
 
 @item \(@var{re}\)
 Defines a (possibly null) subexpression @var{re}. Subexpressions may be
 nested. A subsequent backreference of the form @samp{\@var{n}}, where
 @var{n} is a number in the range [1,9], expands to the text matched by
 the @var{n}th subexpression. For example, the regular expression
-@samp{\(a.c\)\1} matches the string @samp{abcabc}, but not
-@samp{abcadc}. Subexpressions are ordered relative to their left
-delimiter.
+@samp{\(a.c\)\1} matches the string @samp{abcabc}, but not @samp{abcadc}.
+Subexpressions are ordered relative to their left delimiter.
 
 @item *
 Matches zero or more repetitions of the regular expression immediately
@@ -639,21 +648,21 @@ forms occurs first in a regular expression or subexpression, then it is
 interpreted literally (i.e., the regular expression @samp{\@{2\@}}
 matches the string @samp{@{2@}}, and so on).
 
+@end table
+
+The following extensions to basic regular expression operators are preceded
+by a backslash @samp{\} to distinguish them from traditional @command{ed}
+syntax. They may be unavailable depending on the particular regex
+implementation in your system.
+
+@table @code
+
 @item \<
 @itemx \>
 Anchors the single character regular expression or subexpression
 immediately following it to the beginning (in the case of @samp{\<}) or
 ending (in the case of @samp{\>}) of a @dfn{word}, i.e., in ASCII, a
 maximal string of alphanumeric characters, including the underscore (_).
-
-@end table
-
-The following extended regular expression operators are preceded by a
-backslash @samp{\} to distinguish them from traditional @command{ed} syntax.
-They may be unavailable depending on the particular regex implementation in
-your system.
-
-@table @code
 
 @item  \`
 @itemx \'
@@ -767,15 +776,16 @@ Sets the default filename to @var{file}. If @var{file} is not specified,
 then the default unescaped filename is printed.
 
 @item (1,$)g/@var{re}/@var{command-list}
-Global command. The global command makes two passes over the file. On
-the first pass, all the addressed lines matching a regular expression
-@var{re} are marked. Then, going sequentially from the beginning of the
-file to the end of the file, the given @var{command-list} is executed
-for each marked line, with the current address set to the address of
-that line. Any line modified by the @var{command-list} is unmarked. The
-final value of the current address is the value assigned by the last
-command in the last @var{command-list} executed. If there were no
-matching lines, the current address is unchanged.
+Global command. The global command makes two passes over the file. On the
+first pass, all the addressed lines matching a regular expression @var{re}
+are marked. Then, going sequentially from the beginning of the file to the
+end of the file, the given @var{command-list} is executed for each marked
+line, with the current address set to the address of that line. Any line
+modified by the @var{command-list} is unmarked. The final value of the
+current address is the value assigned by the last command in the last
+@var{command-list} executed. If there were no matching lines, the current
+address is unchanged. The execution of @var{command-list} stops on the first
+error.
 
 The first command of @var{command-list} must appear on the same line as the
 @samp{g} command. The other commands of @var{command-list} must appear on
@@ -908,10 +918,9 @@ An unescaped @samp{&} in @var{replacement} is replaced by the currently
 matched text. The character sequence @samp{\@var{m}} where @var{m} is a
 number in the range [1,9], is replaced by the @var{m}th backreference
 expression of the matched text. If the corresponding backreference
-expression does not match, then the character sequence @samp{\@var{m}}
-is replaced by the empty string. If @var{replacement} consists of a
-single @samp{%}, then @var{replacement} from the last substitution is
-used.
+expression does not match, then the character sequence @samp{\@var{m}} is
+replaced by the empty string. If @var{replacement} consists of a single
+@samp{%}, then @var{replacement} from the last substitution is used.
 
 A line can be split by including a newline escaped with a backslash
 (@samp{\}) in @var{replacement}. Each backslash in @var{replacement}
@@ -1000,10 +1009,9 @@ from execution, a @samp{!} is printed to the standard output. The
 current address is unchanged.
 
 @item (.,.)#
-Begins a comment; the rest of the line, up to a newline, is ignored. If
-a line address followed by a semicolon is given, then the current
-address is set to that address. Otherwise, the current address is
-unchanged.
+Begins a comment; the rest of the line, up to a newline, is ignored. If a
+line address followed by a semicolon is given, then the current address is
+set to that address. Otherwise, the current address is unchanged.
 
 @item ($)=
 Prints the line number of the addressed line. The current address is

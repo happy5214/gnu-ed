@@ -11,7 +11,7 @@ CAN_RUN_INSTALLINFO = $(SHELL) -c "install-info --version" > /dev/null 2>&1
 objs = buffer.o carg_parser.o global.o io.o main.o main_loop.o regex.o signal.o
 
 
-.PHONY : all install install-bin install-info install-man \
+.PHONY : all install install-bin install-info install-man-base install-man \
          install-strip install-compress install-strip-compress \
          install-bin-strip install-info-compress install-man-compress \
          uninstall uninstall-bin uninstall-info uninstall-man \
@@ -73,22 +73,23 @@ install-info :
 	-rm -f "$(DESTDIR)$(infodir)/$(pkgname).info"*
 	$(INSTALL_DATA) $(VPATH)/doc/$(pkgname).info "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"
 	-if $(CAN_RUN_INSTALLINFO) ; then \
-		install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
+	  install-info --info-dir="$(DESTDIR)$(infodir)" "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
 	fi
 
 install-info-compress : install-info
 	lzip -v -9 "$(DESTDIR)$(infodir)/$(pkgname).info"
 
-install-man :
+install-man-base :
 	if [ ! -d "$(DESTDIR)$(mandir)/man1" ] ; then $(INSTALL_DIR) "$(DESTDIR)$(mandir)/man1" ; fi
 	-rm -f "$(DESTDIR)$(mandir)/man1/$(program_prefix)$(progname).1"*
 	-rm -f "$(DESTDIR)$(mandir)/man1/$(program_prefix)r$(progname).1"*
 	$(INSTALL_DATA) $(VPATH)/doc/$(progname).1 "$(DESTDIR)$(mandir)/man1/$(program_prefix)$(progname).1"
+
+install-man : install-man-base
 	cd "$(DESTDIR)$(mandir)/man1" && ln -s "$(program_prefix)$(progname).1" "$(program_prefix)r$(progname).1"
 
-install-man-compress : install-man
+install-man-compress : install-man-base
 	lzip -v -9 "$(DESTDIR)$(mandir)/man1/$(program_prefix)$(progname).1"
-	-rm -f "$(DESTDIR)$(mandir)/man1/$(program_prefix)r$(progname).1"*
 	cd "$(DESTDIR)$(mandir)/man1" && ln -s "$(program_prefix)$(progname).1.lz" "$(program_prefix)r$(progname).1.lz"
 
 uninstall : uninstall-man uninstall-info uninstall-bin
@@ -99,7 +100,7 @@ uninstall-bin :
 
 uninstall-info :
 	-if $(CAN_RUN_INSTALLINFO) ; then \
-		install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
+	  install-info --info-dir="$(DESTDIR)$(infodir)" --remove "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info" ; \
 	fi
 	-rm -f "$(DESTDIR)$(infodir)/$(program_prefix)$(pkgname).info"*
 

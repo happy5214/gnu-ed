@@ -3,7 +3,7 @@ g/./m0
 g//a\
 hello world
 # lines beginning with a `#' should be ignored
-g/hello /# including in global commands \
+g/hello /# even in global commands \
 s/lo/p!/\
 a\
 order\
@@ -35,4 +35,10 @@ g/./s/difficulty/%
 # to be undone
 g/./s//x/g
 u
+w out.o
+a
+hello
+.
+g/hello/Q
+# not reached
 w out.o

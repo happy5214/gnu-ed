@@ -1,20 +1,20 @@
 /* global.c: global command routines for the ed line editor */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <errno.h>
@@ -55,16 +55,25 @@ const line_t * next_active_node( void )
 /* add a line node to the global-active list */
 bool set_active_node( const line_t * const lp )
   {
-  disable_interrupts();
-  if( !resize_line_buffer( &active_list, &active_size,
-                           ( active_len + 1 ) * sizeof (line_t **) ) )
+  const int min_size = ( active_len + 1 ) * sizeof (line_t **);
+  if( active_size < min_size )
     {
-    show_strerror( 0, errno );
-    set_error_msg( "Memory exhausted" );
+    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    void * new_buf = 0;
+    disable_interrupts();
+    if( active_list ) new_buf = realloc( active_list, new_size );
+    else new_buf = malloc( new_size );
+    if( !new_buf )
+      {
+      show_strerror( 0, errno );
+      set_error_msg( mem_msg );
+      enable_interrupts();
+      return false;
+      }
+    active_size = new_size;
+    active_list = (const line_t **)new_buf;
     enable_interrupts();
-    return false;
     }
-  enable_interrupts();
   active_list[active_len++] = lp;
   return true;
   }

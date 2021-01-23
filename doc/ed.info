@@ -5,12 +5,12 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2021 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.3 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+under the terms of the GNU Free Documentation License, Version 1.3 or any
+later version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 
 File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.16, 20 February 2020).
+This manual is for GNU ed (version 1.17, 6 January 2021).
 
 * Menu:
 
@@ -34,12 +34,12 @@ This manual is for GNU ed (version 1.16, 20 February 2020).
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2021 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.3 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+under the terms of the GNU Free Documentation License, Version 1.3 or any
+later version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 
 File: ed.info,  Node: Overview,  Next: Introduction to line editing,  Prev: Top,  Up: Top
@@ -47,54 +47,53 @@ File: ed.info,  Node: Overview,  Next: Introduction to line editing,  Prev: Top,
 1 Overview
 **********
 
-GNU ed is a line-oriented text editor. It is used to create, display,
-modify and otherwise manipulate text files, both interactively and via
-shell scripts. A restricted version of ed, red, can only edit files in
-the current directory and cannot execute shell commands. Ed is the
-'standard' text editor in the sense that it is the original editor for
-Unix, and thus widely available. For most purposes, however, it is
-superseded by full-screen editors such as GNU Emacs or GNU Moe.
+GNU ed is a line-oriented text editor. It is used to create, display, modify
+and otherwise manipulate text files, both interactively and via shell
+scripts. A restricted version of ed, red, can only edit files in the current
+directory and cannot execute shell commands. Ed is the 'standard' text
+editor in the sense that it is the original editor for Unix, and thus widely
+available. For most purposes, however, it is superseded by full-screen
+editors such as GNU Emacs or GNU Moe.
 
-   GNU ed is based on the editor algorithm described in Brian W.
-Kernighan and P. J. Plauger's book "Software Tools in Pascal",
-Addison-Wesley, 1981.
+   GNU ed is based on the editor algorithm described in Brian W. Kernighan
+and P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
 
-   If invoked with a FILE argument, then a copy of FILE is read into
-the editor's buffer. Changes are made to this copy and not directly to
-FILE itself. Upon quitting 'ed', any changes not explicitly saved with
-a 'w' command are lost.
+   If invoked with a FILE argument, then a copy of FILE is read into the
+editor's buffer. Changes are made to this copy and not directly to FILE
+itself. Upon quitting 'ed', any changes not explicitly saved with a 'w'
+command are lost.
 
-   Editing is done in two distinct modes: "command" and "input".  When
-first invoked, 'ed' is in command mode. In this mode commands are read
-from the standard input and executed to manipulate the contents of the
-editor buffer. A typical command might look like:
+   Editing is done in two distinct modes: "command" and "input". When first
+invoked, 'ed' is in command mode. In this mode commands are read from the
+standard input and executed to manipulate the contents of the editor
+buffer. A typical command might look like:
 
      ,s/OLD/NEW/g
 
    which replaces all occurences of the string OLD with NEW.
 
    When an input command, such as 'a' (append), 'i' (insert) or 'c'
-(change), is given, 'ed' enters input mode. This is the primary means
-of adding text to a file. In this mode, no commands are available;
-instead, the standard input is written directly to the editor buffer. A
-"line" consists of the text up to and including a <newline> character.
-Input mode is terminated by entering a single period ('.') on a line.
+(change), is given, 'ed' enters input mode. This is the primary means of
+adding text to a file. In this mode, no commands are available; instead,
+the standard input is written directly to the editor buffer. A "line"
+consists of the text up to and including a <newline> character. Input mode
+is terminated by entering a single period ('.') on a line.
 
-   All 'ed' commands operate on whole lines or ranges of lines; e.g.,
-the 'd' command deletes lines; the 'm' command moves lines, and so on.
-It is possible to modify only a portion of a line by means of
-replacement, as in the example above. However even here, the 's'
-command is applied to whole lines at a time.
+   All 'ed' commands operate on whole lines or ranges of lines; e.g., the
+'d' command deletes lines; the 'm' command moves lines, and so on. It is
+possible to modify only a portion of a line by means of replacement, as in
+the example above. However even here, the 's' command is applied to whole
+lines at a time.
 
    In general, 'ed' commands consist of zero or more line addresses,
-followed by a single character command and possibly additional
-parameters; i.e., commands have the structure:
+followed by a single character command and possibly additional parameters;
+i.e., commands have the structure:
 
      [ADDRESS[,ADDRESS]]COMMAND[PARAMETERS]
 
-   The ADDRESSes indicate the line or range of lines to be affected by
-the command. If fewer addresses are given than the command accepts,
-then default addresses are supplied.
+   The ADDRESSes indicate the line or range of lines to be affected by the
+command. If fewer addresses are given than the command accepts, then
+default addresses are supplied.
 
 
 File: ed.info,  Node: Introduction to line editing,  Next: Invoking ed,  Prev: Overview,  Up: Top
@@ -102,37 +101,36 @@ File: ed.info,  Node: Introduction to line editing,  Next: Invoking ed,  Prev: O
 2 Introduction to line editing
 ******************************
 
-'ed' was created, along with the Unix operating system, by Ken Thompson
-and Dennis Ritchie. It is the refinement of its more complex,
-programmable predecessor, 'QED', to which Thompson and Ritchie had
-already added pattern matching capabilities (*note Regular
-expressions::).
+'ed' was created, along with the Unix operating system, by Ken Thompson and
+Dennis Ritchie. It is the refinement of its more complex, programmable
+predecessor, 'QED', to which Thompson and Ritchie had already added pattern
+matching capabilities (*note Regular expressions::).
 
-   For the purposes of this tutorial, a working knowledge of the Unix
-shell 'sh' and the Unix file system is recommended, since 'ed' is
-designed to interact closely with them.  (*Note GNU bash manual:
-(bash)Top, for details about bash).
+   For the purposes of this tutorial, a working knowledge of the Unix shell
+'sh' and the Unix file system is recommended, since 'ed' is designed to
+interact closely with them. (*Note GNU bash manual: (bash)Top, for details
+about bash).
 
    The principal difference between line editors and display editors is
 that display editors provide instant feedback to user commands, whereas
-line editors require sometimes lengthy input before any effects are
-seen. The advantage of instant feedback, of course, is that if a mistake
-is made, it can be corrected immediately, before more damage is done.
-Editing in 'ed' requires more strategy and forethought; but if you are
-up to the task, it can be quite efficient.
+line editors require sometimes lengthy input before any effects are seen.
+The advantage of instant feedback, of course, is that if a mistake is made,
+it can be corrected immediately, before more damage is done. Editing in
+'ed' requires more strategy and forethought; but if you are up to the task,
+it can be quite efficient.
 
    Much of the 'ed' command syntax is shared with other Unix utilities.
 
-   As with the shell, <RETURN> (the carriage-return key) enters a line
-of input. So when we speak of "entering" a command or some text in
-'ed', <RETURN> is implied at the end of each line. Prior to typing
-<RETURN>, corrections to the line may be made by typing either
-<BACKSPACE> to erase characters backwards, or <CONTROL>-u (i.e., hold
-the CONTROL key and type u) to erase the whole line.
+   As with the shell, <RETURN> (the carriage-return key) enters a line of
+input. So when we speak of "entering" a command or some text in 'ed',
+<RETURN> is implied at the end of each line. Prior to typing <RETURN>,
+corrections to the line may be made by typing either <BACKSPACE> to erase
+characters backwards, or <CONTROL>-u (i.e., hold the CONTROL key and type
+u) to erase the whole line.
 
    When 'ed' first opens, it expects to be told what to do but doesn't
-prompt us like the shell. So let's begin by telling 'ed' to do so with
-the <P> ("prompt") command:
+prompt us like the shell. So let's begin by telling 'ed' to do so with the
+<P> ("prompt") command:
 
      $ ed
      P
@@ -141,8 +139,8 @@ the <P> ("prompt") command:
    By default, 'ed' uses asterisk ('*') as command prompt to avoid
 confusion with the shell command prompt ('$').
 
-   We can run Unix shell ('sh') commands from inside 'ed' by prefixing
-them with <!> (exclamation mark, aka "bang"). For example:
+   We can run Unix shell ('sh') commands from inside 'ed' by prefixing them
+with <!> (exclamation mark, aka "bang"). For example:
 
      *!date
      Mon Jun 26 10:08:41 PDT 2006
@@ -156,20 +154,20 @@ them with <!> (exclamation mark, aka "bang"). For example:
    So far, this is no different from running commands in the Unix shell.
 But let's say we want to edit the output of a command, or save it to a
 file. First we must capture the command output to a temporary location
-called a "buffer" where 'ed' can access it. This is done with 'ed''s
-<r> command (mnemonic: "read"):
+called a "buffer" where 'ed' can access it. This is done with 'ed''s <r>
+command (mnemonic: "read"):
 
      *r !cal -m
      137
      *
 
-   Here 'ed' is telling us that it has just read 137 characters into
-the editor buffer - i.e., the output of the 'cal' command, which prints
-a simple ASCII calendar. To display the buffer contents we issue the
-<p> ("print") command (not to be confused with the prompt command,
-which is uppercase!). To indicate the range of lines in the buffer that
-should be printed, we prefix the command with <,> (comma) which is
-shorthand for "the whole buffer":
+   Here 'ed' is telling us that it has just read 137 characters into the
+editor buffer - i.e., the output of the 'cal' command, which prints a
+simple ASCII calendar. To display the buffer contents we issue the <p>
+("print") command (not to be confused with the prompt command, which is
+uppercase!). To indicate the range of lines in the buffer that should be
+printed, we prefix the command with <,> (comma) which is shorthand for "the
+whole buffer":
 
      *,p
            June 2006
@@ -182,23 +180,21 @@ shorthand for "the whole buffer":
 
      *
 
-   Now let's write the buffer contents to a file named 'junk' with the
-<w> ("write") command:
+   Now let's write the buffer contents to a file named 'junk' with the <w>
+("write") command:
 
      *w junk
      137
      *
 
-   Need we say? It's good practice to frequently write the buffer
-contents, since unwritten changes to the buffer will be lost when we
-exit 'ed'.
+   Need we say? It's good practice to frequently write the buffer contents,
+since unwritten changes to the buffer will be lost when we exit 'ed'.
 
-   The sample sessions below illustrate some basic concepts of line
-editing with 'ed'. We begin by creating a file, 'sonnet', with some
-help from Shakespeare. As with the shell, all input to 'ed' must be
-followed by a <newline> character. Commands beginning with '#' are
-taken as comments and ignored. Input mode lines that begin with '#' are
-just more input.
+   The sample sessions below illustrate some basic concepts of line editing
+with 'ed'. We begin by creating a file, 'sonnet', with some help from
+Shakespeare. As with the shell, all input to 'ed' must be followed by a
+<newline> character. Commands beginning with '#' are taken as comments and
+ignored. Input mode lines that begin with '#' are just more input.
 
      $ ed
      # The 'a' command is for appending text to the editor buffer.
@@ -245,17 +241,16 @@ just more input.
      q
      $
 
-   Since 'ed' is line-oriented, we have to tell it which line, or range
-of lines we want to edit. In the above example, we do this by
-specifying the line's number, or sequence in the buffer. Alternatively,
-we could have specified a unique string in the line, e.g., '/filvers/',
-where the '/'s delimit the string in question.  Subsequent commands
-affect only the selected line, a.k.a. the "current" line. Portions of
-that line are then replaced with the substitute command, whose syntax
-is 's/OLD/NEW/'.
+   Since 'ed' is line-oriented, we have to tell it which line, or range of
+lines we want to edit. In the example above, we do this by specifying the
+line's number, or sequence in the buffer. Alternatively, we could have
+specified a unique string in the line, e.g., '/filvers/', where the '/'s
+delimit the string in question. Subsequent commands affect only the
+selected line, a.k.a. the "current" line. Portions of that line are then
+replaced with the substitute command, whose syntax is 's/OLD/NEW/'.
 
-   Although 'ed' accepts only one command per line, the print command
-'p' is an exception, and may be appended to the end of most commands.
+   Although 'ed' accepts only one command per line, the print command 'p'
+is an exception, and may be appended to the end of most commands.
 
    In the next example, a title is added to our sonnet.
 
@@ -288,11 +283,11 @@ is 's/OLD/NEW/'.
      $
 
    When 'ed' opens a file, the current address is initially set to the
-address of the last line of that file. Similarly, the move command 'm'
-sets the current address to the address of the last line moved.
+address of the last line of that file. Similarly, the move command 'm' sets
+the current address to the address of the last line moved.
 
-   Related programs or routines are 'vi (1)', 'sed (1)', 'regex (3)',
-'sh (1)'. Relevant documents are:
+   Related programs or routines are 'vi (1)', 'sed (1)', 'regex (3)', 'sh
+(1)'. Relevant documents are:
 
      Unix User's Manual Supplementary Documents: 12 -- 13
 
@@ -310,14 +305,14 @@ The format for running 'ed' is:
      ed [OPTIONS] [FILE]
      red [OPTIONS] [FILE]
 
-   FILE specifies the name of a file to read. If FILE is prefixed with
-a bang (!), then it is interpreted as a shell command. In this case,
-what is read is the standard output of FILE executed via 'sh (1)'. To
-read a file whose name begins with a bang, prefix the name with a
-backslash ('\'). The default filename is set to FILE only if it is not
-prefixed with a bang.
+   FILE specifies the name of a file to read. If FILE is prefixed with a
+bang (!), then it is interpreted as a shell command. In this case, what is
+read is the standard output of FILE executed via 'sh (1)'. To read a file
+whose name begins with a bang, prefix the name with a backslash ('\'). The
+default filename is set to FILE only if it is not prefixed with a bang.
 
-   'ed' supports the following options:
+   'ed' supports the following options: *Note Argument syntax:
+(arg_parser)Argument syntax.
 
 '-h'
 '--help'
@@ -325,43 +320,48 @@ prefixed with a bang.
 
 '-V'
 '--version'
-     Print the version number of 'ed' on the standard output and exit.
-     This version number should be included in all bug reports.
+     Print the version number of 'ed' on the standard output and exit. This
+     version number should be included in all bug reports.
+
+'-E'
+'--extended-regexp'
+     Use extended regular expressions instead of the basic regular
+     expressions mandated by POSIX.
 
 '-G'
 '--traditional'
-     Forces backwards compatibility. This affects the behavior of the
-     'ed' commands 'G', 'V', 'f', 'l', 'm', 't' and '!!'. If the
-     default behavior of these commands does not seem familiar, then
-     try invoking 'ed' with this switch.
+     Forces backwards compatibility. This affects the behavior of the 'ed'
+     commands 'G', 'V', 'f', 'l', 'm', 't' and '!!'. If the default
+     behavior of these commands does not seem familiar, then try invoking
+     'ed' with this switch.
 
 '-l'
 '--loose-exit-status'
-     Don't exit with bad status if a command happens to "fail" (for
-     example if a substitution command finds nothing to replace). This
-     can be useful when 'ed' is invoked as the editor for crontab.
+     Don't exit with bad status if a command happens to "fail" (for example
+     if a substitution command finds nothing to replace). This can be useful
+     when 'ed' is invoked as the editor for crontab.
 
 '-p STRING'
 '--prompt=STRING'
-     Specifies a command prompt string and turns prompting on. Showing
-     the prompt string may be toggled on and off with the 'P' command.
+     Specifies a command prompt string and turns prompting on. Showing the
+     prompt string may be toggled on and off with the 'P' command.
 
 '-r'
 '--restricted'
-     Run in restricted mode. This mode disables editing of files out of
-     the current directory and execution of shell commands.
+     Run in restricted mode. This mode disables editing of files out of the
+     current directory and execution of shell commands.
 
 '-s'
 '--quiet'
 '--silent'
-     Suppresses diagnostics, the printing of byte counts by 'e', 'E',
-     'r' and 'w' commands, and the '!' prompt after a '!' command. This
-     option may be useful if 'ed''s standard input is from a script.
+     Suppresses diagnostics, the printing of byte counts by 'e', 'E', 'r'
+     and 'w' commands, and the '!' prompt after a '!' command. This option
+     may be useful if 'ed''s standard input is from a script.
 
 '-v'
 '--verbose'
-     Verbose mode; prints error explanations. This may be toggled on
-     and off with the 'H' command.
+     Verbose mode; prints error explanations. This may be toggled on and off
+     with the 'H' command.
 
 
    Exit status: 0 if no errors occurred; otherwise >0.
@@ -372,33 +372,32 @@ File: ed.info,  Node: Line addressing,  Next: Regular expressions,  Prev: Invoki
 4 Line addressing
 *****************
 
-An address represents the number of a line in the buffer. 'ed'
-maintains a "current address" which is typically supplied to commands
-as the default address when none is specified. When a file is first
-read, the current address is set to the address of the last line of the
-file. In general, the current address is set to the address of the last
-line affected by a command.
+An address represents the number of a line in the buffer. 'ed' maintains a
+"current address" which is typically supplied to commands as the default
+address when none is specified. When a file is first read, the current
+address is set to the address of the last line of the file. In general, the
+current address is set to the address of the last line affected by a
+command.
 
-   One exception to the rule that addresses represent line numbers is
-the address '0' (zero). This means "at the beginning of the buffer",
-and is valid wherever it makes sense.
+   One exception to the rule that addresses represent line numbers is the
+address '0' (zero). This means "at the beginning of the buffer", and is
+valid wherever it makes sense.
 
-   An address range is two addresses separated either by a comma (',')
-or a semicolon (';'). In a semicolon-delimited range, the current
-address ('.') is set to the first address before the second address is
-calculated. This feature can be used to set the starting line for
-searches if the second address contains a regular expression. The value
-of the first address in a range cannot exceed the value of the second.
+   An address range is two addresses separated either by a comma (',') or a
+semicolon (';'). In a semicolon-delimited range, the current address ('.')
+is set to the first address before the second address is calculated. This
+feature can be used to set the starting line for searches if the second
+address contains a regular expression. The value of the first address in a
+range cannot exceed the value of the second.
 
    Addresses can be omitted on either side of the comma or semicolon
-separator. If only the first address is given in a range, then the
-second address is set to the given address. If only the second address
-is given, the resulting address pairs are '1,addr' and '.;addr'
-respectively. If a N-tuple of addresses is given where N > 2, then the
-corresponding range is determined by the last two addresses in the
-N-tuple. If only one address is expected, then the last address is
-used. It is an error to give any number of addresses to a command that
-requires zero addresses.
+separator. If only the first address is given in a range, then the second
+address is set to the given address. If only the second address is given,
+the resulting address pairs are '1,addr' and '.;addr' respectively. If a
+N-tuple of addresses is given where N > 2, then the corresponding range is
+determined by the last two addresses in the N-tuple. If only one address is
+expected, then the last address is used. It is an error to give any number
+of addresses to a command that requires zero addresses.
 
    A line address is constructed as follows:
 
@@ -422,50 +421,50 @@ requires zero addresses.
      cumulative effect.
 
 '-'
-     The previous line. This is equivalent to '-1' and may be repeated
-     with cumulative effect.
+     The previous line. This is equivalent to '-1' and may be repeated with
+     cumulative effect.
 
 ','
-     The first through last lines in the buffer. This is equivalent to
-     the address range '1,$'.
+     The first through last lines in the buffer. This is equivalent to the
+     address range '1,$'.
 
 ';'
-     The current through last lines in the buffer. This is equivalent
-     to the address range '.;$'.
+     The current through last lines in the buffer. This is equivalent to the
+     address range '.;$'.
 
 '/RE/'
-     The next line containing the regular expression RE. The search
-     wraps to the beginning of the buffer and continues down to the
-     current line, if necessary.
+     The next line containing the regular expression RE. The search wraps
+     to the beginning of the buffer and continues down to the current line,
+     if necessary.
 
 '?RE?'
      The previous line containing the regular expression RE. The search
-     wraps to the end of the buffer and continues up to the current
-     line, if necessary.
+     wraps to the end of the buffer and continues up to the current line, if
+     necessary.
 
 ''x'
-     The apostrophe-x character pair addresses the line previously
-     marked by a 'k' (mark) command, where 'x' is a lower case letter
-     from the portable character set '[a-z]'.
+     The apostrophe-x character pair addresses the line previously marked by
+     a 'k' (mark) command, where 'x' is a lower case letter from the
+     portable character set '[a-z]'.
 
 
    Addresses can be followed by one or more address offsets, optionally
 separated by whitespace. Offsets are constructed as follows:
 
-   * '+' or '-' followed by a number adds or subtracts the indicated
-     number of lines to or from the address.
+   * '+' or '-' followed by a number adds or subtracts the indicated number
+     of lines to or from the address.
 
-   * '+' or '-' not followed by a number adds or subtracts 1 to or from
-     the address.
+   * '+' or '-' not followed by a number adds or subtracts 1 to or from the
+     address.
 
    * A number adds the indicated number of lines to the address.
 
 
    It is not an error if an intermediate address value is negative or
-greater than the address of the last line in the buffer. It is an error
-if the final address value is negative or greater than the address of
-the last line in the buffer. It is an error if a search for a RE fails
-to find a matching line.
+greater than the address of the last line in the buffer. It is an error if
+the final address value is negative or greater than the address of the last
+line in the buffer. It is an error if a search for a RE fails to find a
+matching line.
 
 
 File: ed.info,  Node: Regular expressions,  Next: Commands,  Prev: Line addressing,  Up: Top
@@ -473,92 +472,90 @@ File: ed.info,  Node: Regular expressions,  Next: Commands,  Prev: Line addressi
 5 Regular expressions
 *********************
 
-Regular expressions are patterns used in selecting text. For example,
-the 'ed' command
+Regular expressions are patterns used in selecting text. For example, the
+'ed' command
 
      g/STRING/
 
-prints all lines containing STRING. Regular expressions are also used
-by the 's' command for selecting old text to be replaced with new text.
+prints all lines containing STRING. Regular expressions are also used by
+the 's' command for selecting old text to be replaced with new text.
 
    In addition to specifying string literals, regular expressions can
 represent classes of strings. Strings thus represented are said to be
 matched by the corresponding regular expression. If it is possible for a
-regular expression to match several strings in a line, then the
-left-most match is the one selected. If the regular expression permits a
-variable number of matching characters, the longest sequence starting at
-that point is matched.
+regular expression to match several strings in a line, then the left-most
+match is the one selected. If the regular expression permits a variable
+number of matching characters, the longest sequence starting at that point
+is matched.
 
    A null RE is equivalent to the last RE encountered.
 
-   The following symbols are used in constructing regular expressions:
+   The following symbols are used in constructing regular expressions using
+POSIX basic regular expression syntax:
 
 'C'
-     Any character C not listed below, including '{', '}', '(', ')',
-     '<' and '>', matches itself.
+     Any character C not listed below, including '{', '}', '(', ')', '<'
+     and '>', matches itself.
 
 '\C'
-     Any backslash-escaped character C, other than '{', '}', '(', ')',
-     '<', '>', 'b', 'B', 'w', 'W', '+' and '?', matches itself.
+     Any backslash-escaped character C, other than '{', '}', '(', ')', '<',
+     '>', 'b', 'B', 'w', 'W', '+' and '?', matches itself.
 
 '.'
      Matches any single character.
 
 '[CHAR-CLASS]'
      Matches any single character in CHAR-CLASS. To include a ']' in
-     CHAR-CLASS, it must be the first character. A range of characters
-     may be specified by separating the end characters of the range
-     with a '-', e.g., 'a-z' specifies the lower case characters. The
-     following literal expressions can also be used in CHAR-CLASS to
-     specify sets of characters:
+     CHAR-CLASS, it must be the first character. A range of characters may
+     be specified by separating the end characters of the range with a '-',
+     e.g., 'a-z' specifies the lower case characters. The following literal
+     expressions can also be used in CHAR-CLASS to specify sets of
+     characters:
 
           [:alnum:] [:cntrl:] [:lower:] [:space:]
           [:alpha:] [:digit:] [:print:] [:upper:]
           [:blank:] [:graph:] [:punct:] [:xdigit:]
 
-     If '-' appears as the first or last character of CHAR-CLASS, then
-     it matches itself. All other characters in CHAR-CLASS match
-     themselves.
+     If '-' appears as the first or last character of CHAR-CLASS, then it
+     matches itself. All other characters in CHAR-CLASS match themselves.
 
      Patterns in CHAR-CLASS of the form:
           [.COL-ELM.]
           [=COL-ELM=]
 
-     where COL-ELM is a "collating element" are interpreted according
-     to 'locale (5)'. See 'regex (7)' for an explanation of these
-     constructs.
+     where COL-ELM is a "collating element" are interpreted according to
+     'locale (5)'. See 'regex (7)' for an explanation of these constructs.
 
 '[^CHAR-CLASS]'
-     Matches any single character, other than newline, not in
-     CHAR-CLASS.  CHAR-CLASS is defined as above.
+     Matches any single character, other than newline, not in CHAR-CLASS.
+     CHAR-CLASS is defined as above.
 
 '^'
-     If '^' is the first character of a regular expression, then it
-     anchors the regular expression to the beginning of a line.
-     Otherwise, it matches itself.
+     If '^' is the first character of a regular expression, then it anchors
+     the regular expression to the beginning of a line. Otherwise, it
+     matches itself.
 
 '$'
-     If '$' is the last character of a regular expression, it anchors
-     the regular expression to the end of a line. Otherwise, it matches
-     itself.
+     If '$' is the last character of a regular expression, it anchors the
+     regular expression to the end of a line. Otherwise, it matches itself.
 
 '\(RE\)'
      Defines a (possibly null) subexpression RE. Subexpressions may be
      nested. A subsequent backreference of the form '\N', where N is a
      number in the range [1,9], expands to the text matched by the Nth
-     subexpression. For example, the regular expression '\(a.c\)\1'
-     matches the string 'abcabc', but not 'abcadc'. Subexpressions are
-     ordered relative to their left delimiter.
+     subexpression. For example, the regular expression '\(a.c\)\1' matches
+     the string 'abcabc', but not 'abcadc'. Subexpressions are ordered
+     relative to their left delimiter.
 
 '*'
-     Matches zero or more repetitions of the regular expression
-     immediately preceding it. The regular expression can be either a
-     single character regular expression or a subexpression. If '*' is
-     the first character of a regular expression or subexpression, then
-     it matches itself. The '*' operator sometimes yields unexpected
-     results. For example, the regular expression 'b*' matches the
-     beginning of the string 'abbb', as opposed to the substring 'bbb',
-     since a null match is the only left-most match.
+     Matches zero or more repetitions of the regular expression immediately
+     preceding it. The regular expression can be either a single character
+     regular expression or a subexpression. If '*' is the first character
+     of a regular expression or subexpression, then it matches itself. The
+     '*' operator sometimes yields unexpected results. For example, the
+     regular expression 'b*' matches the beginning of the string 'abbb', as
+     opposed to the substring 'bbb', since a null match is the only
+     left-most match.
 
 '\{N,M\}'
 '\{N,\}'
@@ -566,49 +563,45 @@ that point is matched.
      Matches the single character regular expression or subexpression
      immediately preceding it at least N and at most M times. If M is
      omitted, then it matches at least N times. If the comma is also
-     omitted, then it matches exactly N times. If any of these forms
-     occurs first in a regular expression or subexpression, then it is
-     interpreted literally (i.e., the regular expression '\{2\}'
-     matches the string '{2}', and so on).
+     omitted, then it matches exactly N times. If any of these forms occurs
+     first in a regular expression or subexpression, then it is interpreted
+     literally (i.e., the regular expression '\{2\}' matches the string
+     '{2}', and so on).
+
+
+   The following extensions to basic regular expression operators are
+preceded by a backslash '\' to distinguish them from traditional 'ed'
+syntax. They may be unavailable depending on the particular regex
+implementation in your system.
 
 '\<'
 '\>'
      Anchors the single character regular expression or subexpression
      immediately following it to the beginning (in the case of '\<') or
-     ending (in the case of '\>') of a "word", i.e., in ASCII, a
-     maximal string of alphanumeric characters, including the
-     underscore (_).
-
-
-   The following extended regular expression operators are preceded by a
-backslash '\' to distinguish them from traditional 'ed' syntax.  They
-may be unavailable depending on the particular regex implementation in
-your system.
+     ending (in the case of '\>') of a "word", i.e., in ASCII, a maximal
+     string of alphanumeric characters, including the underscore (_).
 
 '\`'
 '\''
-     Unconditionally matches the beginning '\`' or ending '\'' of a
-     line.
+     Unconditionally matches the beginning '\`' or ending '\'' of a line.
 
 '\?'
      Optionally matches the single character regular expression or
      subexpression immediately preceding it. For example, the regular
-     expression 'a[bd]\?c' matches the strings 'abc', 'adc' and 'ac'.
-     If '\?' occurs at the beginning of a regular expressions or
+     expression 'a[bd]\?c' matches the strings 'abc', 'adc' and 'ac'. If
+     '\?' occurs at the beginning of a regular expressions or
      subexpression, then it matches a literal '?'.
 
 '\+'
      Matches the single character regular expression or subexpression
-     immediately preceding it one or more times. So the regular
-     expression 'a\+' is shorthand for 'aa*'. If '\+' occurs at the
-     beginning of a regular expression or subexpression, then it
-     matches a literal '+'.
+     immediately preceding it one or more times. So the regular expression
+     'a\+' is shorthand for 'aa*'. If '\+' occurs at the beginning of a
+     regular expression or subexpression, then it matches a literal '+'.
 
 '\b'
      Matches the beginning or ending (null string) of a word. Thus the
-     regular expression '\bhello\b' is equivalent to '\<hello\>'.
-     However, '\b\b' is a valid regular expression whereas '\<\>' is
-     not.
+     regular expression '\bhello\b' is equivalent to '\<hello\>'. However,
+     '\b\b' is a valid regular expression whereas '\<\>' is not.
 
 '\B'
      Matches (a null string) inside a word.
@@ -627,16 +620,15 @@ File: ed.info,  Node: Commands,  Next: Limitations,  Prev: Regular expressions, 
 **********
 
 All 'ed' commands are single characters, though some require additonal
-parameters. If a command's parameters extend over several lines, then
-each line except for the last must be terminated with a backslash ('\').
+parameters. If a command's parameters extend over several lines, then each
+line except for the last must be terminated with a backslash ('\').
 
    In general, at most one command is allowed per line. However, most
-commands accept a print suffix, which is any of 'p' (print), 'l'
-(list), or 'n' (enumerate), to print the last line affected by the
-command. It is not portable to give more than one print suffix, but
-'ed' allows any combination of non-repeated print suffixes and combines
-their effects. If any suffix letter is given, it must immediately
-follow the command.
+commands accept a print suffix, which is any of 'p' (print), 'l' (list), or
+'n' (enumerate), to print the last line affected by the command. It is not
+portable to give more than one print suffix, but 'ed' allows any
+combination of non-repeated print suffixes and combines their effects. If
+any suffix letter is given, it must immediately follow the command.
 
    The 'e', 'E', 'f', 'r', and 'w' commands take an optional FILE
 parameter, separated from the command letter by one or more whitespace
@@ -645,208 +637,202 @@ characters.
    An interrupt (typically <Control-C>) has the effect of aborting the
 current command and returning the editor to command mode.
 
-   'ed' recognizes the following commands. The commands are shown
-together with the default address or address range supplied if none is
-specified (in parenthesis).
+   'ed' recognizes the following commands. The commands are shown together
+with the default address or address range supplied if none is specified (in
+parenthesis).
 
 '(.)a'
-     Appends text to the buffer after the addressed line. The address
-     '0' (zero) is valid for this command; it places the entered text at
-     the beginning of the buffer. Text is entered in input mode. The
-     current address is set to the address of the last line entered or,
-     if there were none, to the addressed line.
+     Appends text to the buffer after the addressed line. The address '0'
+     (zero) is valid for this command; it places the entered text at the
+     beginning of the buffer. Text is entered in input mode. The current
+     address is set to the address of the last line entered or, if there
+     were none, to the addressed line.
 
 '(.,.)c'
-     Changes lines in the buffer. The addressed lines are deleted from
-     the buffer, and text is inserted in their place. Text is entered
-     in input mode.  The current address is set to the address of the
-     last line entered or, if there were none, to the new address of
-     the line after the last line deleted; if the lines deleted were
-     originally at the end of the buffer, the current address is set to
-     the address of the new last line; if no lines remain in the
-     buffer, the current address is set to zero. The lines deleted are
-     copied to the cut buffer.
+     Changes lines in the buffer. The addressed lines are deleted from the
+     buffer, and text is inserted in their place. Text is entered in input
+     mode. The current address is set to the address of the last line
+     entered or, if there were none, to the new address of the line after
+     the last line deleted; if the lines deleted were originally at the end
+     of the buffer, the current address is set to the address of the new
+     last line; if no lines remain in the buffer, the current address is
+     set to zero. The lines deleted are copied to the cut buffer.
 
 '(.,.)d'
-     Deletes the addressed lines from the buffer. The current address
-     is set to the new address of the line after the last line deleted;
-     if the lines deleted were originally at the end of the buffer, the
-     current address is set to the address of the new last line; if no
-     lines remain in the buffer, the current address is set to zero.
-     The lines deleted are copied to the cut buffer.
+     Deletes the addressed lines from the buffer. The current address is
+     set to the new address of the line after the last line deleted; if the
+     lines deleted were originally at the end of the buffer, the current
+     address is set to the address of the new last line; if no lines remain
+     in the buffer, the current address is set to zero. The lines deleted
+     are copied to the cut buffer.
 
 'e FILE'
-     Edits FILE, and sets the default filename. If FILE is not
-     specified, then the default filename is used. Any lines in the
-     buffer are deleted before the new file is read. The current
-     address is set to the address of the last line in the buffer.
+     Edits FILE, and sets the default filename. If FILE is not specified,
+     then the default filename is used. Any lines in the buffer are deleted
+     before the new file is read. The current address is set to the address
+     of the last line in the buffer.
 
-     If FILE is prefixed with a bang (!), then it is interpreted as a
-     shell command whose output is to be read, (*note shell escape
-     command:: '!' below). In this case the default filename is
-     unchanged.
+     If FILE is prefixed with a bang (!), then it is interpreted as a shell
+     command whose output is to be read, (*note shell escape command:: '!'
+     below). In this case the default filename is unchanged.
 
-     A warning is printed if any changes have been made in the buffer
-     since the last 'w' command that wrote the entire buffer to a file.
+     A warning is printed if any changes have been made in the buffer since
+     the last 'w' command that wrote the entire buffer to a file.
 
 'E FILE'
-     Edits FILE unconditionally. This is similar to the 'e' command,
-     except that unwritten changes are discarded without warning.
+     Edits FILE unconditionally. This is similar to the 'e' command, except
+     that unwritten changes are discarded without warning.
 
 'f FILE'
-     Sets the default filename to FILE. If FILE is not specified, then
-     the default unescaped filename is printed.
+     Sets the default filename to FILE. If FILE is not specified, then the
+     default unescaped filename is printed.
 
 '(1,$)g/RE/COMMAND-LIST'
-     Global command. The global command makes two passes over the file.
-     On the first pass, all the addressed lines matching a regular
-     expression RE are marked. Then, going sequentially from the
-     beginning of the file to the end of the file, the given
-     COMMAND-LIST is executed for each marked line, with the current
-     address set to the address of that line. Any line modified by the
-     COMMAND-LIST is unmarked. The final value of the current address
-     is the value assigned by the last command in the last COMMAND-LIST
-     executed. If there were no matching lines, the current address is
-     unchanged.
+     Global command. The global command makes two passes over the file. On
+     the first pass, all the addressed lines matching a regular expression
+     RE are marked. Then, going sequentially from the beginning of the file
+     to the end of the file, the given COMMAND-LIST is executed for each
+     marked line, with the current address set to the address of that line.
+     Any line modified by the COMMAND-LIST is unmarked. The final value of
+     the current address is the value assigned by the last command in the
+     last COMMAND-LIST executed. If there were no matching lines, the
+     current address is unchanged. The execution of COMMAND-LIST stops on
+     the first error.
 
-     The first command of COMMAND-LIST must appear on the same line as
-     the 'g' command. The other commands of COMMAND-LIST must appear on
-     separate lines. All lines of a multi-line COMMAND-LIST except the
-     last line must be terminated with a backslash ('\'). Any commands
-     are allowed, except for 'g', 'G', 'v', and 'V'. The '.'
-     terminating the input mode of commands 'a', 'c', and 'i' can be
-     omitted if it would be the last line of COMMAND-LIST. By default, a
-     newline alone in COMMAND-LIST is equivalent to a 'p' command. If
-     'ed' is invoked with the command-line option '-G', then a newline
-     in COMMAND-LIST is equivalent to a '.+1p' command.
+     The first command of COMMAND-LIST must appear on the same line as the
+     'g' command. The other commands of COMMAND-LIST must appear on
+     separate lines. All lines of a multi-line COMMAND-LIST except the last
+     line must be terminated with a backslash ('\'). Any commands are
+     allowed, except for 'g', 'G', 'v', and 'V'. The '.' terminating the
+     input mode of commands 'a', 'c', and 'i' can be omitted if it would be
+     the last line of COMMAND-LIST. By default, a newline alone in
+     COMMAND-LIST is equivalent to a 'p' command. If 'ed' is invoked with
+     the command-line option '-G', then a newline in COMMAND-LIST is
+     equivalent to a '.+1p' command.
 
 '(1,$)G/RE/'
      Interactive global command. Interactively edits the addressed lines
-     matching a regular expression RE. For each matching line, the line
-     is printed, the current address is set, and the user is prompted to
-     enter a COMMAND-LIST. The final value of the current address is
-     the value assigned by the last command executed. If there were no
-     matching lines, the current address is unchanged.
+     matching a regular expression RE. For each matching line, the line is
+     printed, the current address is set, and the user is prompted to enter
+     a COMMAND-LIST. The final value of the current address is the value
+     assigned by the last command executed. If there were no matching
+     lines, the current address is unchanged.
 
-     The format of COMMAND-LIST is the same as that of the 'g' command.
-     A newline alone acts as a null command list. A single '&' repeats
-     the last non-null command list.
+     The format of COMMAND-LIST is the same as that of the 'g' command. A
+     newline alone acts as a null command list. A single '&' repeats the
+     last non-null command list.
 
 'h'
      Help. Prints an explanation of the last error.
 
 'H'
-     Toggles the printing of error explanations. By default,
-     explanations are not printed. It is recommended that ed scripts
-     begin with this command to aid in debugging.
+     Toggles the printing of error explanations. By default, explanations
+     are not printed. It is recommended that ed scripts begin with this
+     command to aid in debugging.
 
 '(.)i'
-     Inserts text in the buffer before the addressed line. The address
-     '0' (zero) is valid for this command; it places the entered text at
-     the beginning of the buffer. Text is entered in input mode. The
-     current address is set to the address of the last line entered or,
-     if there were none, to the addressed line.
+     Inserts text in the buffer before the addressed line. The address '0'
+     (zero) is valid for this command; it places the entered text at the
+     beginning of the buffer. Text is entered in input mode. The current
+     address is set to the address of the last line entered or, if there
+     were none, to the addressed line.
 
 '(.,.+1)j'
-     Joins the addressed lines, replacing them by a single line
-     containing their joined text. If only one address is given, this
-     command does nothing. If lines are joined, the lines replaced are
-     copied to the cut buffer and the current address is set to the
-     address of the joined line. Else, the current address is unchanged.
+     Joins the addressed lines, replacing them by a single line containing
+     their joined text. If only one address is given, this command does
+     nothing. If lines are joined, the lines replaced are copied to the cut
+     buffer and the current address is set to the address of the joined
+     line. Else, the current address is unchanged.
 
 '(.)kx'
      Marks a line with a lower case letter 'x'. The line can then be
-     addressed as ''x' (i.e., a single quote followed by 'x') in
-     subsequent commands. The mark is not cleared until the line is
-     deleted or otherwise modified. The current address is unchanged.
+     addressed as ''x' (i.e., a single quote followed by 'x') in subsequent
+     commands. The mark is not cleared until the line is deleted or
+     otherwise modified. The current address is unchanged.
 
 '(.,.)l'
-     List command. Prints the addressed lines unambiguously. The end of
-     each line is marked with a '$', and every '$' character within the
-     text is printed with a preceding backslash. Special characters are
-     printed as escape sequences. The current address is set to the
-     address of the last line printed.
+     List command. Prints the addressed lines unambiguously. The end of each
+     line is marked with a '$', and every '$' character within the text is
+     printed with a preceding backslash. Special characters are printed as
+     escape sequences. The current address is set to the address of the
+     last line printed.
 
 '(.,.)m(.)'
-     Moves lines in the buffer. The addressed lines are moved to after
-     the right-hand destination address. The destination address '0'
-     (zero) is valid for this command; it moves the addressed lines to
-     the beginning of the buffer. It is an error if the destination
-     address falls within the range of lines to be moved. The current
-     address is set to the new address of the last line moved.
+     Moves lines in the buffer. The addressed lines are moved to after the
+     right-hand destination address. The destination address '0' (zero) is
+     valid for this command; it moves the addressed lines to the beginning
+     of the buffer. It is an error if the destination address falls within
+     the range of lines to be moved. The current address is set to the new
+     address of the last line moved.
 
 '(.,.)n'
-     Number command. Prints the addressed lines, preceding each line by
-     its line number and a <tab>. The current address is set to the
-     address of the last line printed.
+     Number command. Prints the addressed lines, preceding each line by its
+     line number and a <tab>. The current address is set to the address of
+     the last line printed.
 
 '(.,.)p'
-     Prints the addressed lines. The current address is set to the
-     address of the last line printed.
+     Prints the addressed lines. The current address is set to the address
+     of the last line printed.
 
 'P'
      Toggles the command prompt on and off. Unless a prompt string is
-     specified with the command-line option '-p', the command prompt is
-     by default turned off. The default prompt string is an asterisk
-     ('*').
+     specified with the command-line option '-p', the command prompt is by
+     default turned off. The default prompt string is an asterisk ('*').
 
 'q'
-     Quits 'ed'. A warning is printed if any changes have been made in
-     the buffer since the last 'w' command that wrote the entire buffer
-     to a file.
+     Quits 'ed'. A warning is printed if any changes have been made in the
+     buffer since the last 'w' command that wrote the entire buffer to a
+     file.
 
 'Q'
-     Quits 'ed' unconditionally. This is similar to the 'q' command,
-     except that unwritten changes are discarded without warning.
+     Quits 'ed' unconditionally. This is similar to the 'q' command, except
+     that unwritten changes are discarded without warning.
 
 '($)r FILE'
      Reads FILE and appends it after the addressed line. If FILE is not
-     specified, then the default filename is used. If there is no
-     default filename prior to the command, then the default filename
-     is set to FILE. Otherwise, the default filename is unchanged. The
-     address '0' (zero) is valid for this command; it reads the file at
-     the beginning of the buffer. The current address is set to the
-     address of the last line read or, if there were none, to the
-     addressed line.
+     specified, then the default filename is used. If there is no default
+     filename prior to the command, then the default filename is set to
+     FILE. Otherwise, the default filename is unchanged. The address '0'
+     (zero) is valid for this command; it reads the file at the beginning
+     of the buffer. The current address is set to the address of the last
+     line read or, if there were none, to the addressed line.
 
-     If FILE is prefixed with a bang (!), then it is interpreted as a
-     shell command whose output is to be read, (*note shell escape
-     command:: '!' below). In this case the default filename is
-     unchanged.
+     If FILE is prefixed with a bang (!), then it is interpreted as a shell
+     command whose output is to be read, (*note shell escape command:: '!'
+     below). In this case the default filename is unchanged.
 
 '(.,.)s/RE/REPLACEMENT/'
-     Substitute command. Replaces text in the addressed lines matching
-     a regular expression RE with REPLACEMENT. By default, only the
-     first match in each line is replaced. The 's' command accepts any
-     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'.  If
-     the 'g' (global) suffix is given, then every match is replaced. The
+     Substitute command. Replaces text in the addressed lines matching a
+     regular expression RE with REPLACEMENT. By default, only the first
+     match in each line is replaced. The 's' command accepts any
+     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'. If the
+     'g' (global) suffix is given, then every match is replaced. The
      'COUNT' suffix, where COUNT is a positive number, causes only the
-     COUNTth match to be replaced. 'g' and 'COUNT' can't be specified
-     in the same command. 'l', 'n', and 'p' are the usual print
-     suffixes. It is an error if no substitutions are performed on any
-     of the addressed lines. The current address is set to the address
-     of the last line on which a substitution occurred. If a line is
-     split, a substitution is considered to have occurred on each of
-     the new lines. If no substitution is performed, the current
-     address is unchanged. The last line modified is copied to the cut
-     buffer.
+     COUNTth match to be replaced. 'g' and 'COUNT' can't be specified in
+     the same command. 'l', 'n', and 'p' are the usual print suffixes. It
+     is an error if no substitutions are performed on any of the addressed
+     lines. The current address is set to the address of the last line on
+     which a substitution occurred. If a line is split, a substitution is
+     considered to have occurred on each of the new lines. If no
+     substitution is performed, the current address is unchanged. The last
+     line modified is copied to the cut buffer.
 
      RE and REPLACEMENT may be delimited by any character other than
      <space>, <newline> and the characters used by the form of the 's'
-     command shown below. If the last delimiter is omitted, then the
-     last line affected is printed as if the print suffix 'p' were
-     specified. The last delimiter can't be omitted if the 's' command
-     is part of a 'g' or 'v' COMMAND-LIST and is not the last command
-     in the list, because the meaning of the following escaped newline
-     would become ambiguous.
+     command shown below. If the last delimiter is omitted, then the last
+     line affected is printed as if the print suffix 'p' were specified.
+     The last delimiter can't be omitted if the 's' command is part of a
+     'g' or 'v' COMMAND-LIST and is not the last command in the list,
+     because the meaning of the following escaped newline would become
+     ambiguous.
 
-     An unescaped '&' in REPLACEMENT is replaced by the currently
-     matched text. The character sequence '\M' where M is a number in
-     the range [1,9], is replaced by the Mth backreference expression
-     of the matched text. If the corresponding backreference expression
-     does not match, then the character sequence '\M' is replaced by
-     the empty string. If REPLACEMENT consists of a single '%', then
-     REPLACEMENT from the last substitution is used.
+     An unescaped '&' in REPLACEMENT is replaced by the currently matched
+     text. The character sequence '\M' where M is a number in the range
+     [1,9], is replaced by the Mth backreference expression of the matched
+     text. If the corresponding backreference expression does not match,
+     then the character sequence '\M' is replaced by the empty string. If
+     REPLACEMENT consists of a single '%', then REPLACEMENT from the last
+     substitution is used.
 
      A line can be split by including a newline escaped with a backslash
      ('\') in REPLACEMENT. Each backslash in REPLACEMENT removes the
@@ -854,58 +840,54 @@ specified (in parenthesis).
 
 '(.,.)s'
      Repeats the last substitution. This form of the 's' command accepts
-     the 'g' and 'COUNT' suffixes described above, and any combination
-     of the suffixes 'p' and 'r'. The 'g' suffix toggles the global
-     suffix of the last substitution and resets COUNT to 1. The 'p'
-     suffix toggles the print suffixes of the last substitution. The
-     'r' suffix causes the RE of the last search to be used instead of
-     the RE of the last substitution (if the search happened after the
-     substitution).
+     the 'g' and 'COUNT' suffixes described above, and any combination of
+     the suffixes 'p' and 'r'. The 'g' suffix toggles the global suffix of
+     the last substitution and resets COUNT to 1. The 'p' suffix toggles
+     the print suffixes of the last substitution. The 'r' suffix causes the
+     RE of the last search to be used instead of the RE of the last
+     substitution (if the search happened after the substitution).
 
 '(.,.)t(.)'
-     Copies (i.e., transfers) the addressed lines to after the
-     right-hand destination address. If the destination address is '0'
-     (zero), the lines are copied at the beginning of the buffer. The
-     current address is set to the address of the last line copied.
+     Copies (i.e., transfers) the addressed lines to after the right-hand
+     destination address. If the destination address is '0' (zero), the
+     lines are copied at the beginning of the buffer. The current address is
+     set to the address of the last line copied.
 
 'u'
-     Undoes the effect of the last command that modified anything in
-     the buffer and restores the current address to what it was before
-     the command. The global commands 'g', 'G', 'v', and 'V' are
-     treated as a single command by undo. 'u' is its own inverse; it
-     can undo only the last command.
+     Undoes the effect of the last command that modified anything in the
+     buffer and restores the current address to what it was before the
+     command. The global commands 'g', 'G', 'v', and 'V' are treated as a
+     single command by undo. 'u' is its own inverse; it can undo only the
+     last command.
 
 '(1,$)v/RE/COMMAND-LIST'
-     This is similar to the 'g' command except that it applies
-     COMMAND-LIST to each of the addressed lines not matching the
-     regular expression RE.
+     This is similar to the 'g' command except that it applies COMMAND-LIST
+     to each of the addressed lines not matching the regular expression RE.
 
 '(1,$)V/RE/'
-     This is similar to the 'G' command except that it interactively
-     edits the addressed lines not matching the regular expression RE.
+     This is similar to the 'G' command except that it interactively edits
+     the addressed lines not matching the regular expression RE.
 
 '(1,$)w FILE'
-     Writes the addressed lines to FILE. Any previous contents of FILE
-     are lost without warning. If there is no default filename, then
-     the default filename is set to FILE, otherwise it is unchanged. If
-     no filename is specified, then the default filename is used. The
-     current address is unchanged.
+     Writes the addressed lines to FILE. Any previous contents of FILE are
+     lost without warning. If there is no default filename, then the
+     default filename is set to FILE, otherwise it is unchanged. If no
+     filename is specified, then the default filename is used. The current
+     address is unchanged.
 
-     If FILE is prefixed with a bang (!), then it is interpreted as a
-     shell command and the addressed lines are written to its standard
-     input, (*note shell escape command:: '!' below). In this case the
-     default filename is unchanged. Writing the buffer to a shell
-     command does not prevent the warning to the user if an attempt is
-     made to overwrite or discard the buffer via the 'e' or 'q'
-     commands.
+     If FILE is prefixed with a bang (!), then it is interpreted as a shell
+     command and the addressed lines are written to its standard input,
+     (*note shell escape command:: '!' below). In this case the default
+     filename is unchanged. Writing the buffer to a shell command does not
+     prevent the warning to the user if an attempt is made to overwrite or
+     discard the buffer via the 'e' or 'q' commands.
 
 '(1,$)wq FILE'
-     Writes the addressed lines to FILE, and then executes a 'q'
-     command.
+     Writes the addressed lines to FILE, and then executes a 'q' command.
 
 '(1,$)W FILE'
-     Appends the addressed lines to the end of FILE. This is similar to
-     the 'w' command, except that the previous contents of FILE are not
+     Appends the addressed lines to the end of FILE. This is similar to the
+     'w' command, except that the previous contents of FILE are not
      clobbered. The current address is unchanged.
 
 '(.)x'
@@ -914,40 +896,40 @@ specified (in parenthesis).
      copied.
 
 '(.,.)y'
-     Copies (yanks) the addressed lines to the cut buffer. The cut
-     buffer is overwritten by subsequent 'c', 'd', 'j', 's', or 'y'
-     commands. The current address is unchanged.
+     Copies (yanks) the addressed lines to the cut buffer. The cut buffer is
+     overwritten by subsequent 'c', 'd', 'j', 's', or 'y' commands. The
+     current address is unchanged.
 
 '(.+1)zN'
-     Scroll. Prints N lines at a time starting at addressed line, and
-     sets window size to N. If N is not specified, then the current
-     window size is used. Window size defaults to screen size minus two
-     lines, or to 22 if screen size can't be determined. The current
-     address is set to the address of the last line printed.
+     Scroll. Prints N lines at a time starting at addressed line, and sets
+     window size to N. If N is not specified, then the current window size
+     is used. Window size defaults to screen size minus two lines, or to 22
+     if screen size can't be determined. The current address is set to the
+     address of the last line printed.
 
 '!COMMAND'
      Shell escape command. Executes COMMAND via 'sh (1)'. If the first
-     character of COMMAND is '!', then it is replaced by the text of
-     the previous '!COMMAND'. Thus, '!!' repeats the previous
-     '!COMMAND'. 'ed' does not process COMMAND for backslash ('\')
-     escapes. However, an unescaped '%' is replaced by the default
-     filename. When the shell returns from execution, a '!' is printed
-     to the standard output. The current address is unchanged.
+     character of COMMAND is '!', then it is replaced by the text of the
+     previous '!COMMAND'. Thus, '!!' repeats the previous '!COMMAND'. 'ed'
+     does not process COMMAND for backslash ('\') escapes. However, an
+     unescaped '%' is replaced by the default filename. When the shell
+     returns from execution, a '!' is printed to the standard output. The
+     current address is unchanged.
 
 '(.,.)#'
-     Begins a comment; the rest of the line, up to a newline, is
-     ignored. If a line address followed by a semicolon is given, then
-     the current address is set to that address. Otherwise, the current
-     address is unchanged.
+     Begins a comment; the rest of the line, up to a newline, is ignored.
+     If a line address followed by a semicolon is given, then the current
+     address is set to that address. Otherwise, the current address is
+     unchanged.
 
 '($)='
-     Prints the line number of the addressed line. The current address
-     is unchanged.
+     Prints the line number of the addressed line. The current address is
+     unchanged.
 
 '(.+1)<newline>'
-     Null command. An address alone prints the addressed line. A
-     <newline> alone is equivalent to '+1p'. The current address is set
-     to the address of the printed line.
+     Null command. An address alone prints the addressed line. A <newline>
+     alone is equivalent to '+1p'. The current address is set to the
+     address of the printed line.
 
 
 
@@ -964,18 +946,17 @@ filename, any character preceded by a backslash ('\') is interpreted
 literally. For example, 'ed 'hello\tworld'' will edit the file
 'hellotworld'.
 
-   If a text (non-binary) file is not terminated by a newline
-character, then 'ed' appends one on reading/writing it. In the case of
-a binary file, 'ed' does not append a newline on reading/writing. A
-binary file is one containing at least one ASCII NUL character. If the
-last line has been modified, reading an empty file, for example
-/dev/null, prior to writing prevents appending a newline to a binary
-file.
+   If a text (non-binary) file is not terminated by a newline character,
+then 'ed' appends one on reading/writing it. In the case of a binary file,
+'ed' does not append a newline on reading/writing. A binary file is one
+containing at least one ASCII NUL character. If the last line has been
+modified, reading an empty file, for example /dev/null, prior to writing
+prevents appending a newline to a binary file.
 
    In order to keep track of the text lines in the buffer, 'ed' uses a
-doubly linked list of structures containing the position and size of
-each line. This results in a per line overhead of 2 'pointer's, 1 'long
-int', and 1 'int'.
+doubly linked list of structures containing the position and size of each
+line. This results in a per line overhead of 2 'pointer's, 1 'long int',
+and 1 'int'.
 
 
 File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
@@ -984,16 +965,16 @@ File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 *************
 
 When an error occurs, if 'ed''s input is from a regular file or here
-document, then it exits, otherwise it prints a '?' and returns to
-command mode. An explanation of the last error can be printed with the
-'h' (help) command.
+document, then it exits, otherwise it prints a '?' and returns to command
+mode. An explanation of the last error can be printed with the 'h' (help)
+command.
 
    If the 'u' (undo) command occurs in a global command list, then the
 command list is executed only once.
 
-   Attempting to quit 'ed' or edit another file before writing a
-modified buffer results in an error. If the command is entered a second
-time, it succeeds, but any changes to the buffer are lost.
+   Attempting to quit 'ed' or edit another file before writing a modified
+buffer results in an error. If the command is entered a second time, it
+succeeds, but any changes to the buffer are lost.
 
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
@@ -1001,14 +982,14 @@ File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Di
 9 Reporting bugs
 ****************
 
-There are probably bugs in 'ed'. There are certainly errors and
-omissions in this manual. If you report them, they will get fixed. If
-you don't, no one will ever know about them and they will remain unfixed
-for all eternity, if not longer.
+There are probably bugs in 'ed'. There are certainly errors and omissions
+in this manual. If you report them, they will get fixed. If you don't, no
+one will ever know about them and they will remain unfixed for all
+eternity, if not longer.
 
    If you find a bug in 'ed', please send electronic mail to
-<bug-ed@gnu.org>. Include the version number, which you can find by
-running 'ed --version'.
+<bug-ed@gnu.org>. Include the version number, which you can find by running
+'ed --version'.
 
 
 File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
@@ -1016,7 +997,7 @@ File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
 10 GNU Free Documentation License
 *********************************
 
-                     Version 1.3, 3 November 2008
+                       Version 1.3, 3 November 2008
 
      Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
      'http://fsf.org/'
@@ -1029,420 +1010,398 @@ File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
      The purpose of this License is to make a manual, textbook, or other
      functional and useful document "free" in the sense of freedom: to
      assure everyone the effective freedom to copy and redistribute it,
-     with or without modifying it, either commercially or
-     noncommercially.  Secondarily, this License preserves for the
-     author and publisher a way to get credit for their work, while not
-     being considered responsible for modifications made by others.
+     with or without modifying it, either commercially or noncommercially.
+     Secondarily, this License preserves for the author and publisher a way
+     to get credit for their work, while not being considered responsible
+     for modifications made by others.
 
      This License is a kind of "copyleft", which means that derivative
-     works of the document must themselves be free in the same sense.
-     It complements the GNU General Public License, which is a copyleft
+     works of the document must themselves be free in the same sense.  It
+     complements the GNU General Public License, which is a copyleft
      license designed for free software.
 
-     We have designed this License in order to use it for manuals for
-     free software, because free software needs free documentation: a
-     free program should come with manuals providing the same freedoms
-     that the software does.  But this License is not limited to
-     software manuals; it can be used for any textual work, regardless
-     of subject matter or whether it is published as a printed book.
-     We recommend this License principally for works whose purpose is
-     instruction or reference.
+     We have designed this License in order to use it for manuals for free
+     software, because free software needs free documentation: a free
+     program should come with manuals providing the same freedoms that the
+     software does.  But this License is not limited to software manuals;
+     it can be used for any textual work, regardless of subject matter or
+     whether it is published as a printed book.  We recommend this License
+     principally for works whose purpose is instruction or reference.
 
   1. APPLICABILITY AND DEFINITIONS
 
-     This License applies to any manual or other work, in any medium,
-     that contains a notice placed by the copyright holder saying it
-     can be distributed under the terms of this License.  Such a notice
-     grants a world-wide, royalty-free license, unlimited in duration,
-     to use that work under the conditions stated herein.  The
-     "Document", below, refers to any such manual or work.  Any member
-     of the public is a licensee, and is addressed as "you".  You
-     accept the license if you copy, modify or distribute the work in a
-     way requiring permission under copyright law.
+     This License applies to any manual or other work, in any medium, that
+     contains a notice placed by the copyright holder saying it can be
+     distributed under the terms of this License.  Such a notice grants a
+     world-wide, royalty-free license, unlimited in duration, to use that
+     work under the conditions stated herein.  The "Document", below,
+     refers to any such manual or work.  Any member of the public is a
+     licensee, and is addressed as "you".  You accept the license if you
+     copy, modify or distribute the work in a way requiring permission
+     under copyright law.
 
      A "Modified Version" of the Document means any work containing the
      Document or a portion of it, either copied verbatim, or with
      modifications and/or translated into another language.
 
-     A "Secondary Section" is a named appendix or a front-matter section
-     of the Document that deals exclusively with the relationship of the
+     A "Secondary Section" is a named appendix or a front-matter section of
+     the Document that deals exclusively with the relationship of the
      publishers or authors of the Document to the Document's overall
-     subject (or to related matters) and contains nothing that could
-     fall directly within that overall subject.  (Thus, if the Document
-     is in part a textbook of mathematics, a Secondary Section may not
-     explain any mathematics.)  The relationship could be a matter of
-     historical connection with the subject or with related matters, or
-     of legal, commercial, philosophical, ethical or political position
-     regarding them.
+     subject (or to related matters) and contains nothing that could fall
+     directly within that overall subject.  (Thus, if the Document is in
+     part a textbook of mathematics, a Secondary Section may not explain
+     any mathematics.)  The relationship could be a matter of historical
+     connection with the subject or with related matters, or of legal,
+     commercial, philosophical, ethical or political position regarding
+     them.
 
-     The "Invariant Sections" are certain Secondary Sections whose
-     titles are designated, as being those of Invariant Sections, in
-     the notice that says that the Document is released under this
-     License.  If a section does not fit the above definition of
-     Secondary then it is not allowed to be designated as Invariant.
-     The Document may contain zero Invariant Sections.  If the Document
-     does not identify any Invariant Sections then there are none.
+     The "Invariant Sections" are certain Secondary Sections whose titles
+     are designated, as being those of Invariant Sections, in the notice
+     that says that the Document is released under this License.  If a
+     section does not fit the above definition of Secondary then it is not
+     allowed to be designated as Invariant.  The Document may contain zero
+     Invariant Sections.  If the Document does not identify any Invariant
+     Sections then there are none.
 
-     The "Cover Texts" are certain short passages of text that are
-     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
-     that says that the Document is released under this License.  A
-     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
-     be at most 25 words.
+     The "Cover Texts" are certain short passages of text that are listed,
+     as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+     the Document is released under this License.  A Front-Cover Text may
+     be at most 5 words, and a Back-Cover Text may be at most 25 words.
 
      A "Transparent" copy of the Document means a machine-readable copy,
      represented in a format whose specification is available to the
      general public, that is suitable for revising the document
-     straightforwardly with generic text editors or (for images
-     composed of pixels) generic paint programs or (for drawings) some
-     widely available drawing editor, and that is suitable for input to
-     text formatters or for automatic translation to a variety of
-     formats suitable for input to text formatters.  A copy made in an
-     otherwise Transparent file format whose markup, or absence of
-     markup, has been arranged to thwart or discourage subsequent
-     modification by readers is not Transparent.  An image format is
-     not Transparent if used for any substantial amount of text.  A
-     copy that is not "Transparent" is called "Opaque".
+     straightforwardly with generic text editors or (for images composed of
+     pixels) generic paint programs or (for drawings) some widely available
+     drawing editor, and that is suitable for input to text formatters or
+     for automatic translation to a variety of formats suitable for input
+     to text formatters.  A copy made in an otherwise Transparent file
+     format whose markup, or absence of markup, has been arranged to thwart
+     or discourage subsequent modification by readers is not Transparent.
+     An image format is not Transparent if used for any substantial amount
+     of text.  A copy that is not "Transparent" is called "Opaque".
 
      Examples of suitable formats for Transparent copies include plain
-     ASCII without markup, Texinfo input format, LaTeX input format,
-     SGML or XML using a publicly available DTD, and
-     standard-conforming simple HTML, PostScript or PDF designed for
-     human modification.  Examples of transparent image formats include
-     PNG, XCF and JPG.  Opaque formats include proprietary formats that
-     can be read and edited only by proprietary word processors, SGML or
-     XML for which the DTD and/or processing tools are not generally
-     available, and the machine-generated HTML, PostScript or PDF
-     produced by some word processors for output purposes only.
+     ASCII without markup, Texinfo input format, LaTeX input format, SGML
+     or XML using a publicly available DTD, and standard-conforming simple
+     HTML, PostScript or PDF designed for human modification.  Examples of
+     transparent image formats include PNG, XCF and JPG.  Opaque formats
+     include proprietary formats that can be read and edited only by
+     proprietary word processors, SGML or XML for which the DTD and/or
+     processing tools are not generally available, and the
+     machine-generated HTML, PostScript or PDF produced by some word
+     processors for output purposes only.
 
      The "Title Page" means, for a printed book, the title page itself,
-     plus such following pages as are needed to hold, legibly, the
-     material this License requires to appear in the title page.  For
-     works in formats which do not have any title page as such, "Title
-     Page" means the text near the most prominent appearance of the
-     work's title, preceding the beginning of the body of the text.
+     plus such following pages as are needed to hold, legibly, the material
+     this License requires to appear in the title page.  For works in
+     formats which do not have any title page as such, "Title Page" means
+     the text near the most prominent appearance of the work's title,
+     preceding the beginning of the body of the text.
 
-     The "publisher" means any person or entity that distributes copies
-     of the Document to the public.
+     The "publisher" means any person or entity that distributes copies of
+     the Document to the public.
 
-     A section "Entitled XYZ" means a named subunit of the Document
-     whose title either is precisely XYZ or contains XYZ in parentheses
-     following text that translates XYZ in another language.  (Here XYZ
-     stands for a specific section name mentioned below, such as
-     "Acknowledgements", "Dedications", "Endorsements", or "History".)
-     To "Preserve the Title" of such a section when you modify the
-     Document means that it remains a section "Entitled XYZ" according
-     to this definition.
+     A section "Entitled XYZ" means a named subunit of the Document whose
+     title either is precisely XYZ or contains XYZ in parentheses following
+     text that translates XYZ in another language.  (Here XYZ stands for a
+     specific section name mentioned below, such as "Acknowledgements",
+     "Dedications", "Endorsements", or "History".)  To "Preserve the Title"
+     of such a section when you modify the Document means that it remains a
+     section "Entitled XYZ" according to this definition.
 
-     The Document may include Warranty Disclaimers next to the notice
-     which states that this License applies to the Document.  These
-     Warranty Disclaimers are considered to be included by reference in
-     this License, but only as regards disclaiming warranties: any other
-     implication that these Warranty Disclaimers may have is void and
-     has no effect on the meaning of this License.
+     The Document may include Warranty Disclaimers next to the notice which
+     states that this License applies to the Document.  These Warranty
+     Disclaimers are considered to be included by reference in this
+     License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and has
+     no effect on the meaning of this License.
 
   2. VERBATIM COPYING
 
      You may copy and distribute the Document in any medium, either
      commercially or noncommercially, provided that this License, the
-     copyright notices, and the license notice saying this License
-     applies to the Document are reproduced in all copies, and that you
-     add no other conditions whatsoever to those of this License.  You
-     may not use technical measures to obstruct or control the reading
-     or further copying of the copies you make or distribute.  However,
-     you may accept compensation in exchange for copies.  If you
-     distribute a large enough number of copies you must also follow
-     the conditions in section 3.
+     copyright notices, and the license notice saying this License applies
+     to the Document are reproduced in all copies, and that you add no other
+     conditions whatsoever to those of this License.  You may not use
+     technical measures to obstruct or control the reading or further
+     copying of the copies you make or distribute.  However, you may accept
+     compensation in exchange for copies.  If you distribute a large enough
+     number of copies you must also follow the conditions in section 3.
 
-     You may also lend copies, under the same conditions stated above,
-     and you may publicly display copies.
+     You may also lend copies, under the same conditions stated above, and
+     you may publicly display copies.
 
   3. COPYING IN QUANTITY
 
-     If you publish printed copies (or copies in media that commonly
-     have printed covers) of the Document, numbering more than 100, and
-     the Document's license notice requires Cover Texts, you must
-     enclose the copies in covers that carry, clearly and legibly, all
-     these Cover Texts: Front-Cover Texts on the front cover, and
-     Back-Cover Texts on the back cover.  Both covers must also clearly
-     and legibly identify you as the publisher of these copies.  The
-     front cover must present the full title with all words of the
-     title equally prominent and visible.  You may add other material
-     on the covers in addition.  Copying with changes limited to the
-     covers, as long as they preserve the title of the Document and
-     satisfy these conditions, can be treated as verbatim copying in
-     other respects.
+     If you publish printed copies (or copies in media that commonly have
+     printed covers) of the Document, numbering more than 100, and the
+     Document's license notice requires Cover Texts, you must enclose the
+     copies in covers that carry, clearly and legibly, all these Cover
+     Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+     the back cover.  Both covers must also clearly and legibly identify
+     you as the publisher of these copies.  The front cover must present
+     the full title with all words of the title equally prominent and
+     visible.  You may add other material on the covers in addition.
+     Copying with changes limited to the covers, as long as they preserve
+     the title of the Document and satisfy these conditions, can be treated
+     as verbatim copying in other respects.
 
      If the required texts for either cover are too voluminous to fit
      legibly, you should put the first ones listed (as many as fit
-     reasonably) on the actual cover, and continue the rest onto
-     adjacent pages.
+     reasonably) on the actual cover, and continue the rest onto adjacent
+     pages.
 
-     If you publish or distribute Opaque copies of the Document
-     numbering more than 100, you must either include a
-     machine-readable Transparent copy along with each Opaque copy, or
-     state in or with each Opaque copy a computer-network location from
-     which the general network-using public has access to download
-     using public-standard network protocols a complete Transparent
-     copy of the Document, free of added material.  If you use the
-     latter option, you must take reasonably prudent steps, when you
-     begin distribution of Opaque copies in quantity, to ensure that
-     this Transparent copy will remain thus accessible at the stated
-     location until at least one year after the last time you
-     distribute an Opaque copy (directly or through your agents or
-     retailers) of that edition to the public.
+     If you publish or distribute Opaque copies of the Document numbering
+     more than 100, you must either include a machine-readable Transparent
+     copy along with each Opaque copy, or state in or with each Opaque copy
+     a computer-network location from which the general network-using
+     public has access to download using public-standard network protocols
+     a complete Transparent copy of the Document, free of added material.
+     If you use the latter option, you must take reasonably prudent steps,
+     when you begin distribution of Opaque copies in quantity, to ensure
+     that this Transparent copy will remain thus accessible at the stated
+     location until at least one year after the last time you distribute an
+     Opaque copy (directly or through your agents or retailers) of that
+     edition to the public.
 
-     It is requested, but not required, that you contact the authors of
-     the Document well before redistributing any large number of
-     copies, to give them a chance to provide you with an updated
-     version of the Document.
+     It is requested, but not required, that you contact the authors of the
+     Document well before redistributing any large number of copies, to give
+     them a chance to provide you with an updated version of the Document.
 
   4. MODIFICATIONS
 
-     You may copy and distribute a Modified Version of the Document
-     under the conditions of sections 2 and 3 above, provided that you
-     release the Modified Version under precisely this License, with
-     the Modified Version filling the role of the Document, thus
-     licensing distribution and modification of the Modified Version to
-     whoever possesses a copy of it.  In addition, you must do these
-     things in the Modified Version:
+     You may copy and distribute a Modified Version of the Document under
+     the conditions of sections 2 and 3 above, provided that you release
+     the Modified Version under precisely this License, with the Modified
+     Version filling the role of the Document, thus licensing distribution
+     and modification of the Modified Version to whoever possesses a copy
+     of it.  In addition, you must do these things in the Modified Version:
 
-       A. Use in the Title Page (and on the covers, if any) a title
-          distinct from that of the Document, and from those of
-          previous versions (which should, if there were any, be listed
-          in the History section of the Document).  You may use the
-          same title as a previous version if the original publisher of
-          that version gives permission.
+       A. Use in the Title Page (and on the covers, if any) a title distinct
+          from that of the Document, and from those of previous versions
+          (which should, if there were any, be listed in the History section
+          of the Document).  You may use the same title as a previous
+          version if the original publisher of that version gives
+          permission.
 
        B. List on the Title Page, as authors, one or more persons or
-          entities responsible for authorship of the modifications in
-          the Modified Version, together with at least five of the
-          principal authors of the Document (all of its principal
-          authors, if it has fewer than five), unless they release you
-          from this requirement.
+          entities responsible for authorship of the modifications in the
+          Modified Version, together with at least five of the principal
+          authors of the Document (all of its principal authors, if it has
+          fewer than five), unless they release you from this requirement.
 
-       C. State on the Title page the name of the publisher of the
-          Modified Version, as the publisher.
+       C. State on the Title page the name of the publisher of the Modified
+          Version, as the publisher.
 
        D. Preserve all the copyright notices of the Document.
 
        E. Add an appropriate copyright notice for your modifications
           adjacent to the other copyright notices.
 
-       F. Include, immediately after the copyright notices, a license
-          notice giving the public permission to use the Modified
-          Version under the terms of this License, in the form shown in
-          the Addendum below.
+       F. Include, immediately after the copyright notices, a license notice
+          giving the public permission to use the Modified Version under the
+          terms of this License, in the form shown in the Addendum below.
 
        G. Preserve in that license notice the full lists of Invariant
-          Sections and required Cover Texts given in the Document's
-          license notice.
+          Sections and required Cover Texts given in the Document's license
+          notice.
 
        H. Include an unaltered copy of this License.
 
-       I. Preserve the section Entitled "History", Preserve its Title,
-          and add to it an item stating at least the title, year, new
-          authors, and publisher of the Modified Version as given on
-          the Title Page.  If there is no section Entitled "History" in
-          the Document, create one stating the title, year, authors,
-          and publisher of the Document as given on its Title Page,
-          then add an item describing the Modified Version as stated in
-          the previous sentence.
+       I. Preserve the section Entitled "History", Preserve its Title, and
+          add to it an item stating at least the title, year, new authors,
+          and publisher of the Modified Version as given on the Title Page.
+          If there is no section Entitled "History" in the Document, create
+          one stating the title, year, authors, and publisher of the
+          Document as given on its Title Page, then add an item describing
+          the Modified Version as stated in the previous sentence.
 
-       J. Preserve the network location, if any, given in the Document
-          for public access to a Transparent copy of the Document, and
-          likewise the network locations given in the Document for
-          previous versions it was based on.  These may be placed in
-          the "History" section.  You may omit a network location for a
-          work that was published at least four years before the
-          Document itself, or if the original publisher of the version
-          it refers to gives permission.
+       J. Preserve the network location, if any, given in the Document for
+          public access to a Transparent copy of the Document, and likewise
+          the network locations given in the Document for previous versions
+          it was based on.  These may be placed in the "History" section.
+          You may omit a network location for a work that was published at
+          least four years before the Document itself, or if the original
+          publisher of the version it refers to gives permission.
 
        K. For any section Entitled "Acknowledgements" or "Dedications",
-          Preserve the Title of the section, and preserve in the
-          section all the substance and tone of each of the contributor
+          Preserve the Title of the section, and preserve in the section
+          all the substance and tone of each of the contributor
           acknowledgements and/or dedications given therein.
 
-       L. Preserve all the Invariant Sections of the Document,
-          unaltered in their text and in their titles.  Section numbers
-          or the equivalent are not considered part of the section
-          titles.
+       L. Preserve all the Invariant Sections of the Document, unaltered in
+          their text and in their titles.  Section numbers or the
+          equivalent are not considered part of the section titles.
 
-       M. Delete any section Entitled "Endorsements".  Such a section
-          may not be included in the Modified Version.
+       M. Delete any section Entitled "Endorsements".  Such a section may
+          not be included in the Modified Version.
 
-       N. Do not retitle any existing section to be Entitled
-          "Endorsements" or to conflict in title with any Invariant
-          Section.
+       N. Do not retitle any existing section to be Entitled "Endorsements"
+          or to conflict in title with any Invariant Section.
 
        O. Preserve any Warranty Disclaimers.
 
      If the Modified Version includes new front-matter sections or
-     appendices that qualify as Secondary Sections and contain no
-     material copied from the Document, you may at your option
-     designate some or all of these sections as invariant.  To do this,
-     add their titles to the list of Invariant Sections in the Modified
-     Version's license notice.  These titles must be distinct from any
-     other section titles.
+     appendices that qualify as Secondary Sections and contain no material
+     copied from the Document, you may at your option designate some or all
+     of these sections as invariant.  To do this, add their titles to the
+     list of Invariant Sections in the Modified Version's license notice.
+     These titles must be distinct from any other section titles.
 
      You may add a section Entitled "Endorsements", provided it contains
      nothing but endorsements of your Modified Version by various
-     parties--for example, statements of peer review or that the text
-     has been approved by an organization as the authoritative
-     definition of a standard.
+     parties--for example, statements of peer review or that the text has
+     been approved by an organization as the authoritative definition of a
+     standard.
 
-     You may add a passage of up to five words as a Front-Cover Text,
-     and a passage of up to 25 words as a Back-Cover Text, to the end
-     of the list of Cover Texts in the Modified Version.  Only one
-     passage of Front-Cover Text and one of Back-Cover Text may be
-     added by (or through arrangements made by) any one entity.  If the
-     Document already includes a cover text for the same cover,
-     previously added by you or by arrangement made by the same entity
-     you are acting on behalf of, you may not add another; but you may
-     replace the old one, on explicit permission from the previous
-     publisher that added the old one.
+     You may add a passage of up to five words as a Front-Cover Text, and a
+     passage of up to 25 words as a Back-Cover Text, to the end of the list
+     of Cover Texts in the Modified Version.  Only one passage of
+     Front-Cover Text and one of Back-Cover Text may be added by (or
+     through arrangements made by) any one entity.  If the Document already
+     includes a cover text for the same cover, previously added by you or
+     by arrangement made by the same entity you are acting on behalf of,
+     you may not add another; but you may replace the old one, on explicit
+     permission from the previous publisher that added the old one.
 
-     The author(s) and publisher(s) of the Document do not by this
-     License give permission to use their names for publicity for or to
-     assert or imply endorsement of any Modified Version.
+     The author(s) and publisher(s) of the Document do not by this License
+     give permission to use their names for publicity for or to assert or
+     imply endorsement of any Modified Version.
 
   5. COMBINING DOCUMENTS
 
-     You may combine the Document with other documents released under
-     this License, under the terms defined in section 4 above for
-     modified versions, provided that you include in the combination
-     all of the Invariant Sections of all of the original documents,
-     unmodified, and list them all as Invariant Sections of your
-     combined work in its license notice, and that you preserve all
-     their Warranty Disclaimers.
+     You may combine the Document with other documents released under this
+     License, under the terms defined in section 4 above for modified
+     versions, provided that you include in the combination all of the
+     Invariant Sections of all of the original documents, unmodified, and
+     list them all as Invariant Sections of your combined work in its
+     license notice, and that you preserve all their Warranty Disclaimers.
 
      The combined work need only contain one copy of this License, and
      multiple identical Invariant Sections may be replaced with a single
-     copy.  If there are multiple Invariant Sections with the same name
-     but different contents, make the title of each such section unique
-     by adding at the end of it, in parentheses, the name of the
-     original author or publisher of that section if known, or else a
-     unique number.  Make the same adjustment to the section titles in
-     the list of Invariant Sections in the license notice of the
-     combined work.
+     copy.  If there are multiple Invariant Sections with the same name but
+     different contents, make the title of each such section unique by
+     adding at the end of it, in parentheses, the name of the original
+     author or publisher of that section if known, or else a unique number.
+     Make the same adjustment to the section titles in the list of
+     Invariant Sections in the license notice of the combined work.
 
-     In the combination, you must combine any sections Entitled
-     "History" in the various original documents, forming one section
-     Entitled "History"; likewise combine any sections Entitled
-     "Acknowledgements", and any sections Entitled "Dedications".  You
-     must delete all sections Entitled "Endorsements."
+     In the combination, you must combine any sections Entitled "History"
+     in the various original documents, forming one section Entitled
+     "History"; likewise combine any sections Entitled "Acknowledgements",
+     and any sections Entitled "Dedications".  You must delete all sections
+     Entitled "Endorsements."
 
   6. COLLECTIONS OF DOCUMENTS
 
      You may make a collection consisting of the Document and other
      documents released under this License, and replace the individual
      copies of this License in the various documents with a single copy
-     that is included in the collection, provided that you follow the
-     rules of this License for verbatim copying of each of the
-     documents in all other respects.
+     that is included in the collection, provided that you follow the rules
+     of this License for verbatim copying of each of the documents in all
+     other respects.
 
      You may extract a single document from such a collection, and
-     distribute it individually under this License, provided you insert
-     a copy of this License into the extracted document, and follow
-     this License in all other respects regarding verbatim copying of
-     that document.
+     distribute it individually under this License, provided you insert a
+     copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
 
   7. AGGREGATION WITH INDEPENDENT WORKS
 
-     A compilation of the Document or its derivatives with other
-     separate and independent documents or works, in or on a volume of
-     a storage or distribution medium, is called an "aggregate" if the
-     copyright resulting from the compilation is not used to limit the
-     legal rights of the compilation's users beyond what the individual
-     works permit.  When the Document is included in an aggregate, this
-     License does not apply to the other works in the aggregate which
-     are not themselves derivative works of the Document.
+     A compilation of the Document or its derivatives with other separate
+     and independent documents or works, in or on a volume of a storage or
+     distribution medium, is called an "aggregate" if the copyright
+     resulting from the compilation is not used to limit the legal rights
+     of the compilation's users beyond what the individual works permit.
+     When the Document is included in an aggregate, this License does not
+     apply to the other works in the aggregate which are not themselves
+     derivative works of the Document.
 
      If the Cover Text requirement of section 3 is applicable to these
-     copies of the Document, then if the Document is less than one half
-     of the entire aggregate, the Document's Cover Texts may be placed
-     on covers that bracket the Document within the aggregate, or the
-     electronic equivalent of covers if the Document is in electronic
-     form.  Otherwise they must appear on printed covers that bracket
-     the whole aggregate.
+     copies of the Document, then if the Document is less than one half of
+     the entire aggregate, the Document's Cover Texts may be placed on
+     covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic form.
+     Otherwise they must appear on printed covers that bracket the whole
+     aggregate.
 
   8. TRANSLATION
 
      Translation is considered a kind of modification, so you may
-     distribute translations of the Document under the terms of section
-     4.  Replacing Invariant Sections with translations requires special
+     distribute translations of the Document under the terms of section 4.
+     Replacing Invariant Sections with translations requires special
      permission from their copyright holders, but you may include
      translations of some or all Invariant Sections in addition to the
      original versions of these Invariant Sections.  You may include a
      translation of this License, and all the license notices in the
-     Document, and any Warranty Disclaimers, provided that you also
-     include the original English version of this License and the
-     original versions of those notices and disclaimers.  In case of a
-     disagreement between the translation and the original version of
-     this License or a notice or disclaimer, the original version will
-     prevail.
+     Document, and any Warranty Disclaimers, provided that you also include
+     the original English version of this License and the original versions
+     of those notices and disclaimers.  In case of a disagreement between
+     the translation and the original version of this License or a notice
+     or disclaimer, the original version will prevail.
 
      If a section in the Document is Entitled "Acknowledgements",
-     "Dedications", or "History", the requirement (section 4) to
-     Preserve its Title (section 1) will typically require changing the
-     actual title.
+     "Dedications", or "History", the requirement (section 4) to Preserve
+     its Title (section 1) will typically require changing the actual title.
 
   9. TERMINATION
 
      You may not copy, modify, sublicense, or distribute the Document
      except as expressly provided under this License.  Any attempt
-     otherwise to copy, modify, sublicense, or distribute it is void,
-     and will automatically terminate your rights under this License.
+     otherwise to copy, modify, sublicense, or distribute it is void, and
+     will automatically terminate your rights under this License.
 
-     However, if you cease all violation of this License, then your
-     license from a particular copyright holder is reinstated (a)
-     provisionally, unless and until the copyright holder explicitly
-     and finally terminates your license, and (b) permanently, if the
-     copyright holder fails to notify you of the violation by some
-     reasonable means prior to 60 days after the cessation.
+     However, if you cease all violation of this License, then your license
+     from a particular copyright holder is reinstated (a) provisionally,
+     unless and until the copyright holder explicitly and finally
+     terminates your license, and (b) permanently, if the copyright holder
+     fails to notify you of the violation by some reasonable means prior to
+     60 days after the cessation.
 
      Moreover, your license from a particular copyright holder is
      reinstated permanently if the copyright holder notifies you of the
      violation by some reasonable means, this is the first time you have
-     received notice of violation of this License (for any work) from
-     that copyright holder, and you cure the violation prior to 30 days
-     after your receipt of the notice.
+     received notice of violation of this License (for any work) from that
+     copyright holder, and you cure the violation prior to 30 days after
+     your receipt of the notice.
 
-     Termination of your rights under this section does not terminate
-     the licenses of parties who have received copies or rights from
-     you under this License.  If your rights have been terminated and
-     not permanently reinstated, receipt of a copy of some or all of
-     the same material does not give you any rights to use it.
+     Termination of your rights under this section does not terminate the
+     licenses of parties who have received copies or rights from you under
+     this License.  If your rights have been terminated and not permanently
+     reinstated, receipt of a copy of some or all of the same material does
+     not give you any rights to use it.
 
  10. FUTURE REVISIONS OF THIS LICENSE
 
-     The Free Software Foundation may publish new, revised versions of
-     the GNU Free Documentation License from time to time.  Such new
-     versions will be similar in spirit to the present version, but may
-     differ in detail to address new problems or concerns.  See
+     The Free Software Foundation may publish new, revised versions of the
+     GNU Free Documentation License from time to time.  Such new versions
+     will be similar in spirit to the present version, but may differ in
+     detail to address new problems or concerns.  See
      'http://www.gnu.org/copyleft/'.
 
-     Each version of the License is given a distinguishing version
-     number.  If the Document specifies that a particular numbered
-     version of this License "or any later version" applies to it, you
-     have the option of following the terms and conditions either of
-     that specified version or of any later version that has been
-     published (not as a draft) by the Free Software Foundation.  If
-     the Document does not specify a version number of this License,
-     you may choose any version ever published (not as a draft) by the
-     Free Software Foundation.  If the Document specifies that a proxy
-     can decide which future versions of this License can be used, that
-     proxy's public statement of acceptance of a version permanently
-     authorizes you to choose that version for the Document.
+     Each version of the License is given a distinguishing version number.
+     If the Document specifies that a particular numbered version of this
+     License "or any later version" applies to it, you have the option of
+     following the terms and conditions either of that specified version or
+     of any later version that has been published (not as a draft) by the
+     Free Software Foundation.  If the Document does not specify a version
+     number of this License, you may choose any version ever published (not
+     as a draft) by the Free Software Foundation.  If the Document
+     specifies that a proxy can decide which future versions of this
+     License can be used, that proxy's public statement of acceptance of a
+     version permanently authorizes you to choose that version for the
+     Document.
 
  11. RELICENSING
 
      "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
      World Wide Web server that publishes copyrightable works and also
      provides prominent facilities for anybody to edit those works.  A
-     public wiki that anybody can edit is an example of such a server.
-     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
-     site means any set of copyrightable works thus published on the MMC
-     site.
+     public wiki that anybody can edit is an example of such a server.  A
+     "Massive Multiauthor Collaboration" (or "MMC") contained in the site
+     means any set of copyrightable works thus published on the MMC site.
 
      "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
      license published by Creative Commons Corporation, a not-for-profit
@@ -1450,27 +1409,26 @@ File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
      California, as well as future copyleft versions of that license
      published by that same organization.
 
-     "Incorporate" means to publish or republish a Document, in whole or
-     in part, as part of another Document.
+     "Incorporate" means to publish or republish a Document, in whole or in
+     part, as part of another Document.
 
      An MMC is "eligible for relicensing" if it is licensed under this
-     License, and if all works that were first published under this
-     License somewhere other than this MMC, and subsequently
-     incorporated in whole or in part into the MMC, (1) had no cover
-     texts or invariant sections, and (2) were thus incorporated prior
-     to November 1, 2008.
+     License, and if all works that were first published under this License
+     somewhere other than this MMC, and subsequently incorporated in whole
+     or in part into the MMC, (1) had no cover texts or invariant sections,
+     and (2) were thus incorporated prior to November 1, 2008.
 
-     The operator of an MMC Site may republish an MMC contained in the
-     site under CC-BY-SA on the same site at any time before August 1,
-     2009, provided the MMC is eligible for relicensing.
+     The operator of an MMC Site may republish an MMC contained in the site
+     under CC-BY-SA on the same site at any time before August 1, 2009,
+     provided the MMC is eligible for relicensing.
 
 
 ADDENDUM: How to use this License for your documents
 ====================================================
 
-To use this License in a document you have written, include a copy of
-the License in the document and put the following copyright and license
-notices just after the title page:
+To use this License in a document you have written, include a copy of the
+License in the document and put the following copyright and license notices
+just after the title page:
 
        Copyright (C)  YEAR  YOUR NAME.
        Permission is granted to copy, distribute and/or modify this document
@@ -1480,8 +1438,8 @@ notices just after the title page:
        Texts.  A copy of the license is included in the section entitled ``GNU
        Free Documentation License''.
 
-   If you have Invariant Sections, Front-Cover Texts and Back-Cover
-Texts, replace the "with...Texts." line with this:
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the "with...Texts." line with this:
 
          with the Invariant Sections being LIST THEIR TITLES, with
          the Front-Cover Texts being LIST, and with the Back-Cover Texts
@@ -1492,25 +1450,25 @@ combination of the three, merge those two alternatives to suit the
 situation.
 
    If your document contains nontrivial examples of program code, we
-recommend releasing these examples in parallel under your choice of
-free software license, such as the GNU General Public License, to
-permit their use in free software.
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit their
+use in free software.
 
 
 
 Tag Table:
 Node: Top535
-Node: Overview1710
-Node: Introduction to line editing4175
-Node: Invoking ed11448
-Node: Line addressing13565
-Node: Regular expressions17267
-Node: Commands22974
-Ref: shell escape command37385
-Node: Limitations38407
-Node: Diagnostics39499
-Node: Problems40144
-Node: GNU Free Documentation License40677
+Node: Overview1708
+Node: Introduction to line editing4172
+Node: Invoking ed11443
+Node: Line addressing13741
+Node: Regular expressions17443
+Node: Commands23168
+Ref: shell escape command37583
+Node: Limitations38605
+Node: Diagnostics39697
+Node: Problems40342
+Node: GNU Free Documentation License40875
 
 End Tag Table
 

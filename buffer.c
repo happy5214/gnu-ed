@@ -1,20 +1,20 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <errno.h>
@@ -93,7 +93,7 @@ static line_t * dup_line_node( line_t * const lp )
   if( !p )
     {
     show_strerror( 0, errno );
-    set_error_msg( "Memory exhausted" );
+    set_error_msg( mem_msg );
     return 0;
     }
   if( lp ) { p->pos = lp->pos; p->len = lp->len; }
@@ -241,8 +241,7 @@ int get_line_node_addr( const line_t * const lp )
   int addr = 0;
 
   while( p != lp && ( p = p->q_forw ) != &buffer_head ) ++addr;
-  if( addr && p == &buffer_head )
-    { set_error_msg( "Invalid address" ); return -1; }
+  if( addr && p == &buffer_head ) { invalid_address(); return -1; }
   return addr;
   }
 
@@ -560,26 +559,36 @@ void reset_undo_state( void )
 /* return pointer to intialized undo node */
 undo_t * push_undo_atom( const int type, const int from, const int to )
   {
+  const int min_size = ( u_ptr + 1 ) * sizeof (undo_t);
   disable_interrupts();
-  if( !resize_undo_buffer( &ustack, &usize, ( u_ptr + 1 ) * sizeof (undo_t) ) )
+  if( usize < min_size )
     {
-    show_strerror( 0, errno );
-    set_error_msg( "Memory exhausted" );
-    if( ustack )
+    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    void * new_buf = 0;
+    if( ustack ) new_buf = realloc( ustack, new_size );
+    else new_buf = malloc( new_size );
+    if( !new_buf )
       {
-      clear_undo_stack();
-      free( ustack );
-      ustack = 0;
-      usize = u_ptr = 0;
-      u_current_addr = u_last_addr = -1;
+      show_strerror( 0, errno );
+      set_error_msg( mem_msg );
+      if( ustack )
+        {
+        clear_undo_stack();
+        free( ustack );
+        ustack = 0;
+        usize = u_ptr = 0;
+        u_current_addr = u_last_addr = -1;
+        }
+      enable_interrupts();
+      return 0;
       }
-    enable_interrupts();
-    return 0;
+    usize = new_size;
+    ustack = (undo_t *)new_buf;
     }
-  enable_interrupts();
   ustack[u_ptr].type = type;
   ustack[u_ptr].tail = search_line_node( to );
   ustack[u_ptr].head = search_line_node( from );
+  enable_interrupts();
   return ustack + u_ptr++;
   }
 

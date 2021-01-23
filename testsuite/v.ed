@@ -11,3 +11,9 @@ order
 v/z/s/./x/g
 u
 w out.o
+v/hello/q
+# not reached
+a
+hello
+.
+w out.o

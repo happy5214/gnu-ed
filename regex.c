@@ -1,20 +1,20 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <stddef.h>
@@ -27,6 +27,8 @@
 #include "ed.h"
 
 
+static const char * const inv_pat_del = "Invalid pattern delimiter";
+static const char * const no_match = "No match";
 static regex_t * subst_regex_ = 0;	/* regex of previous substitution */
 
 static char * rbuf = 0;		/* replacement buffer */
@@ -113,8 +115,7 @@ static regex_t * get_compiled_regex( const char ** const ibufpp,
   const char delimiter = **ibufpp;
   int n;
 
-  if( delimiter == ' ' )
-    { set_error_msg( "Invalid pattern delimiter" ); return 0; }
+  if( delimiter == ' ' ) { set_error_msg( inv_pat_del ); return 0; }
   if( delimiter == '\n' || *++*ibufpp == delimiter ||
       ( **ibufpp == '\n' && !test_delimiter ) )
     {
@@ -128,7 +129,7 @@ static regex_t * get_compiled_regex( const char ** const ibufpp,
   /* exp compiled && not copied */
   if( exp && exp != subst_regex_ ) regfree( exp );
   else exp = ( &store[0] != subst_regex_ ) ? &store[0] : &store[1];
-  n = regcomp( exp, pat, 0 );
+  n = regcomp( exp, pat, extended_regexp() ? REG_EXTENDED : 0 );
   if( n )
     {
     char buf[80];
@@ -166,7 +167,7 @@ bool build_active_list( const char ** const ibufpp, const int first_addr,
   const char delimiter = **ibufpp;
 
   if( delimiter == ' ' || delimiter == '\n' )
-    { set_error_msg( "Invalid pattern delimiter" ); return false; }
+    { set_error_msg( inv_pat_del ); return false; }
   exp = get_compiled_regex( ibufpp, false );
   if( !exp ) return false;
   if( **ibufpp == delimiter ) ++*ibufpp;
@@ -204,7 +205,7 @@ int next_matching_node_addr( const char ** const ibufpp, const bool forward )
       }
     }
   while( addr != current_addr() );
-  set_error_msg( "No match" );
+  set_error_msg( no_match );
   return -1;
   }
 
@@ -388,6 +389,6 @@ bool search_and_replace( const int first_addr, const int second_addr,
       }
     }
   if( !match_found && !isglobal )
-    { set_error_msg( "No match" ); return false; }
+    { set_error_msg( no_match ); return false; }
   return true;
   }

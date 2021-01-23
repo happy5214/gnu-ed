@@ -1,25 +1,24 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
-/*  GNU ed - The GNU line editor.
-    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-    Copyright (C) 2006-2020 Antonio Diaz Diaz.
+/* GNU ed - The GNU line editor.
+   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
+   Copyright (C) 2006-2021 Antonio Diaz Diaz.
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 2 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -31,8 +30,8 @@
 #include "ed.h"
 
 
-jmp_buf jmp_state;
-static int mutex = 0;			/* If > 0, signals stay pending */
+jmp_buf jmp_state;			/* jumps to main_loop */
+static int mutex = 0;			/* if > 0, signals stay pending */
 static int window_lines_ = 22;		/* scroll lines set by sigwinch_handler */
 static int window_columns_ = 72;
 static bool sighup_pending = false;
@@ -146,31 +145,6 @@ int window_columns( void ) { return window_columns_; }
 int window_lines( void ) { return window_lines_; }
 
 
-/* convert a string to int with out_of_range detection */
-bool parse_int( int * const i, const char * const str, const char ** const tail )
-  {
-  char * tmp;
-  long li;
-
-  errno = 0;
-  *i = li = strtol( str, &tmp, 10 );
-  if( tail ) *tail = tmp;
-  if( tmp == str )
-    {
-    set_error_msg( "Bad numerical result" );
-    *i = 0;
-    return false;
-    }
-  if( errno == ERANGE || li > INT_MAX || li < -INT_MAX )
-    {
-    set_error_msg( "Numerical result out of range" );
-    *i = 0;
-    return false;
-    }
-  return true;
-  }
-
-
 /* assure at least a minimum size for buffer 'buf' */
 bool resize_buffer( char ** const buf, int * const size, const int min_size )
   {
@@ -184,64 +158,12 @@ bool resize_buffer( char ** const buf, int * const size, const int min_size )
     if( !new_buf )
       {
       show_strerror( 0, errno );
-      set_error_msg( "Memory exhausted" );
+      set_error_msg( mem_msg );
       enable_interrupts();
       return false;
       }
     *size = new_size;
     *buf = (char *)new_buf;
-    enable_interrupts();
-    }
-  return true;
-  }
-
-
-/* assure at least a minimum size for buffer 'buf' */
-bool resize_line_buffer( const line_t *** const buf, int * const size,
-                         const int min_size )
-  {
-  if( *size < min_size )
-    {
-    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
-    void * new_buf = 0;
-    disable_interrupts();
-    if( *buf ) new_buf = realloc( *buf, new_size );
-    else new_buf = malloc( new_size );
-    if( !new_buf )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( "Memory exhausted" );
-      enable_interrupts();
-      return false;
-      }
-    *size = new_size;
-    *buf = (const line_t **)new_buf;
-    enable_interrupts();
-    }
-  return true;
-  }
-
-
-/* assure at least a minimum size for buffer 'buf' */
-bool resize_undo_buffer( undo_t ** const buf, int * const size,
-                         const int min_size )
-  {
-  if( *size < min_size )
-    {
-    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
-    void * new_buf = 0;
-    disable_interrupts();
-    if( *buf ) new_buf = realloc( *buf, new_size );
-    else new_buf = malloc( new_size );
-    if( !new_buf )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( "Memory exhausted" );
-      enable_interrupts();
-      return false;
-      }
-    *size = new_size;
-    *buf = (undo_t *)new_buf;
     enable_interrupts();
     }
   return true;
