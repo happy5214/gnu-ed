@@ -19,6 +19,9 @@ s/\([^ ][^ ]*\)/(\1)/pg
 /\(No\)/sr
 /\(.\)/sgpr
 ,s&$&$&
+# set last regex to subst regex
+//p
+# use last regex as subst regex
 5s//%/lg
 ,s%^%^%
 5i

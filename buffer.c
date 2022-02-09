@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -76,6 +76,13 @@ static void insert_node( line_t * const lp, line_t * const prev )
   }
 
 
+/* to be called before add_line_node */
+static bool too_many_lines( void )
+  {
+  if( last_addr_ < INT_MAX - 1 ) return false;
+  set_error_msg( "Too many lines in buffer" ); return true;
+  }
+
 /* add a line node in the editor buffer after the given line */
 static void add_line_node( line_t * const lp )
   {
@@ -103,7 +110,8 @@ static line_t * dup_line_node( line_t * const lp )
 
 /* Insert text from stdin (or from command buffer if global) to after
    line n; stop when either a single period is read or at EOF.
-   Returns false if insertion fails. */
+   Return false if insertion fails.
+*/
 bool append_lines( const char ** const ibufpp, const int addr,
                    bool insert, const bool isglobal )
   {
@@ -196,6 +204,7 @@ bool copy_lines( const int first_addr, const int second_addr, const int addr )
   for( ; n > 0; n = m, m = 0, np = search_line_node( current_addr_ + 1 ) )
     for( ; n-- > 0; np = np->q_forw )
       {
+      if( too_many_lines() ) return false;
       disable_interrupts();
       lp = dup_line_node( np );
       if( !lp ) { enable_interrupts(); return false; }
@@ -412,6 +421,7 @@ bool put_lines( const int addr )
   current_addr_ = addr;
   while( lp != &yank_buffer_head )
     {
+    if( too_many_lines() ) return false;
     disable_interrupts();
     p = dup_line_node( lp );
     if( !p ) { enable_interrupts(); return false; }
@@ -430,18 +440,21 @@ bool put_lines( const int addr )
   }
 
 
-/* write a line of text to the scratch file and add a line node to the
-   editor buffer; return a pointer to the end of the text, or 0 if error */
+/* Write a line of text to the scratch file and add a line node to the
+   editor buffer.
+   The text line stops at the first newline and may be shorter than size.
+   Return a pointer to the char following the newline in buf, or 0 if error.
+*/
 const char * put_sbuf_line( const char * const buf, const int size )
   {
   const char * const p = (const char *) memchr( buf, '\n', size );
-  line_t * lp;
-  int len;
+  if( !p )
+    { set_error_msg( "internal error: unterminated line passed to put_sbuf_line" );
+      return 0; }
+  const int len = p - buf;
+  if( too_many_lines() ) return 0;
 
-  if( !p ) { set_error_msg( "Line too long" ); return 0; }
-  len = p - buf;
-  /* out of position */
-  if( seek_write )
+  if( seek_write )				/* out of position */
     {
     if( fseek( sfp, 0L, SEEK_END ) != 0 )
       {
@@ -459,7 +472,7 @@ const char * put_sbuf_line( const char * const buf, const int size )
     set_error_msg( "Cannot write temp file" );
     return 0;
     }
-  lp = dup_line_node( 0 );
+  line_t * lp = dup_line_node( 0 );
   if( !lp ) return 0;
   lp->pos = sfpos; lp->len = len;
   add_line_node( lp );
@@ -519,7 +532,7 @@ bool yank_lines( const int from, const int to )
 
 static undo_t * ustack = 0;		/* undo stack */
 static int usize = 0;			/* ustack size (in bytes) */
-static int u_ptr = 0;			/* undo stack pointer */
+static int u_idx = 0;			/* undo stack index */
 static int u_current_addr = -1;		/* if < 0, undo disabled */
 static int u_last_addr = -1;		/* if < 0, undo disabled */
 static bool u_modified = false;
@@ -527,11 +540,11 @@ static bool u_modified = false;
 
 void clear_undo_stack( void )
   {
-  while( u_ptr-- )
-    if( ustack[u_ptr].type == UDEL )
+  while( u_idx-- )
+    if( ustack[u_idx].type == UDEL )
       {
-      line_t * const ep = ustack[u_ptr].tail->q_forw;
-      line_t * bp = ustack[u_ptr].head;
+      line_t * const ep = ustack[u_idx].tail->q_forw;
+      line_t * bp = ustack[u_idx].head;
       while( bp != ep )
         {
         line_t * const lp = bp->q_forw;
@@ -541,7 +554,7 @@ void clear_undo_stack( void )
         bp = lp;
         }
       }
-  u_ptr = 0;
+  u_idx = 0;
   u_current_addr = current_addr_;
   u_last_addr = last_addr_;
   u_modified = modified_;
@@ -556,40 +569,46 @@ void reset_undo_state( void )
   }
 
 
+static void free_undo_stack( void )
+  {
+  if( ustack )
+    {
+    clear_undo_stack();
+    free( ustack );
+    ustack = 0;
+    usize = u_idx = 0;
+    u_current_addr = u_last_addr = -1;
+    }
+  }
+
+
 /* return pointer to intialized undo node */
 undo_t * push_undo_atom( const int type, const int from, const int to )
   {
-  const int min_size = ( u_ptr + 1 ) * sizeof (undo_t);
+  const unsigned min_size = ( u_idx + 1 ) * sizeof (undo_t);
+
   disable_interrupts();
-  if( usize < min_size )
+  if( (unsigned)usize < min_size )
     {
-    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    if( min_size >= INT_MAX )
+      { set_error_msg( "Undo stack too long" );
+        free_undo_stack(); enable_interrupts(); return 0; }
+    const int new_size = ( ( min_size < 512 ) ? 512 :
+      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     if( ustack ) new_buf = realloc( ustack, new_size );
     else new_buf = malloc( new_size );
     if( !new_buf )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( mem_msg );
-      if( ustack )
-        {
-        clear_undo_stack();
-        free( ustack );
-        ustack = 0;
-        usize = u_ptr = 0;
-        u_current_addr = u_last_addr = -1;
-        }
-      enable_interrupts();
-      return 0;
-      }
+      { show_strerror( 0, errno ); set_error_msg( mem_msg );
+        free_undo_stack(); enable_interrupts(); return 0; }
     usize = new_size;
     ustack = (undo_t *)new_buf;
     }
-  ustack[u_ptr].type = type;
-  ustack[u_ptr].tail = search_line_node( to );
-  ustack[u_ptr].head = search_line_node( from );
+  ustack[u_idx].type = type;
+  ustack[u_idx].tail = search_line_node( to );
+  ustack[u_idx].head = search_line_node( from );
   enable_interrupts();
-  return ustack + u_ptr++;
+  return ustack + u_idx++;
   }
 
 
@@ -601,11 +620,11 @@ bool undo( const bool isglobal )
   const int o_last_addr = last_addr_;
   const bool o_modified = modified_;
 
-  if( u_ptr <= 0 || u_current_addr < 0 || u_last_addr < 0 )
+  if( u_idx <= 0 || u_current_addr < 0 || u_last_addr < 0 )
     { set_error_msg( "Nothing to undo" ); return false; }
   search_line_node( 0 );		/* reset cached value */
   disable_interrupts();
-  for( n = u_ptr - 1; n >= 0; --n )
+  for( n = u_idx - 1; n >= 0; --n )
     {
     switch( ustack[n].type )
       {
@@ -623,10 +642,10 @@ bool undo( const bool isglobal )
     ustack[n].type ^= 1;
     }
   /* reverse undo stack order */
-  for( n = 0; 2 * n < u_ptr - 1; ++n )
+  for( n = 0; 2 * n < u_idx - 1; ++n )
     {
     undo_t tmp = ustack[n];
-    ustack[n] = ustack[u_ptr-1-n]; ustack[u_ptr-1-n] = tmp;
+    ustack[n] = ustack[u_idx-1-n]; ustack[u_idx-1-n] = tmp;
     }
   if( isglobal ) clear_active_list();
   current_addr_ = u_current_addr; u_current_addr = o_current_addr;

@@ -1,7 +1,7 @@
 /* Global declarations for the ed editor.  */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ typedef enum Bool bool;
 
 enum Pflags			/* print suffixes */
   {
-  GLS = 0x01,			/* list after command */
-  GNP = 0x02,			/* enumerate after command */
-  GPR = 0x04			/* print after command */
+  pf_l = 0x01,			/* list after command */
+  pf_n = 0x02,			/* enumerate after command */
+  pf_p = 0x04			/* print after command */
   };
 
 
@@ -49,13 +49,14 @@ typedef struct
 undo_t;
 
 #ifndef max
-#define max( a,b ) ( (( a ) > ( b )) ? ( a ) : ( b ) )
+#define max( a, b ) ( (( a ) > ( b )) ? ( a ) : ( b ) )
 #endif
 #ifndef min
-#define min( a,b ) ( (( a ) < ( b )) ? ( a ) : ( b ) )
+#define min( a, b ) ( (( a ) < ( b )) ? ( a ) : ( b ) )
 #endif
 
 static const char * const mem_msg = "Memory exhausted";
+static const char * const no_prev_subst = "No previous substitution";
 
 /* defined in buffer.c */
 bool append_lines( const char ** const ibufpp, const int addr,
@@ -115,11 +116,12 @@ bool may_access_filename( const char * const name );
 bool restricted( void );
 bool scripted( void );
 void show_strerror( const char * const filename, const int errcode );
+bool strip_cr( void );
 bool traditional( void );
 
 /* defined in main_loop.c */
 void invalid_address( void );
-int main_loop( const bool loose );
+int main_loop( const bool initial_error, const bool loose );
 bool set_def_filename( const char * const s );
 void set_error_msg( const char * const msg );
 bool set_prompt( const char * const s );
@@ -129,17 +131,19 @@ void unmark_line_node( const line_t * const lp );
 /* defined in regex.c */
 bool build_active_list( const char ** const ibufpp, const int first_addr,
                         const int second_addr, const bool match );
+const char * get_pattern_for_s( const char ** const ibufpp );
 bool extract_replacement( const char ** const ibufpp, const bool isglobal );
-int next_matching_node_addr( const char ** const ibufpp, const bool forward );
+int next_matching_node_addr( const char ** const ibufpp );
 bool search_and_replace( const int first_addr, const int second_addr,
                          const int snum, const bool isglobal );
-bool set_subst_regex( const char ** const ibufpp );
+bool set_subst_regex( const char * const pat, const bool ignore_case );
+bool replace_subst_re_by_search_re( void );
 bool subst_regex( void );
 
 /* defined in signal.c */
 void disable_interrupts( void );
 void enable_interrupts( void );
-bool resize_buffer( char ** const buf, int * const size, const int min_size );
+bool resize_buffer( char ** const buf, int * const size, const unsigned min_size );
 void set_signals( void );
 void set_window_lines( const int lines );
 const char * strip_escapes( const char * p );

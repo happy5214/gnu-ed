@@ -1,7 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,16 +27,20 @@
 #include "ed.h"
 
 
+static const char * const inv_i_suf   = "Suffix 'I' not allowed on empty regexp";
 static const char * const inv_pat_del = "Invalid pattern delimiter";
-static const char * const no_match = "No match";
-static regex_t * subst_regex_ = 0;	/* regex of previous substitution */
+static const char * const mis_pat_del = "Missing pattern delimiter";
+static const char * const no_match    = "No match";
+static const char * const no_prev_pat = "No previous pattern";
+static regex_t * last_regexp = 0;	/* pointer to last regex found */
+static regex_t * subst_regexp = 0;	/* regex of last substitution */
 
-static char * rbuf = 0;		/* replacement buffer */
-static int rbufsz = 0;		/* replacement buffer size */
-static int rlen = 0;		/* replacement length */
+static char * rbuf = 0;			/* replacement buffer */
+static int rbufsz = 0;			/* replacement buffer size */
+static int rlen = 0;			/* replacement length */
 
 
-bool subst_regex( void ) { return subst_regex_ != 0; }
+bool subst_regex( void ) { return subst_regexp != 0; }
 
 
 /* translate characters in a string */
@@ -75,7 +79,9 @@ static const char * parse_char_class( const char * p )
   }
 
 
-/* copy a pattern string from the command buffer; return pointer to the copy */
+/* Copy a pattern string from the command buffer. If successful, return a
+   pointer to the copy and point *ibufpp to the closing delimiter or final
+   newline. */
 static char * extract_pattern( const char ** const ibufpp, const char delimiter )
   {
   static char * buf = 0;
@@ -104,75 +110,124 @@ static char * extract_pattern( const char ** const ibufpp, const char delimiter 
   }
 
 
-/* return pointer to compiled regex from command buffer, or to previous
-   compiled regex if empty RE. return 0 if error */
-static regex_t * get_compiled_regex( const char ** const ibufpp,
-                                     const bool test_delimiter )
+/* Return pointer to compiled regex (last_regexp), different from subst_regexp.
+   Return 0 if error.
+*/
+static regex_t * compile_regex( const char * const pat, const bool ignore_case )
   {
-  static regex_t store[2];		/* space for two compiled regexes */
-  static regex_t * exp = 0;
-  const char * pat;
-  const char delimiter = **ibufpp;
+  static regex_t store[3];		/* space for three compiled regexes */
+  regex_t * exp;
   int n;
 
-  if( delimiter == ' ' ) { set_error_msg( inv_pat_del ); return 0; }
-  if( delimiter == '\n' || *++*ibufpp == delimiter ||
-      ( **ibufpp == '\n' && !test_delimiter ) )
-    {
-    if( !exp ) set_error_msg( "No previous pattern" );
-    return exp;
-    }
-  pat = extract_pattern( ibufpp, delimiter );
-  if( !pat ) return 0;
-  if( test_delimiter && delimiter != **ibufpp )
-    { set_error_msg( "Missing pattern delimiter" ); return 0; }
-  /* exp compiled && not copied */
-  if( exp && exp != subst_regex_ ) regfree( exp );
-  else exp = ( &store[0] != subst_regex_ ) ? &store[0] : &store[1];
-  n = regcomp( exp, pat, extended_regexp() ? REG_EXTENDED : 0 );
+  for( n = 0; n < 3; ++n )
+    if( ( exp = &store[n] ) != last_regexp && exp != subst_regexp ) break;
+  const int cflags = ( extended_regexp() ? REG_EXTENDED : 0 ) |
+                     ( ignore_case ? REG_ICASE : 0 );
+  n = regcomp( exp, pat, cflags );
   if( n )
     {
     char buf[80];
-    regerror( n, exp, buf, sizeof buf );
+    regerror( n, last_regexp, buf, sizeof buf );
     set_error_msg( buf );
-    exp = 0;
+    return 0;
     }
-  return exp;
+  /* free last_regexp if compiled and different from subst_regexp */
+  if( last_regexp && last_regexp != subst_regexp ) regfree( last_regexp );
+  last_regexp = exp;
+  return last_regexp;
   }
 
 
-bool set_subst_regex( const char ** const ibufpp )
+/* return pointer to compiled regex from command buffer, or to previous
+   compiled regex if empty RE. return 0 if error */
+static regex_t * get_compiled_regex( const char ** const ibufpp )
   {
-  regex_t * exp;
+  const char delimiter = **ibufpp;
+
+  if( delimiter == ' ' || delimiter == '\n' )
+    { set_error_msg( inv_pat_del ); return 0; }
+  if( *++*ibufpp == delimiter || **ibufpp == '\n' )	/* empty RE */
+    {
+    if( !last_regexp ) { set_error_msg( no_prev_pat ); return 0; }
+    if( **ibufpp == delimiter && *++*ibufpp == 'I' )	/* remove delimiter */
+      { set_error_msg( inv_i_suf ); return 0; }
+    return last_regexp;
+    }
+  else
+    {
+    const char * const pat = extract_pattern( ibufpp, delimiter );
+    if( !pat ) return 0;
+    bool ignore_case = false;
+    if( **ibufpp == delimiter && *++*ibufpp == 'I' )	/* remove delimiter */
+      { ignore_case = true; ++*ibufpp; }		/* remove suffix */
+    return compile_regex( pat, ignore_case );
+    }
+  }
+
+
+/* Extract RE pattern (may be empty) from the command buffer.
+   Return 0 if error.
+*/
+const char * get_pattern_for_s( const char ** const ibufpp )
+  {
+  const char delimiter = **ibufpp;
+
+  if( delimiter == ' ' || delimiter == '\n' )
+    { set_error_msg( inv_pat_del ); return 0; }
+  if( *++*ibufpp == delimiter )				/* empty RE */
+    {
+    if( !last_regexp ) { set_error_msg( no_prev_pat ); return 0; }
+    return "";
+    }
+  const char * const pat = extract_pattern( ibufpp, delimiter );
+  if( !pat ) return 0;
+  if( **ibufpp != delimiter ) { set_error_msg( mis_pat_del ); return 0; }
+  return pat;
+  }
+
+
+bool set_subst_regex( const char * const pat, const bool ignore_case )
+  {
+  if( !pat ) return false;
+  if( !*pat && ignore_case ) { set_error_msg( inv_i_suf ); return false; }
 
   disable_interrupts();
-  exp = get_compiled_regex( ibufpp, true );
-  if( exp && exp != subst_regex_ )
+  regex_t * exp = *pat ? compile_regex( pat, ignore_case ) : last_regexp;
+  if( exp && exp != subst_regexp )
     {
-    if( subst_regex_ ) regfree( subst_regex_ );
-    subst_regex_ = exp;
+    if( subst_regexp ) regfree( subst_regexp );
+    subst_regexp = exp;
     }
   enable_interrupts();
   return ( exp ? true : false );
   }
 
 
-/* add line matching a regular expression to the global-active list */
+/* set subst_regexp to last RE found */
+bool replace_subst_re_by_search_re( void )
+  {
+  if( !last_regexp ) { set_error_msg( no_prev_pat ); return false; }
+  if( last_regexp != subst_regexp )
+    {
+    disable_interrupts();
+    if( subst_regexp ) regfree( subst_regexp );
+    subst_regexp = last_regexp;
+    enable_interrupts();
+    }
+  return true;
+  }
+
+
+/* add lines matching a regular expression to the global-active list */
 bool build_active_list( const char ** const ibufpp, const int first_addr,
                         const int second_addr, const bool match )
   {
-  const regex_t * exp;
-  const line_t * lp;
   int addr;
-  const char delimiter = **ibufpp;
 
-  if( delimiter == ' ' || delimiter == '\n' )
-    { set_error_msg( inv_pat_del ); return false; }
-  exp = get_compiled_regex( ibufpp, false );
+  const regex_t * const exp = get_compiled_regex( ibufpp );
   if( !exp ) return false;
-  if( **ibufpp == delimiter ) ++*ibufpp;
   clear_active_list();
-  lp = search_line_node( first_addr );
+  const line_t * lp = search_line_node( first_addr );
   for( addr = first_addr; addr <= second_addr; ++addr, lp = lp->q_forw )
     {
     char * const s = get_sbuf_line( lp );
@@ -187,9 +242,10 @@ bool build_active_list( const char ** const ibufpp, const int first_addr,
 
 /* return the address of the next line matching a regular expression in a
    given direction. wrap around begin/end of editor buffer if necessary */
-int next_matching_node_addr( const char ** const ibufpp, const bool forward )
+int next_matching_node_addr( const char ** const ibufpp )
   {
-  const regex_t * const exp = get_compiled_regex( ibufpp, false );
+  const bool forward = ( **ibufpp == '/' );
+  const regex_t * const exp = get_compiled_regex( ibufpp );
   int addr = current_addr();
 
   if( !exp ) return -1;
@@ -219,15 +275,14 @@ bool extract_replacement( const char ** const ibufpp, const bool isglobal )
   int i = 0;
   const char delimiter = **ibufpp;
 
-  if( delimiter == '\n' )
-    { set_error_msg( "Missing pattern delimiter" ); return false; }
+  if( delimiter == '\n' ) { set_error_msg( mis_pat_del ); return false; }
   ++*ibufpp;
   if( **ibufpp == '%' &&		/* replacement is a single '%' */
       ( (*ibufpp)[1] == delimiter ||
         ( (*ibufpp)[1] == '\n' && ( !isglobal || (*ibufpp)[2] == 0 ) ) ) )
     {
     ++*ibufpp;
-    if( !rbuf ) { set_error_msg( "No previous substitution" ); return false; }
+    if( !rbuf ) { set_error_msg( no_prev_subst ); return false; }
     return true;
     }
   while( **ibufpp != delimiter )
@@ -270,14 +325,14 @@ static int replace_matched_text( char ** txtbufp, int * const txtbufszp,
     if( rbuf[i] == '&' )
       {
       int j = rm[0].rm_so; int k = rm[0].rm_eo;
-      if( !resize_buffer( txtbufp, txtbufszp, offset + k - j ) ) return -1;
+      if( !resize_buffer( txtbufp, txtbufszp, offset - j + k ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
     else if( rbuf[i] == '\\' && rbuf[++i] >= '1' && rbuf[i] <= '9' &&
              ( n = rbuf[i] - '0' ) <= re_nsub )
       {
       int j = rm[n].rm_so; int k = rm[n].rm_eo;
-      if( !resize_buffer( txtbufp, txtbufszp, offset + k - j ) ) return -1;
+      if( !resize_buffer( txtbufp, txtbufszp, offset - j + k ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
     else		/* preceding 'if' skipped escaping backslashes */
@@ -308,7 +363,7 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
   if( !txt ) return -1;
   if( isbinary() ) nul_to_newline( txt, lp->len );
   eot = txt + lp->len;
-  if( !regexec( subst_regex_, txt, se_max, rm, 0 ) )
+  if( !regexec( subst_regexp, txt, se_max, rm, 0 ) )
     {
     int matchno = 0;
     bool infloop = false;
@@ -320,7 +375,7 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
         if( isbinary() ) newline_to_nul( txt, rm[0].rm_eo );
         memcpy( *txtbufp + offset, txt, i ); offset += i;
         offset = replace_matched_text( txtbufp, txtbufszp, txt, rm, offset,
-                                       subst_regex_->re_nsub );
+                                       subst_regexp->re_nsub );
         if( offset < 0 ) return -1;
         }
       else
@@ -336,7 +391,7 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
           else { set_error_msg( "Infinite substitution loop" ); return -1; } }
       }
     while( *txt && ( !changed || global ) &&
-           !regexec( subst_regex_, txt, se_max, rm, REG_NOTBOL ) );
+           !regexec( subst_regexp, txt, se_max, rm, REG_NOTBOL ) );
     i = eot - txt;
     if( !resize_buffer( txtbufp, txtbufszp, offset + i + 2 ) ) return -1;
     if( isbinary() ) newline_to_nul( txt, i );

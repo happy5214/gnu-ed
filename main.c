@@ -1,5 +1,5 @@
 /* GNU ed - The GNU line editor.
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
    Exit status: 0 for a normal exit, 1 for environmental problems
    (file not found, invalid flags, I/O errors, etc), 2 to indicate a
    corrupt or invalid input file, 3 for an internal consistency error
-   (eg, bug) which caused ed to panic.
+   (e.g., bug) which caused ed to panic.
 */
 /*
  * CREDITS
@@ -43,19 +43,21 @@
 
 
 static const char * const program_name = "ed";
-static const char * const program_year = "2021";
+static const char * const program_year = "2022";
 static const char * invocation_name = "ed";		/* default value */
 
 static bool extended_regexp_ = false;	/* if set, use EREs */
 static bool restricted_ = false;	/* if set, run in restricted mode */
 static bool scripted_ = false;		/* if set, suppress diagnostics,
 					   byte counts and '!' prompt */
+static bool strip_cr_ = false;		/* if set, strip trailing CRs */
 static bool traditional_ = false;	/* if set, be backwards compatible */
 
 /* Access functions for command line flags. */
 bool extended_regexp( void ) { return extended_regexp_; }
 bool restricted( void ) { return restricted_; }
 bool scripted( void ) { return scripted_; }
+bool strip_cr( void ) { return strip_cr_; }
 bool traditional( void ) { return traditional_; }
 
 
@@ -79,11 +81,12 @@ static void show_help( void )
           "  -r, --restricted           run in restricted mode\n"
           "  -s, --quiet, --silent      suppress diagnostics, byte counts and '!' prompt\n"
           "  -v, --verbose              be verbose; equivalent to the 'H' command\n"
+          "      --strip-trailing-cr    strip carriage returns at end of text lines\n"
           "\nStart edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
           "\nExit status: 0 for a normal exit, 1 for environmental problems (file\n"
           "not found, invalid flags, I/O errors, etc), 2 to indicate a corrupt or\n"
-          "invalid input file, 3 for an internal consistency error (eg, bug) which\n"
+          "invalid input file, 3 for an internal consistency error (e.g., bug) which\n"
           "caused ed to panic.\n"
           "\nReport bugs to bug-ed@gnu.org\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
@@ -96,7 +99,7 @@ static void show_version( void )
   printf( "GNU %s %s\n", program_name, PROGVERSION );
   printf( "Copyright (C) 1994 Andrew L. Moore.\n"
           "Copyright (C) %s Antonio Diaz Diaz.\n", program_year );
-  printf( "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+  printf( "License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>\n"
           "This is free software: you are free to change and redistribute it.\n"
           "There is NO WARRANTY, to the extent permitted by law.\n" );
   }
@@ -134,11 +137,12 @@ bool is_regular_file( const int fd )
 
 bool may_access_filename( const char * const name )
   {
-  if( restricted_ &&
-      ( *name == '!' || strcmp( name, ".." ) == 0 || strchr( name, '/' ) ) )
+  if( restricted_ )
     {
-    set_error_msg( "Shell access restricted" );
-    return false;
+    if( name[0] == '!' )
+      { set_error_msg( "Shell access restricted" ); return false; }
+    if( strcmp( name, ".." ) == 0 || strchr( name, '/' ) )
+      { set_error_msg( "Directory access restricted" ); return false; }
     }
   return true;
   }
@@ -147,20 +151,23 @@ bool may_access_filename( const char * const name )
 int main( const int argc, const char * const argv[] )
   {
   int argind;
+  bool initial_error = false;		/* fatal error reading file */
   bool loose = false;
+  enum { opt_cr = 256 };
   const struct ap_Option options[] =
     {
-    { 'E', "extended-regexp",   ap_no  },
-    { 'G', "traditional",       ap_no  },
-    { 'h', "help",              ap_no  },
-    { 'l', "loose-exit-status", ap_no  },
-    { 'p', "prompt",            ap_yes },
-    { 'r', "restricted",        ap_no  },
-    { 's', "quiet",             ap_no  },
-    { 's', "silent",            ap_no  },
-    { 'v', "verbose",           ap_no  },
-    { 'V', "version",           ap_no  },
-    {  0 ,  0,                  ap_no } };
+    { 'E', "extended-regexp",      ap_no  },
+    { 'G', "traditional",          ap_no  },
+    { 'h', "help",                 ap_no  },
+    { 'l', "loose-exit-status",    ap_no  },
+    { 'p', "prompt",               ap_yes },
+    { 'r', "restricted",           ap_no  },
+    { 's', "quiet",                ap_no  },
+    { 's', "silent",               ap_no  },
+    { 'v', "verbose",              ap_no  },
+    { 'V', "version",              ap_no  },
+    { opt_cr, "strip-trailing-cr", ap_no  },
+    {  0, 0,                       ap_no } };
 
   struct Arg_parser parser;
   if( argc > 0 ) invocation_name = argv[0];
@@ -186,6 +193,7 @@ int main( const int argc, const char * const argv[] )
       case 's': scripted_ = true; break;
       case 'v': set_verbose(); break;
       case 'V': show_version(); return 0;
+      case opt_cr: strip_cr_ = true; break;
       default : show_error( "internal error: uncaught option.", 0, false );
                 return 3;
       }
@@ -200,19 +208,20 @@ int main( const int argc, const char * const argv[] )
     if( strcmp( arg, "-" ) == 0 ) { scripted_ = true; ++argind; continue; }
     if( may_access_filename( arg ) )
       {
-      if( read_file( arg, 0 ) < 0 && is_regular_file( 0 ) )
-        return 2;
-      else if( arg[0] != '!' && !set_def_filename( arg ) ) return 1;
+      const int ret = read_file( arg, 0 );
+      if( ret < 0 && is_regular_file( 0 ) ) return 2;
+      if( arg[0] != '!' && !set_def_filename( arg ) ) return 1;
+      if( ret == -2 ) initial_error = true;
       }
     else
       {
-      fputs( "?\n", stdout );
-      if( arg[0] ) set_error_msg( "Invalid filename" );
       if( is_regular_file( 0 ) ) return 2;
+      initial_error = true;
       }
     break;
     }
   ap_free( &parser );
 
-  return main_loop( loose );
+  if( initial_error ) fputs( "?\n", stdout );
+  return main_loop( initial_error, loose );
   }

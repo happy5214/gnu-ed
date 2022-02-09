@@ -1,7 +1,7 @@
 /* global.c: global command routines for the ed line editor */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +29,8 @@
 static const line_t **active_list = 0;	/* list of lines active in a global command */
 static int active_size = 0;	/* size (in bytes) of active_list */
 static int active_len = 0;	/* number of lines in active_list */
-static int active_ptr = 0;	/* active_list index ( non-decreasing ) */
-static int active_ndx = 0;	/* active_list index ( modulo active_last ) */
+static int active_idx = 0;	/* active_list index ( non-decreasing ) */
+static int active_idxm = 0;	/* active_list index ( modulo active_len ) */
 
 
 /* clear the global-active list */
@@ -38,7 +39,7 @@ void clear_active_list( void )
   disable_interrupts();
   if( active_list ) free( active_list );
   active_list = 0;
-  active_size = active_len = active_ptr = active_ndx = 0;
+  active_size = active_len = active_idx = active_idxm = 0;
   enable_interrupts();
   }
 
@@ -46,30 +47,29 @@ void clear_active_list( void )
 /* return the next global-active line node */
 const line_t * next_active_node( void )
   {
-  while( active_ptr < active_len && !active_list[active_ptr] )
-    ++active_ptr;
-  return ( active_ptr < active_len ) ? active_list[active_ptr++] : 0;
+  while( active_idx < active_len && !active_list[active_idx] )
+    ++active_idx;
+  return ( active_idx < active_len ) ? active_list[active_idx++] : 0;
   }
 
 
 /* add a line node to the global-active list */
 bool set_active_node( const line_t * const lp )
   {
-  const int min_size = ( active_len + 1 ) * sizeof (line_t **);
-  if( active_size < min_size )
+  const unsigned min_size = ( active_len + 1 ) * sizeof (line_t **);
+  if( (unsigned)active_size < min_size )
     {
-    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    if( min_size >= INT_MAX )
+      { set_error_msg( "Too many matching lines" ); return false; }
+    const int new_size = ( ( min_size < 512 ) ? 512 :
+      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     disable_interrupts();
     if( active_list ) new_buf = realloc( active_list, new_size );
     else new_buf = malloc( new_size );
     if( !new_buf )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( mem_msg );
-      enable_interrupts();
-      return false;
-      }
+      { show_strerror( 0, errno );
+        set_error_msg( mem_msg ); enable_interrupts(); return false; }
     active_size = new_size;
     active_list = (const line_t **)new_buf;
     enable_interrupts();
@@ -87,9 +87,9 @@ void unset_active_nodes( const line_t * bp, const line_t * const ep )
     int i;
     for( i = 0; i < active_len; ++i )
       {
-      if( ++active_ndx >= active_len ) active_ndx = 0;
-      if( active_list[active_ndx] == bp )
-        { active_list[active_ndx] = 0; break; }
+      if( ++active_idxm >= active_len ) active_idxm = 0;
+      if( active_list[active_idxm] == bp )
+        { active_list[active_idxm] = 0; break; }
       }
     bp = bp->q_forw;
     }

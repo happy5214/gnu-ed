@@ -1,8 +1,0 @@
-Some missing tests:
-1) g/./s^@^@	- okay: NULs in commands
-2) g/./s/^@/	- okay: NULs in patterns
-3) ed -x 	- verify: 8-bit clean
-4) ed		- verify: long-line support
-5) ed		- verify: interactive/help mode
-6) G/pat/	- verify: global interactive command
-7) V/pat/	- verify: global interactive command

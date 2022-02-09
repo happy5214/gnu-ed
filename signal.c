@@ -1,7 +1,7 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -41,30 +42,23 @@ static bool sigint_pending = false;
 static void sighup_handler( int signum )
   {
   if( signum ) {}			/* keep compiler happy */
-  if( mutex ) sighup_pending = true;
-  else
-    {
-    const char hb[] = "ed.hup";
-    sighup_pending = false;
-    if( last_addr() && modified() &&
-        write_file( hb, "w", 1, last_addr() ) < 0 )
-      {
-      char * const s = getenv( "HOME" );
-      const int len = ( s ? strlen( s ) : 0 );
-      const int need_slash = ( ( !len || s[len-1] != '/' ) ? 1 : 0 );
-      char * const hup = ( ( len + need_slash + (int)sizeof hb < path_max( 0 ) ) ?
-                    (char *) malloc( len + need_slash + sizeof hb ) : 0 );
-      if( len && hup )			/* hup filename */
-        {
-        memcpy( hup, s, len );
-        if( need_slash ) hup[len] = '/';
-        memcpy( hup + len + need_slash, hb, sizeof hb );
-        if( write_file( hup, "w", 1, last_addr() ) >= 0 ) exit( 0 );
-        }
-      exit( 1 );			/* hup file write failed */
-      }
-    exit( 0 );
-    }
+  if( mutex ) { sighup_pending = true; return; }
+  sighup_pending = false;
+  const char hb[] = "ed.hup";
+  if( last_addr() <= 0 || !modified() ||
+      write_file( hb, "w", 1, last_addr() ) >= 0 ) exit( 0 );
+  char * const s = getenv( "HOME" );
+  if( !s || !s[0] ) exit( 1 );
+  const int len = strlen( s );
+  const int need_slash = s[len-1] != '/';
+  char * const hup = ( len + need_slash + (int)sizeof hb < path_max( 0 ) ) ?
+                     (char *)malloc( len + need_slash + sizeof hb ) : 0;
+  if( !hup ) exit( 1 );			/* hup file name */
+  memcpy( hup, s, len );
+  if( need_slash ) hup[len] = '/';
+  memcpy( hup + len + need_slash, hb, sizeof hb );
+  if( write_file( hup, "w", 1, last_addr() ) >= 0 ) exit( 0 );
+  exit( 1 );				/* hup file write failed */
   }
 
 
@@ -146,22 +140,21 @@ int window_lines( void ) { return window_lines_; }
 
 
 /* assure at least a minimum size for buffer 'buf' */
-bool resize_buffer( char ** const buf, int * const size, const int min_size )
+bool resize_buffer( char ** const buf, int * const size, const unsigned min_size )
   {
-  if( *size < min_size )
+  if( (unsigned)*size < min_size )
     {
-    const int new_size = ( min_size < 512 ? 512 : ( min_size / 512 ) * 1024 );
+    if( min_size >= INT_MAX )
+      { set_error_msg( "Line too long" ); return false; }
+    const int new_size = ( ( min_size < 512 ) ? 512 :
+      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     disable_interrupts();
     if( *buf ) new_buf = realloc( *buf, new_size );
     else new_buf = malloc( new_size );
     if( !new_buf )
-      {
-      show_strerror( 0, errno );
-      set_error_msg( mem_msg );
-      enable_interrupts();
-      return false;
-      }
+      { show_strerror( 0, errno );
+        set_error_msg( mem_msg ); enable_interrupts(); return false; }
     *size = new_size;
     *buf = (char *)new_buf;
     enable_interrupts();
@@ -180,7 +173,6 @@ const char * strip_escapes( const char * p )
 
   if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
   /* assert: no trailing escape */
-  while( ( buf[i++] = ( (*p == '\\' ) ? *++p : *p ) ) )
-    ++p;
+  while( ( buf[i++] = ( ( *p == '\\' ) ? *++p : *p ) ) ) ++p;
   return buf;
   }

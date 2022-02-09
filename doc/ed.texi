@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 6 January 2021
-@set VERSION 1.17
+@set UPDATED 4 February 2022
+@set VERSION 1.18
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2021 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2022 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -51,6 +51,7 @@ This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 * Line addressing::                 Specifying lines/ranges in the buffer
 * Regular expressions::             Patterns for selecting text
 * Commands::                        Commands recognized by GNU @command{ed}
+* The 's' Command::                 Substitute command
 * Limitations::                     Intrinsic limits of GNU @command{ed}
 * Diagnostics::                     GNU @command{ed} error handling
 * Problems::                        Reporting bugs
@@ -80,7 +81,8 @@ P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
 If invoked with a @var{file} argument, then a copy of @var{file} is read
 into the editor's buffer. Changes are made to this copy and not directly
 to @var{file} itself. Upon quitting @command{ed}, any changes not
-explicitly saved with a @samp{w} command are lost.
+explicitly saved with a @samp{w} command are lost. In interactive mode, a
+non-existing @var{file} is reported but does not alter the exit status.
 
 Editing is done in two distinct modes: @dfn{command} and @dfn{input}.
 When first invoked, @command{ed} is in command mode. In this mode
@@ -107,17 +109,17 @@ lines, and so on. It is possible to modify only a portion of a line by
 means of replacement, as in the example above. However even here, the
 @samp{s} command is applied to whole lines at a time.
 
-In general, @command{ed} commands consist of zero or more line
-addresses, followed by a single character command and possibly
-additional parameters; i.e., commands have the structure:
+In general, @command{ed} commands consist of zero or more line addresses,
+followed by a single character command and possibly additional parameters;
+i.e., commands have the structure:
 
 @example
 [@var{address}[,@var{address}]]@var{command}[@var{parameters}]
 @end example
 
-The @var{address}es indicate the line or range of lines to be affected
-by the command. If fewer addresses are given than the command accepts,
-then default addresses are supplied.
+The @var{address}es indicate the line or range of lines to be affected by
+the command. If fewer addresses are given than the command accepts, then
+default addresses are supplied.
 
 
 @node Introduction to line editing
@@ -423,6 +425,13 @@ input is from a script.
 Verbose mode; prints error explanations. This may be toggled on and off
 with the @samp{H} command.
 
+@item --strip-trailing-cr
+Strip the carriage returns at the end of text lines in DOS files. CRs are
+removed only from the CR/LF (carriage return/line feed) pair ending the
+line. CRs at other positions in the line, including a CR finishing an
+unterminated line, are not removed. The CRs are not restored when saving the
+buffer to a file.
+
 @end table
 
 Exit status: 0 if no errors occurred; otherwise >0.
@@ -494,15 +503,17 @@ address range @samp{1,$}.
 The current through last lines in the buffer. This is equivalent to the
 address range @samp{.;$}.
 
-@item /@var{re}/
+@item /@var{re}/[I]
 The next line containing the regular expression @var{re}. The search
 wraps to the beginning of the buffer and continues down to the current
-line, if necessary.
+line, if necessary. The suffix @samp{I} is a GNU extension which makes
+@command{ed} match @var{re} in a case-insensitive manner.
 
-@item ?@var{re}?
+@item ?@var{re}?[I]
 The previous line containing the regular expression @var{re}. The search
 wraps to the end of the buffer and continues up to the current line, if
-necessary.
+necessary. The suffix @samp{I} is a GNU extension which makes @command{ed}
+match @var{re} in a case-insensitive manner.
 
 @item 'x
 The apostrophe-x character pair addresses the line previously marked by
@@ -528,40 +539,46 @@ A number adds the indicated number of lines to the address.
 
 @end itemize
 
-It is not an error if an intermediate address value is negative or
-greater than the address of the last line in the buffer. It is an error
-if the final address value is negative or greater than the address of
-the last line in the buffer. It is an error if a search for a @var{re}
-fails to find a matching line.
+It is not an error if an intermediate address value is negative or greater
+than the address of the last line in the buffer. It is an error if the final
+address value is negative or greater than the address of the last line in
+the buffer. It is an error if a search for a regular expression fails to
+find a matching line.
 
 
 @node Regular expressions
 @chapter Regular expressions
 
-Regular expressions are patterns used in selecting text. For example,
-the @command{ed} command
+Regular expressions are patterns used in selecting text. For example, the
+@command{ed} command
 
 @example
 g/@var{string}/
 @end example
 
 @noindent
-prints all lines containing @var{string}. Regular expressions are also
-used by the @samp{s} command for selecting old text to be replaced with
-new text.
+prints all lines containing @var{string}. Regular expressions are also used
+by the @samp{s} command for selecting old text to be replaced with new text.
 
-In addition to specifying string literals, regular expressions can
-represent classes of strings. Strings thus represented are said to be
-matched by the corresponding regular expression. If it is possible for a
-regular expression to match several strings in a line, then the
-left-most match is the one selected. If the regular expression permits a
-variable number of matching characters, the longest sequence starting at
-that point is matched.
+In addition to specifying string literals, regular expressions can represent
+classes of strings. Strings thus represented are said to be matched by the
+corresponding regular expression. If it is possible for a regular expression
+to match several strings in a line, then the left-most match is the one
+selected. If the regular expression permits a variable number of matching
+characters, the longest sequence starting at that point is matched.
 
-A null @var{re} is equivalent to the last @var{re} encountered.
+An empty regular expression is equivalent to the last regular expression
+processed. Therefore @samp{/@var{re}/s//@var{replacement}/} replaces
+@var{re} with @var{replacement}.
 
-The following symbols are used in constructing regular expressions
-using POSIX basic regular expression syntax:
+As a GNU extension, a regular expression /@var{re}/ may be followed by the
+suffix @samp{I} which makes @command{ed} match @var{re} in a
+case-insensitive manner. Note that the suffix is evaluated when the regular
+expression is compiled, thus it is invalid to specify it together with the
+empty regular expression.
+
+The following symbols are used in constructing regular expressions using
+POSIX basic regular expression syntax:
 
 @table @code
 
@@ -620,7 +637,7 @@ If @samp{$} is the last character of a regular expression, it anchors the
 regular expression to the end of a line. Otherwise, it matches itself.
 
 @item \(@var{re}\)
-Defines a (possibly null) subexpression @var{re}. Subexpressions may be
+Defines a (possibly empty) subexpression @var{re}. Subexpressions may be
 nested. A subsequent backreference of the form @samp{\@var{n}}, where
 @var{n} is a number in the range [1,9], expands to the text matched by
 the @var{n}th subexpression. For example, the regular expression
@@ -634,8 +651,8 @@ regular expression or a subexpression. If @samp{*} is the first
 character of a regular expression or subexpression, then it matches
 itself. The @samp{*} operator sometimes yields unexpected results. For
 example, the regular expression @samp{b*} matches the beginning of the
-string @samp{abbb}, as opposed to the substring @samp{bbb}, since a null
-match is the only left-most match.
+string @samp{abbb}, as opposed to the substring @samp{bbb}, since an empty
+string is the only left-most match.
 
 @item \@{@var{n},@var{m}\@}
 @itemx \@{@var{n},\@}
@@ -683,19 +700,18 @@ beginning of a regular expression or subexpression, then it matches a
 literal @samp{+}.
 
 @item \b
-Matches the beginning or ending (null string) of a word. Thus the
-regular expression @samp{\bhello\b} is equivalent to @samp{\<hello\>}.
-However, @samp{\b\b} is a valid regular expression whereas @samp{\<\>}
-is not.
+Matches the beginning or ending (empty string) of a word. Thus the regular
+expression @samp{\bhello\b} is equivalent to @samp{\<hello\>}. However,
+@samp{\b\b} is a valid regular expression whereas @samp{\<\>} is not.
 
 @item \B
-Matches (a null string) inside a word.
+Matches (an empty string) inside a word.
 
 @item \w
-Matches any character in a word.
+Matches any word-constituent character (letters, digits, and the underscore).
 
 @item \W
-Matches any character not in a word.
+Matches any character that is not a word-constituent.
 
 @end table
 
@@ -704,10 +720,11 @@ Matches any character not in a word.
 @chapter Commands
 
 All @command{ed} commands are single characters, though some require
-additonal parameters. If a command's parameters extend over several
-lines, then each line except for the last must be terminated with a
-backslash (@samp{\}).
+additional parameters. If a command's parameters extend over several lines,
+then each line except for the last must be terminated with a backslash
+(@samp{\}).
 
+@anchor{print suffixes}
 In general, at most one command is allowed per line. However, most
 commands accept a print suffix, which is any of @samp{p} (print),
 @samp{l} (list), or @samp{n} (enumerate), to print the last line
@@ -775,17 +792,18 @@ command, except that unwritten changes are discarded without warning.
 Sets the default filename to @var{file}. If @var{file} is not specified,
 then the default unescaped filename is printed.
 
-@item (1,$)g/@var{re}/@var{command-list}
+@item (1,$)g/@var{re}/[I]@var{command-list}
 Global command. The global command makes two passes over the file. On the
 first pass, all the addressed lines matching a regular expression @var{re}
-are marked. Then, going sequentially from the beginning of the file to the
-end of the file, the given @var{command-list} is executed for each marked
-line, with the current address set to the address of that line. Any line
-modified by the @var{command-list} is unmarked. The final value of the
-current address is the value assigned by the last command in the last
-@var{command-list} executed. If there were no matching lines, the current
-address is unchanged. The execution of @var{command-list} stops on the first
-error.
+are marked. The suffix @samp{I} is a GNU extension which makes @command{ed}
+match @var{re} in a case-insensitive manner. Then, going sequentially from
+the beginning of the file to the end of the file, the given
+@var{command-list} is executed for each marked line, with the current
+address set to the address of that line. Any line modified by the
+@var{command-list} is unmarked. The final value of the current address is
+the value assigned by the last command in the last @var{command-list}
+executed. If there were no matching lines, the current address is unchanged.
+The execution of @var{command-list} stops on the first error.
 
 The first command of @var{command-list} must appear on the same line as the
 @samp{g} command. The other commands of @var{command-list} must appear on
@@ -798,17 +816,18 @@ newline alone in @var{command-list} is equivalent to a @samp{p} command. If
 @command{ed} is invoked with the command-line option @samp{-G}, then a
 newline in @var{command-list} is equivalent to a @samp{.+1p} command.
 
-@item (1,$)G/@var{re}/
+@item (1,$)G/@var{re}/[I]
 Interactive global command. Interactively edits the addressed lines
-matching a regular expression @var{re}. For each matching line, the line
-is printed, the current address is set, and the user is prompted to
-enter a @var{command-list}. The final value of the current address is
-the value assigned by the last command executed. If there were no
-matching lines, the current address is unchanged.
+matching a regular expression @var{re}. The suffix @samp{I} is a GNU
+extension which makes @command{ed} match @var{re} in a case-insensitive
+manner. For each matching line, the line is printed, the current address is
+set, and the user is prompted to enter a @var{command-list}. The final value
+of the current address is the value assigned by the last command executed.
+If there were no matching lines, the current address is unchanged.
 
 The format of @var{command-list} is the same as that of the @samp{g}
-command. A newline alone acts as a null command list. A single @samp{&}
-repeats the last non-null command list.
+command. A newline alone acts as an empty command list. A single @samp{&}
+repeats the last non-empty command list.
 
 @item h
 Help. Prints an explanation of the last error.
@@ -889,53 +908,6 @@ If @var{file} is prefixed with a bang (!), then it is interpreted as a
 shell command whose output is to be read, (@pxref{shell escape command}
 @samp{!} below). In this case the default filename is unchanged.
 
-@item (.,.)s/@var{re}/@var{replacement}/
-Substitute command. Replaces text in the addressed lines matching a regular
-expression @var{re} with @var{replacement}. By default, only the first match
-in each line is replaced. The @samp{s} command accepts any combination of
-the suffixes @samp{g}, @samp{@var{count}}, @samp{l}, @samp{n}, and @samp{p}.
-If the @samp{g} (global) suffix is given, then every match is replaced. The
-@samp{@var{count}} suffix, where @var{count} is a positive number, causes
-only the @var{count}th match to be replaced. @samp{g} and @samp{@var{count}}
-can't be specified in the same command. @samp{l}, @samp{n}, and @samp{p} are
-the usual print suffixes. It is an error if no substitutions are performed
-on any of the addressed lines. The current address is set to the address of
-the last line on which a substitution occurred. If a line is split, a
-substitution is considered to have occurred on each of the new lines. If no
-substitution is performed, the current address is unchanged. The last line
-modified is copied to the cut buffer.
-
-@var{re} and @var{replacement} may be delimited by any character other
-than @key{space}, @key{newline} and the characters used by the form of
-the @samp{s} command shown below. If the last delimiter is omitted, then
-the last line affected is printed as if the print suffix @samp{p} were
-specified. The last delimiter can't be omitted if the @samp{s} command
-is part of a @samp{g} or @samp{v} @var{command-list} and is not the last
-command in the list, because the meaning of the following escaped
-newline would become ambiguous.
-
-An unescaped @samp{&} in @var{replacement} is replaced by the currently
-matched text. The character sequence @samp{\@var{m}} where @var{m} is a
-number in the range [1,9], is replaced by the @var{m}th backreference
-expression of the matched text. If the corresponding backreference
-expression does not match, then the character sequence @samp{\@var{m}} is
-replaced by the empty string. If @var{replacement} consists of a single
-@samp{%}, then @var{replacement} from the last substitution is used.
-
-A line can be split by including a newline escaped with a backslash
-(@samp{\}) in @var{replacement}. Each backslash in @var{replacement}
-removes the special meaning (if any) of the following character.
-
-@item (.,.)s
-Repeats the last substitution. This form of the @samp{s} command accepts
-the @samp{g} and @samp{@var{count}} suffixes described above, and any
-combination of the suffixes @samp{p} and @samp{r}. The @samp{g} suffix
-toggles the global suffix of the last substitution and resets
-@var{count} to 1. The @samp{p} suffix toggles the print suffixes of the
-last substitution. The @samp{r} suffix causes the @var{re} of the last
-search to be used instead of the @var{re} of the last substitution (if
-the search happened after the substitution).
-
 @item (.,.)t(.)
 Copies (i.e., transfers) the addressed lines to after the right-hand
 destination address. If the destination address is @samp{0} (zero), the
@@ -949,12 +921,12 @@ global commands @samp{g}, @samp{G}, @samp{v}, and @samp{V} are treated as a
 single command by undo. @samp{u} is its own inverse; it can undo only the
 last command.
 
-@item (1,$)v/@var{re}/@var{command-list}
+@item (1,$)v/@var{re}/[I]@var{command-list}
 This is similar to the @samp{g} command except that it applies
 @var{command-list} to each of the addressed lines not matching the
 regular expression @var{re}.
 
-@item (1,$)V/@var{re}/
+@item (1,$)V/@var{re}/[I]
 This is similar to the @samp{G} command except that it interactively
 edits the addressed lines not matching the regular expression @var{re}.
 
@@ -999,14 +971,14 @@ address of the last line printed.
 
 @anchor{shell escape command}
 @item !@var{command}
-Shell escape command. Executes @var{command} via @command{sh (1)}. If
-the first character of @var{command} is @samp{!}, then it is replaced by
-the text of the previous @samp{!@var{command}}. Thus, @samp{!!} repeats
-the previous @samp{!@var{command}}. @command{ed} does not process
-@var{command} for backslash (@samp{\}) escapes. However, an unescaped
-@samp{%} is replaced by the default filename. When the shell returns
-from execution, a @samp{!} is printed to the standard output. The
-current address is unchanged.
+Shell escape command. Executes @var{command} via @command{sh (1)}. If the
+first character of @var{command} is @samp{!}, then it is replaced by the
+text of the previous @samp{!@var{command}}. Thus, @samp{!!} repeats the
+previous @samp{!@var{command}}. @command{ed} does not process @var{command}
+for backslash (@samp{\}) escapes. However, each unescaped @samp{%} is
+replaced with the default filename, and the backslash is removed from each
+escaped @samp{%}. When the shell returns from execution, a @samp{!} is
+printed to the standard output. The current address is unchanged.
 
 @item (.,.)#
 Begins a comment; the rest of the line, up to a newline, is ignored. If a
@@ -1018,11 +990,91 @@ Prints the line number of the addressed line. The current address is
 unchanged.
 
 @item (.+1)@key{newline}
-Null command. An address alone prints the addressed line. A
-@key{newline} alone is equivalent to @samp{+1p}. The current address is
-set to the address of the printed line.
+Null command. An address alone prints the addressed line. A @key{newline}
+alone is equivalent to @samp{+1p}. The current address is set to the address
+of the printed line.
 
 @end table
+
+
+@node The 's' Command
+@chapter Substitute command
+
+The substitute command @samp{s} replaces text in the addressed lines
+matching a regular expression @var{re} with @var{replacement}. By default,
+only the first match in each line is replaced. The syntax of the @samp{s}
+command is:
+
+@example
+(.,.)s/@var{re}/@var{replacement}/[@var{suffixes}]
+@end example
+
+The @samp{s} command accepts any combination of the following optional
+suffixes:
+
+@table @code
+
+@item g
+@samp{global}: replace every match in the line, not just the first.
+
+@item @var{count}
+A positive number causes only the @var{count}th match to be replaced.
+@samp{g} and @samp{@var{count}} can't be specified in the same command.
+
+@item l
+@itemx n
+@itemx p
+The usual print suffixes. @xref{print suffixes}.
+
+@item I
+@itemx i
+The suffix @samp{I} is a GNU extension which makes @command{ed} match
+@var{re} in a case-insensitive manner.
+
+@end table
+
+It is an error if no substitutions are performed on any of the addressed
+lines. The current address is set to the address of the last line on which a
+substitution occurred. If a line is split, a substitution is considered to
+have occurred on each of the new lines. If no substitution is performed, the
+current address is unchanged. The last line modified is copied to the cut
+buffer.
+
+@var{re} and @var{replacement} may be delimited by any character other
+than @key{space}, @key{newline} and the characters used by the form of
+the @samp{s} command shown below. If the last delimiter is omitted, then
+the last line affected is printed as if the print suffix @samp{p} were
+specified. The last delimiter can't be omitted if the @samp{s} command
+is part of a @samp{g} or @samp{v} @var{command-list} and is not the last
+command in the list, because the meaning of the following escaped
+newline would become ambiguous.
+
+An unescaped @samp{&} in @var{replacement} is replaced by the currently
+matched text. The character sequence @samp{\@var{m}} where @var{m} is a
+number in the range [1,9], is replaced by the @var{m}th backreference
+expression of the matched text. If the corresponding backreference
+expression does not match, then the character sequence @samp{\@var{m}} is
+replaced by the empty string. If @var{replacement} consists of a single
+@samp{%}, then @var{replacement} from the last substitution is used.
+
+A line can be split by including a newline escaped with a backslash
+(@samp{\}) in @var{replacement}. Each backslash in @var{replacement}
+removes the special meaning (if any) of the following character.
+
+@command{ed} can repeat the last substitution using the following
+alternative syntax for the @samp{s} command:
+
+@example
+(.,.)s[@var{suffixes}]
+@end example
+
+This form of the @samp{s} command accepts the suffixes @samp{g} and
+@samp{@var{count}} described above, and any combination of the suffixes
+@samp{p} and @samp{r}. The suffix @samp{g} toggles the global suffix of the
+last substitution and resets @var{count} to 1. The suffix @samp{p} toggles
+the print suffixes of the last substitution. The suffix @samp{r} causes the
+@var{re} of the last search to be used instead of the @var{re} of the last
+substitution (if the search happened after the substitution).
 
 
 @node Limitations
@@ -1045,8 +1097,9 @@ writing prevents appending a newline to a binary file.
 
 In order to keep track of the text lines in the buffer, @command{ed} uses a
 doubly linked list of structures containing the position and size of each
-line. This results in a per line overhead of 2 @samp{pointer}s, 1 @samp{long
-int}, and 1 @samp{int}.
+line. This results in a per line overhead of @w{2 @samp{pointer}s},
+@w{1 @samp{long int}}, and @w{1 @samp{int}}. The maximum line length is
+@w{INT_MAX - 1} bytes. The maximum number of lines is @w{INT_MAX - 2} lines.
 
 
 @node Diagnostics

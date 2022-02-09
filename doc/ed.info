@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2022 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.17, 6 January 2021).
+This manual is for GNU ed (version 1.18, 4 February 2022).
 
 * Menu:
 
@@ -28,13 +28,14 @@ This manual is for GNU ed (version 1.17, 6 January 2021).
 * Line addressing::                 Specifying lines/ranges in the buffer
 * Regular expressions::             Patterns for selecting text
 * Commands::                        Commands recognized by GNU 'ed'
+* The 's' Command::                 Substitute command
 * Limitations::                     Intrinsic limits of GNU 'ed'
 * Diagnostics::                     GNU 'ed' error handling
 * Problems::                        Reporting bugs
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2022 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -61,7 +62,8 @@ and P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
    If invoked with a FILE argument, then a copy of FILE is read into the
 editor's buffer. Changes are made to this copy and not directly to FILE
 itself. Upon quitting 'ed', any changes not explicitly saved with a 'w'
-command are lost.
+command are lost. In interactive mode, a non-existing FILE is reported but
+does not alter the exit status.
 
    Editing is done in two distinct modes: "command" and "input". When first
 invoked, 'ed' is in command mode. In this mode commands are read from the
@@ -363,6 +365,13 @@ default filename is set to FILE only if it is not prefixed with a bang.
      Verbose mode; prints error explanations. This may be toggled on and off
      with the 'H' command.
 
+'--strip-trailing-cr'
+     Strip the carriage returns at the end of text lines in DOS files. CRs
+     are removed only from the CR/LF (carriage return/line feed) pair
+     ending the line. CRs at other positions in the line, including a CR
+     finishing an unterminated line, are not removed. The CRs are not
+     restored when saving the buffer to a file.
+
 
    Exit status: 0 if no errors occurred; otherwise >0.
 
@@ -432,15 +441,17 @@ of addresses to a command that requires zero addresses.
      The current through last lines in the buffer. This is equivalent to the
      address range '.;$'.
 
-'/RE/'
+'/RE/[I]'
      The next line containing the regular expression RE. The search wraps
      to the beginning of the buffer and continues down to the current line,
-     if necessary.
+     if necessary. The suffix 'I' is a GNU extension which makes 'ed' match
+     RE in a case-insensitive manner.
 
-'?RE?'
+'?RE?[I]'
      The previous line containing the regular expression RE. The search
      wraps to the end of the buffer and continues up to the current line, if
-     necessary.
+     necessary. The suffix 'I' is a GNU extension which makes 'ed' match RE
+     in a case-insensitive manner.
 
 ''x'
      The apostrophe-x character pair addresses the line previously marked by
@@ -463,8 +474,8 @@ separated by whitespace. Offsets are constructed as follows:
    It is not an error if an intermediate address value is negative or
 greater than the address of the last line in the buffer. It is an error if
 the final address value is negative or greater than the address of the last
-line in the buffer. It is an error if a search for a RE fails to find a
-matching line.
+line in the buffer. It is an error if a search for a regular expression
+fails to find a matching line.
 
 
 File: ed.info,  Node: Regular expressions,  Next: Commands,  Prev: Line addressing,  Up: Top
@@ -488,7 +499,13 @@ match is the one selected. If the regular expression permits a variable
 number of matching characters, the longest sequence starting at that point
 is matched.
 
-   A null RE is equivalent to the last RE encountered.
+   An empty regular expression is equivalent to the last regular expression
+processed. Therefore '/RE/s//REPLACEMENT/' replaces RE with REPLACEMENT.
+
+   As a GNU extension, a regular expression /RE/ may be followed by the
+suffix 'I' which makes 'ed' match RE in a case-insensitive manner. Note
+that the suffix is evaluated when the regular expression is compiled, thus
+it is invalid to specify it together with the empty regular expression.
 
    The following symbols are used in constructing regular expressions using
 POSIX basic regular expression syntax:
@@ -540,7 +557,7 @@ POSIX basic regular expression syntax:
      regular expression to the end of a line. Otherwise, it matches itself.
 
 '\(RE\)'
-     Defines a (possibly null) subexpression RE. Subexpressions may be
+     Defines a (possibly empty) subexpression RE. Subexpressions may be
      nested. A subsequent backreference of the form '\N', where N is a
      number in the range [1,9], expands to the text matched by the Nth
      subexpression. For example, the regular expression '\(a.c\)\1' matches
@@ -554,7 +571,7 @@ POSIX basic regular expression syntax:
      of a regular expression or subexpression, then it matches itself. The
      '*' operator sometimes yields unexpected results. For example, the
      regular expression 'b*' matches the beginning of the string 'abbb', as
-     opposed to the substring 'bbb', since a null match is the only
+     opposed to the substring 'bbb', since an empty string is the only
      left-most match.
 
 '\{N,M\}'
@@ -599,27 +616,28 @@ implementation in your system.
      regular expression or subexpression, then it matches a literal '+'.
 
 '\b'
-     Matches the beginning or ending (null string) of a word. Thus the
+     Matches the beginning or ending (empty string) of a word. Thus the
      regular expression '\bhello\b' is equivalent to '\<hello\>'. However,
      '\b\b' is a valid regular expression whereas '\<\>' is not.
 
 '\B'
-     Matches (a null string) inside a word.
+     Matches (an empty string) inside a word.
 
 '\w'
-     Matches any character in a word.
+     Matches any word-constituent character (letters, digits, and the
+     underscore).
 
 '\W'
-     Matches any character not in a word.
+     Matches any character that is not a word-constituent.
 
 
 
-File: ed.info,  Node: Commands,  Next: Limitations,  Prev: Regular expressions,  Up: Top
+File: ed.info,  Node: Commands,  Next: The 's' Command,  Prev: Regular expressions,  Up: Top
 
 6 Commands
 **********
 
-All 'ed' commands are single characters, though some require additonal
+All 'ed' commands are single characters, though some require additional
 parameters. If a command's parameters extend over several lines, then each
 line except for the last must be terminated with a backslash ('\').
 
@@ -687,17 +705,18 @@ parenthesis).
      Sets the default filename to FILE. If FILE is not specified, then the
      default unescaped filename is printed.
 
-'(1,$)g/RE/COMMAND-LIST'
+'(1,$)g/RE/[I]COMMAND-LIST'
      Global command. The global command makes two passes over the file. On
      the first pass, all the addressed lines matching a regular expression
-     RE are marked. Then, going sequentially from the beginning of the file
-     to the end of the file, the given COMMAND-LIST is executed for each
-     marked line, with the current address set to the address of that line.
-     Any line modified by the COMMAND-LIST is unmarked. The final value of
-     the current address is the value assigned by the last command in the
-     last COMMAND-LIST executed. If there were no matching lines, the
-     current address is unchanged. The execution of COMMAND-LIST stops on
-     the first error.
+     RE are marked. The suffix 'I' is a GNU extension which makes 'ed'
+     match RE in a case-insensitive manner. Then, going sequentially from
+     the beginning of the file to the end of the file, the given
+     COMMAND-LIST is executed for each marked line, with the current
+     address set to the address of that line. Any line modified by the
+     COMMAND-LIST is unmarked. The final value of the current address is
+     the value assigned by the last command in the last COMMAND-LIST
+     executed. If there were no matching lines, the current address is
+     unchanged. The execution of COMMAND-LIST stops on the first error.
 
      The first command of COMMAND-LIST must appear on the same line as the
      'g' command. The other commands of COMMAND-LIST must appear on
@@ -710,17 +729,18 @@ parenthesis).
      the command-line option '-G', then a newline in COMMAND-LIST is
      equivalent to a '.+1p' command.
 
-'(1,$)G/RE/'
+'(1,$)G/RE/[I]'
      Interactive global command. Interactively edits the addressed lines
-     matching a regular expression RE. For each matching line, the line is
-     printed, the current address is set, and the user is prompted to enter
-     a COMMAND-LIST. The final value of the current address is the value
-     assigned by the last command executed. If there were no matching
-     lines, the current address is unchanged.
+     matching a regular expression RE. The suffix 'I' is a GNU extension
+     which makes 'ed' match RE in a case-insensitive manner. For each
+     matching line, the line is printed, the current address is set, and
+     the user is prompted to enter a COMMAND-LIST. The final value of the
+     current address is the value assigned by the last command executed. If
+     there were no matching lines, the current address is unchanged.
 
      The format of COMMAND-LIST is the same as that of the 'g' command. A
-     newline alone acts as a null command list. A single '&' repeats the
-     last non-null command list.
+     newline alone acts as an empty command list. A single '&' repeats the
+     last non-empty command list.
 
 'h'
      Help. Prints an explanation of the last error.
@@ -801,52 +821,6 @@ parenthesis).
      command whose output is to be read, (*note shell escape command:: '!'
      below). In this case the default filename is unchanged.
 
-'(.,.)s/RE/REPLACEMENT/'
-     Substitute command. Replaces text in the addressed lines matching a
-     regular expression RE with REPLACEMENT. By default, only the first
-     match in each line is replaced. The 's' command accepts any
-     combination of the suffixes 'g', 'COUNT', 'l', 'n', and 'p'. If the
-     'g' (global) suffix is given, then every match is replaced. The
-     'COUNT' suffix, where COUNT is a positive number, causes only the
-     COUNTth match to be replaced. 'g' and 'COUNT' can't be specified in
-     the same command. 'l', 'n', and 'p' are the usual print suffixes. It
-     is an error if no substitutions are performed on any of the addressed
-     lines. The current address is set to the address of the last line on
-     which a substitution occurred. If a line is split, a substitution is
-     considered to have occurred on each of the new lines. If no
-     substitution is performed, the current address is unchanged. The last
-     line modified is copied to the cut buffer.
-
-     RE and REPLACEMENT may be delimited by any character other than
-     <space>, <newline> and the characters used by the form of the 's'
-     command shown below. If the last delimiter is omitted, then the last
-     line affected is printed as if the print suffix 'p' were specified.
-     The last delimiter can't be omitted if the 's' command is part of a
-     'g' or 'v' COMMAND-LIST and is not the last command in the list,
-     because the meaning of the following escaped newline would become
-     ambiguous.
-
-     An unescaped '&' in REPLACEMENT is replaced by the currently matched
-     text. The character sequence '\M' where M is a number in the range
-     [1,9], is replaced by the Mth backreference expression of the matched
-     text. If the corresponding backreference expression does not match,
-     then the character sequence '\M' is replaced by the empty string. If
-     REPLACEMENT consists of a single '%', then REPLACEMENT from the last
-     substitution is used.
-
-     A line can be split by including a newline escaped with a backslash
-     ('\') in REPLACEMENT. Each backslash in REPLACEMENT removes the
-     special meaning (if any) of the following character.
-
-'(.,.)s'
-     Repeats the last substitution. This form of the 's' command accepts
-     the 'g' and 'COUNT' suffixes described above, and any combination of
-     the suffixes 'p' and 'r'. The 'g' suffix toggles the global suffix of
-     the last substitution and resets COUNT to 1. The 'p' suffix toggles
-     the print suffixes of the last substitution. The 'r' suffix causes the
-     RE of the last search to be used instead of the RE of the last
-     substitution (if the search happened after the substitution).
-
 '(.,.)t(.)'
      Copies (i.e., transfers) the addressed lines to after the right-hand
      destination address. If the destination address is '0' (zero), the
@@ -860,11 +834,11 @@ parenthesis).
      single command by undo. 'u' is its own inverse; it can undo only the
      last command.
 
-'(1,$)v/RE/COMMAND-LIST'
+'(1,$)v/RE/[I]COMMAND-LIST'
      This is similar to the 'g' command except that it applies COMMAND-LIST
      to each of the addressed lines not matching the regular expression RE.
 
-'(1,$)V/RE/'
+'(1,$)V/RE/[I]'
      This is similar to the 'G' command except that it interactively edits
      the addressed lines not matching the regular expression RE.
 
@@ -911,10 +885,11 @@ parenthesis).
      Shell escape command. Executes COMMAND via 'sh (1)'. If the first
      character of COMMAND is '!', then it is replaced by the text of the
      previous '!COMMAND'. Thus, '!!' repeats the previous '!COMMAND'. 'ed'
-     does not process COMMAND for backslash ('\') escapes. However, an
-     unescaped '%' is replaced by the default filename. When the shell
-     returns from execution, a '!' is printed to the standard output. The
-     current address is unchanged.
+     does not process COMMAND for backslash ('\') escapes. However, each
+     unescaped '%' is replaced with the default filename, and the backslash
+     is removed from each escaped '%'. When the shell returns from
+     execution, a '!' is printed to the standard output. The current
+     address is unchanged.
 
 '(.,.)#'
      Begins a comment; the rest of the line, up to a newline, is ignored.
@@ -928,14 +903,86 @@ parenthesis).
 
 '(.+1)<newline>'
      Null command. An address alone prints the addressed line. A <newline>
-     alone is equivalent to '+1p'. The current address is set to the
-     address of the printed line.
+     alone is equivalent to '+1p'. The current address is set to the address
+     of the printed line.
 
 
 
-File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: Commands,  Up: Top
+File: ed.info,  Node: The 's' Command,  Next: Limitations,  Prev: Commands,  Up: Top
 
-7 Limitations
+7 Substitute command
+********************
+
+The substitute command 's' replaces text in the addressed lines matching a
+regular expression RE with REPLACEMENT. By default, only the first match in
+each line is replaced. The syntax of the 's' command is:
+
+     (.,.)s/RE/REPLACEMENT/[SUFFIXES]
+
+   The 's' command accepts any combination of the following optional
+suffixes:
+
+'g'
+     'global': replace every match in the line, not just the first.
+
+'COUNT'
+     A positive number causes only the COUNTth match to be replaced. 'g'
+     and 'COUNT' can't be specified in the same command.
+
+'l'
+'n'
+'p'
+     The usual print suffixes. *Note print suffixes::.
+
+'I'
+'i'
+     The suffix 'I' is a GNU extension which makes 'ed' match RE in a
+     case-insensitive manner.
+
+
+   It is an error if no substitutions are performed on any of the addressed
+lines. The current address is set to the address of the last line on which a
+substitution occurred. If a line is split, a substitution is considered to
+have occurred on each of the new lines. If no substitution is performed, the
+current address is unchanged. The last line modified is copied to the cut
+buffer.
+
+   RE and REPLACEMENT may be delimited by any character other than <space>,
+<newline> and the characters used by the form of the 's' command shown
+below. If the last delimiter is omitted, then the last line affected is
+printed as if the print suffix 'p' were specified. The last delimiter can't
+be omitted if the 's' command is part of a 'g' or 'v' COMMAND-LIST and is
+not the last command in the list, because the meaning of the following
+escaped newline would become ambiguous.
+
+   An unescaped '&' in REPLACEMENT is replaced by the currently matched
+text. The character sequence '\M' where M is a number in the range [1,9],
+is replaced by the Mth backreference expression of the matched text. If the
+corresponding backreference expression does not match, then the character
+sequence '\M' is replaced by the empty string. If REPLACEMENT consists of a
+single '%', then REPLACEMENT from the last substitution is used.
+
+   A line can be split by including a newline escaped with a backslash
+('\') in REPLACEMENT. Each backslash in REPLACEMENT removes the special
+meaning (if any) of the following character.
+
+   'ed' can repeat the last substitution using the following alternative
+syntax for the 's' command:
+
+     (.,.)s[SUFFIXES]
+
+   This form of the 's' command accepts the suffixes 'g' and 'COUNT'
+described above, and any combination of the suffixes 'p' and 'r'. The
+suffix 'g' toggles the global suffix of the last substitution and resets
+COUNT to 1. The suffix 'p' toggles the print suffixes of the last
+substitution. The suffix 'r' causes the RE of the last search to be used
+instead of the RE of the last substitution (if the search happened after
+the substitution).
+
+
+File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: The 's' Command,  Up: Top
+
+8 Limitations
 *************
 
 If the terminal hangs up, 'ed' attempts to write the buffer to the file
@@ -956,12 +1003,13 @@ prevents appending a newline to a binary file.
    In order to keep track of the text lines in the buffer, 'ed' uses a
 doubly linked list of structures containing the position and size of each
 line. This results in a per line overhead of 2 'pointer's, 1 'long int',
-and 1 'int'.
+and 1 'int'. The maximum line length is INT_MAX - 1 bytes. The maximum
+number of lines is INT_MAX - 2 lines.
 
 
 File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 
-8 Diagnostics
+9 Diagnostics
 *************
 
 When an error occurs, if 'ed''s input is from a regular file or here
@@ -979,8 +1027,8 @@ succeeds, but any changes to the buffer are lost.
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
 
-9 Reporting bugs
-****************
+10 Reporting bugs
+*****************
 
 There are probably bugs in 'ed'. There are certainly errors and omissions
 in this manual. If you report them, they will get fixed. If you don't, no
@@ -994,7 +1042,7 @@ eternity, if not longer.
 
 File: ed.info,  Node: GNU Free Documentation License,  Prev: Problems,  Up: Top
 
-10 GNU Free Documentation License
+11 GNU Free Documentation License
 *********************************
 
                        Version 1.3, 3 November 2008
@@ -1458,17 +1506,19 @@ use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview1708
-Node: Introduction to line editing4172
-Node: Invoking ed11443
-Node: Line addressing13741
-Node: Regular expressions17443
-Node: Commands23168
-Ref: shell escape command37583
-Node: Limitations38605
-Node: Diagnostics39697
-Node: Problems40342
-Node: GNU Free Documentation License40875
+Node: Overview1764
+Node: Introduction to line editing4317
+Node: Invoking ed11588
+Node: Line addressing14245
+Node: Regular expressions18159
+Node: Commands24344
+Ref: print suffixes24679
+Ref: shell escape command36257
+Node: The 's' Command37340
+Node: Limitations40254
+Node: Diagnostics41449
+Node: Problems42094
+Node: GNU Free Documentation License42629
 
 End Tag Table
 

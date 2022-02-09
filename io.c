@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2021 Antonio Diaz Diaz.
+   Copyright (C) 2006-2022 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -46,11 +46,11 @@ static void print_line( const char * p, int len, const int pflags )
   const char escchars[] = "abfnrtv";
   int col = 0;
 
-  if( pflags & GNP ) { printf( "%d\t", current_addr() ); col = 8; }
+  if( pflags & pf_n ) { printf( "%d\t", current_addr() ); col = 8; }
   while( --len >= 0 )
     {
     const unsigned char ch = *p++;
-    if( !( pflags & GLS ) ) putchar( ch );
+    if( !( pflags & pf_l ) ) putchar( ch );
     else
       {
       if( ++col > window_columns() ) { col = 1; fputs( "\\\n", stdout ); }
@@ -72,7 +72,7 @@ static void print_line( const char * p, int len, const int pflags )
         }
       }
     }
-  if( !traditional() && ( pflags & GLS ) ) putchar('$');
+  if( !traditional() && ( pflags & pf_l ) ) putchar('$');
   putchar('\n');
   }
 
@@ -145,8 +145,9 @@ bool get_extended_line( const char ** const ibufpp, int * const lenp,
 
 /* Read a line of text from stdin.
    Incomplete lines (lacking the trailing newline) are discarded.
-   Returns pointer to buffer and line size (including trailing newline),
-   or 0 if error, or *sizep = 0 if EOF */
+   Return pointer to buffer and line size (including trailing newline),
+   or 0 if error, or *sizep = 0 if EOF.
+*/
 const char * get_stdin_line( int * const sizep )
   {
   static char * buf = 0;
@@ -185,8 +186,9 @@ const char * get_stdin_line( int * const sizep )
 
 
 /* Read a line of text from a stream.
-   Returns pointer to buffer and line size (including trailing newline
-   if it exists and is not added now) */
+   Return pointer to buffer and line size (including trailing newline
+   if it exists and is not added now).
+*/
 static const char * read_stream_line( const char * const filename,
                                       FILE * const fp, int * const sizep,
                                       bool * const newline_addedp )
@@ -200,7 +202,10 @@ static const char * read_stream_line( const char * const filename,
     if( !resize_buffer( &buf, &bufsz, i + 2 ) ) return 0;
     c = getc( fp ); if( c == EOF ) break;
     buf[i++] = c;
-    if( !c ) set_binary(); else if( c == '\n' ) break;
+    if( !c ) set_binary();
+    else if( c == '\n' )		/* remove CR only from CR/LF pairs */
+      { if( strip_cr() && i > 1 && buf[i-2] == '\r' ) { buf[i-2] = '\n'; --i; }
+        break; }
     }
   buf[i] = 0;
   if( c == EOF )
@@ -268,7 +273,9 @@ static long read_stream( const char * const filename, FILE * const fp,
   }
 
 
-/* read a named file/pipe into the buffer; return line count, or -1 if error */
+/* Read a named file/pipe into the buffer.
+   Return line count, -1 if file not found, -2 if fatal error.
+*/
 int read_file( const char * const filename, const int addr )
   {
   FILE * fp;
@@ -276,7 +283,12 @@ int read_file( const char * const filename, const int addr )
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "r" );
-  else fp = fopen( strip_escapes( filename ), "r" );
+  else
+    {
+    const char * const stripped_name = strip_escapes( filename );
+    if( !stripped_name ) return -2;
+    fp = fopen( stripped_name, "r" );
+    }
   if( !fp )
     {
     show_strerror( filename, errno );
@@ -285,12 +297,12 @@ int read_file( const char * const filename, const int addr )
     }
   size = read_stream( filename, fp, addr );
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
-  if( size < 0 ) return -1;
+  if( size < 0 ) return -2;
   if( ret != 0 )
     {
     show_strerror( filename, errno );
     set_error_msg( "Cannot close input file" );
-    return -1;
+    return -2;
     }
   if( !scripted() ) printf( "%lu\n", size );
   return current_addr() - addr;
@@ -335,7 +347,12 @@ int write_file( const char * const filename, const char * const mode,
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "w" );
-  else fp = fopen( strip_escapes( filename ), mode );
+  else
+    {
+    const char * const stripped_name = strip_escapes( filename );
+    if( !stripped_name ) return -1;
+    fp = fopen( stripped_name, mode );
+    }
   if( !fp )
     {
     show_strerror( filename, errno );

@@ -20,7 +20,7 @@ objs = buffer.o carg_parser.o global.o io.o main.o main_loop.o regex.o signal.o
 all : $(progname) r$(progname)
 
 $(progname) : $(objs)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $(objs)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(objs)
 
 r$(progname) : r$(progname).in
 	cat $(VPATH)/r$(progname).in > $@
@@ -118,7 +118,6 @@ dist : doc
 	  $(DISTNAME)/Makefile.in \
 	  $(DISTNAME)/NEWS \
 	  $(DISTNAME)/README \
-	  $(DISTNAME)/TODO \
 	  $(DISTNAME)/configure \
 	  $(DISTNAME)/doc/$(progname).1 \
 	  $(DISTNAME)/doc/$(pkgname).info \

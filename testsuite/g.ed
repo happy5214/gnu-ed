@@ -24,14 +24,14 @@ hello world\
 # don't change current address if no match
 g/xxx/1d
 ;j
-g/heLp! world//caos/d\
+g/help! world/I/caos/d\
 -;/order/;d
 # split lines
 g/./s/hello world/hello\
 world/
 # use replacement from last substitution
 g/./s/animated/%/
-g/./s/difficulty/%
+g/./Is/difficulty/%
 # to be undone
 g/./s//x/g
 u
