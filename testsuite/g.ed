@@ -10,7 +10,7 @@ order\
 .\
 # and in the command list \
 i\
-caos\
+chaos\
 .\
 -1s/l/L
 u
@@ -24,7 +24,7 @@ hello world\
 # don't change current address if no match
 g/xxx/1d
 ;j
-g/help! world/I/caos/d\
+g/help! world/I/chaos/d\
 -;/order/;d
 # split lines
 g/./s/hello world/hello\

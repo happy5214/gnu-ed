@@ -1,5 +1,5 @@
 /* GNU ed - The GNU line editor.
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 */
 /*
    Exit status: 0 for a normal exit, 1 for environmental problems
-   (file not found, invalid flags, I/O errors, etc), 2 to indicate a
-   corrupt or invalid input file, 3 for an internal consistency error
-   (e.g., bug) which caused ed to panic.
+   (file not found, invalid command line options, I/O errors, etc), 2 to
+   indicate a corrupt or invalid input file, 3 for an internal consistency
+   error (e.g., bug) which caused ed to panic.
 */
 /*
  * CREDITS
@@ -43,13 +43,14 @@
 
 
 static const char * const program_name = "ed";
-static const char * const program_year = "2022";
+static const char * const program_year = "2023";
 static const char * invocation_name = "ed";		/* default value */
 
 static bool extended_regexp_ = false;	/* if set, use EREs */
+static bool quiet_ = false;		/* if set, suppress diagnostics */
 static bool restricted_ = false;	/* if set, run in restricted mode */
-static bool scripted_ = false;		/* if set, suppress diagnostics,
-					   byte counts and '!' prompt */
+static bool scripted_ = false;		/* if set, suppress byte counts and
+					   '!' prompt */
 static bool strip_cr_ = false;		/* if set, strip trailing CRs */
 static bool traditional_ = false;	/* if set, be backwards compatible */
 
@@ -78,16 +79,17 @@ static void show_help( void )
           "  -G, --traditional          run in compatibility mode\n"
           "  -l, --loose-exit-status    exit with 0 status even if a command fails\n"
           "  -p, --prompt=STRING        use STRING as an interactive prompt\n"
+          "  -q, --quiet, --silent      suppress diagnostics written to stderr\n"
           "  -r, --restricted           run in restricted mode\n"
-          "  -s, --quiet, --silent      suppress diagnostics, byte counts and '!' prompt\n"
+          "  -s, --script               suppress byte counts and '!' prompt\n"
           "  -v, --verbose              be verbose; equivalent to the 'H' command\n"
           "      --strip-trailing-cr    strip carriage returns at end of text lines\n"
           "\nStart edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
-          "\nExit status: 0 for a normal exit, 1 for environmental problems (file\n"
-          "not found, invalid flags, I/O errors, etc), 2 to indicate a corrupt or\n"
-          "invalid input file, 3 for an internal consistency error (e.g., bug) which\n"
-          "caused ed to panic.\n"
+          "\nExit status: 0 for a normal exit, 1 for environmental problems\n"
+          "(file not found, invalid command line options, I/O errors, etc), 2 to\n"
+          "indicate a corrupt or invalid input file, 3 for an internal consistency\n"
+          "error (e.g., bug) which caused ed to panic.\n"
           "\nReport bugs to bug-ed@gnu.org\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
           "General help using GNU software: http://www.gnu.org/gethelp\n" );
@@ -107,7 +109,7 @@ static void show_version( void )
 
 void show_strerror( const char * const filename, const int errcode )
   {
-  if( !scripted_ )
+  if( !quiet_ )
     {
     if( filename && filename[0] ) fprintf( stderr, "%s: ", filename );
     fprintf( stderr, "%s\n", strerror( errcode ) );
@@ -127,11 +129,12 @@ static void show_error( const char * const msg, const int errcode, const bool he
   }
 
 
-/* return true if file descriptor is a regular file */
-bool is_regular_file( const int fd )
+/* Return true if stdin is not a regular file.
+   Piped scripts count as interactive (do not force ed to exit on error). */
+bool interactive()
   {
   struct stat st;
-  return ( fstat( fd, &st ) != 0 || S_ISREG( st.st_mode ) );
+  return fstat( 0, &st ) == 0 && !S_ISREG( st.st_mode );
   }
 
 
@@ -161,9 +164,10 @@ int main( const int argc, const char * const argv[] )
     { 'h', "help",                 ap_no  },
     { 'l', "loose-exit-status",    ap_no  },
     { 'p', "prompt",               ap_yes },
+    { 'q', "quiet",                ap_no  },
+    { 'q', "silent",               ap_no  },
     { 'r', "restricted",           ap_no  },
-    { 's', "quiet",                ap_no  },
-    { 's', "silent",               ap_no  },
+    { 's', "script",               ap_no  },
     { 'v', "verbose",              ap_no  },
     { 'V', "version",              ap_no  },
     { opt_cr, "strip-trailing-cr", ap_no  },
@@ -189,6 +193,7 @@ int main( const int argc, const char * const argv[] )
       case 'h': show_help(); return 0;
       case 'l': loose = true; break;
       case 'p': if( set_prompt( arg ) ) break; else return 1;
+      case 'q': quiet_ = true; break;
       case 'r': restricted_ = true; break;
       case 's': scripted_ = true; break;
       case 'v': set_verbose(); break;
@@ -208,14 +213,15 @@ int main( const int argc, const char * const argv[] )
     if( strcmp( arg, "-" ) == 0 ) { scripted_ = true; ++argind; continue; }
     if( may_access_filename( arg ) )
       {
+      /* this read can't be undone because u_current_addr = u_last_addr = -1 */
       const int ret = read_file( arg, 0 );
-      if( ret < 0 && is_regular_file( 0 ) ) return 2;
+      if( ret < 0 && !interactive() ) return 2;
       if( arg[0] != '!' && !set_def_filename( arg ) ) return 1;
       if( ret == -2 ) initial_error = true;
       }
     else
       {
-      if( is_regular_file( 0 ) ) return 2;
+      if( !interactive() ) return 2;
       initial_error = true;
       }
     break;

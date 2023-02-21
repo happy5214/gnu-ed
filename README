@@ -59,16 +59,10 @@ EXTENSIONS
       * 'z' for scrolling through the buffer.
 
   * The POSIX interactive global commands 'G' and 'V' are extended to
-    support multiple commands, including 'a', 'i' and 'c'.  The command
+    support multiple commands, including 'a', 'c', and 'i'.  The command
     format is the same as for the global commands 'g' and 'v', i.e., one
     command per line with each line, except for the last, ending in a
     backslash (\).
-
-  * The file commands 'E', 'e', 'r', 'W' and 'w'  process a <file>
-    argument for backslash escapes; i.e., any character preceded by a
-    backslash is interpreted literally. If the first character of a <file>
-    argument is a bang (!), then the rest of the line is interpreted as a
-    shell command, and no escape processing is performed by GNU ed.
 
   * For SunOS ed(1) compatibility, GNU ed runs in restricted mode if invoked
     as red.  This limits editing of files in the local directory only and
@@ -123,8 +117,8 @@ or:
 	*** Output u.o of script u.ed is incorrect ***
 
 
-Copyright (C) 1993, 1994 Andrew Moore
-Copyright (C) 2006-2022 Antonio Diaz Diaz.
+Copyright (C) 1993, 1994 Andrew L. Moore
+Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute, and modify it.

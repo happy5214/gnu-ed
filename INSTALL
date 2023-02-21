@@ -1,7 +1,7 @@
 Requirements
 ------------
-You will need a C89 compiler and a C library compatible with POSIX.
-(gcc 3.3.6 or newer is recommended).
+You will need a C89 compiler with support for declaration-after-statement
+and a C library compatible with POSIX. (gcc 3.3.6 or newer is recommended).
 I use gcc 6.1.0 and 3.3.6, but the code should compile with any standards
 compliant compiler.
 Gcc is available at http://gcc.gnu.org.
@@ -15,8 +15,8 @@ Procedure
 or
 	lzip -cd ed[version].tar.lz | tar -xf -
 
-This creates the directory ./ed[version] containing the source from
-the main archive.
+This creates the directory ./ed[version] containing the source code
+extracted from the archive.
 
 2. Change to ed directory and run configure.
    (Try 'configure --help' for usage instructions).
@@ -51,15 +51,15 @@ object files and executables to go and run the 'configure' script.
 'configure' automatically checks for the source code in '.', in '..', and
 in the directory that 'configure' is in.
 
-'configure' recognizes the option '--srcdir=DIR' to control where to
-look for the sources. Usually 'configure' can determine that directory
+'configure' recognizes the option '--srcdir=DIR' to control where to look
+for the source code. Usually 'configure' can determine that directory
 automatically.
 
 After running 'configure', you can run 'make' and 'make install' as
 explained above.
 
 
-Copyright (C) 2006-2022 Antonio Diaz Diaz.
+Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute, and modify it.

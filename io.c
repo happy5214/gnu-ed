@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /* GNU ed - The GNU line editor.
-   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -108,7 +108,8 @@ static bool trailing_escape( const char * const s, int len )
 /* If *ibufpp contains an escaped newline, get an extended line (one
    with escaped newlines) from stdin.
    The backslashes escaping the newlines are stripped.
-   Return line length in *lenp, including the trailing newline. */
+   Return line length in *lenp, including the trailing newline.
+*/
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines )
   {
@@ -177,7 +178,7 @@ const char * get_stdin_line( int * const sizep )
       }
     else
       {
-      buf[i++] = c; if( !c ) set_binary(); if( c != '\n' ) continue;
+      buf[i++] = c; if( c == 0 ) set_binary(); if( c != '\n' ) continue;
       ++linenum_; buf[i] = 0; *sizep = i;
       return buf;
       }
@@ -202,7 +203,7 @@ static const char * read_stream_line( const char * const filename,
     if( !resize_buffer( &buf, &bufsz, i + 2 ) ) return 0;
     c = getc( fp ); if( c == EOF ) break;
     buf[i++] = c;
-    if( !c ) set_binary();
+    if( c == 0 ) set_binary();
     else if( c == '\n' )		/* remove CR only from CR/LF pairs */
       { if( strip_cr() && i > 1 && buf[i-2] == '\r' ) { buf[i-2] = '\n'; --i; }
         break; }
@@ -227,14 +228,15 @@ static const char * read_stream_line( const char * const filename,
   }
 
 
-/* read a stream into the editor buffer;
-   return total size of data read, or -1 if error */
+/* Read a stream into the editor buffer.
+   Return number of bytes read, or -1 if error.
+*/
 static long read_stream( const char * const filename, FILE * const fp,
                          const int addr )
   {
   line_t * lp = search_line_node( addr );
   undo_t * up = 0;
-  long total_size = 0;
+  long total_size = 0;		/* number of bytes read */
   const bool o_isbinary = isbinary();
   const bool appended = ( addr == last_addr() );
   const bool o_unterminated_last_line = unterminated_last_line();
@@ -279,16 +281,11 @@ static long read_stream( const char * const filename, FILE * const fp,
 int read_file( const char * const filename, const int addr )
   {
   FILE * fp;
-  long size;
+  long size;		/* number of bytes read */
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "r" );
-  else
-    {
-    const char * const stripped_name = strip_escapes( filename );
-    if( !stripped_name ) return -2;
-    fp = fopen( stripped_name, "r" );
-    }
+  else fp = fopen( filename, "r" );
   if( !fp )
     {
     show_strerror( filename, errno );
@@ -309,12 +306,14 @@ int read_file( const char * const filename, const int addr )
   }
 
 
-/* write a range of lines to a stream */
+/* Write a range of lines to a stream.
+   Return number of bytes written, or -1 if error.
+*/
 static long write_stream( const char * const filename, FILE * const fp,
                           int from, const int to )
   {
   line_t * lp = search_line_node( from );
-  long size = 0;
+  long size = 0;		/* number of bytes written */
 
   while( from && from <= to )
     {
@@ -338,21 +337,18 @@ static long write_stream( const char * const filename, FILE * const fp,
   }
 
 
-/* write a range of lines to a named file/pipe; return line count */
+/* Write a range of lines to a named file/pipe.
+   Return line count, or -1 if error.
+*/
 int write_file( const char * const filename, const char * const mode,
                 const int from, const int to )
   {
   FILE * fp;
-  long size;
+  long size;		/* number of bytes written */
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "w" );
-  else
-    {
-    const char * const stripped_name = strip_escapes( filename );
-    if( !stripped_name ) return -1;
-    fp = fopen( stripped_name, mode );
-    }
+  else fp = fopen( filename, mode );
   if( !fp )
     {
     show_strerror( filename, errno );

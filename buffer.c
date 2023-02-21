@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
-   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ static void insert_node( line_t * const lp, line_t * const prev )
 /* to be called before add_line_node */
 static bool too_many_lines( void )
   {
-  if( last_addr_ < INT_MAX - 1 ) return false;
+  if( last_addr_ < INT_MAX - 2 ) return false;
   set_error_msg( "Too many lines in buffer" ); return true;
   }
 
@@ -594,7 +594,7 @@ undo_t * push_undo_atom( const int type, const int from, const int to )
       { set_error_msg( "Undo stack too long" );
         free_undo_stack(); enable_interrupts(); return 0; }
     const int new_size = ( ( min_size < 512 ) ? 512 :
-      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
+      ( min_size >= INT_MAX / 2 ) ? INT_MAX - 1 : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     if( ustack ) new_buf = realloc( ustack, new_size );
     else new_buf = malloc( new_size );

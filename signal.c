@@ -1,7 +1,7 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
-   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ int window_columns( void ) { return window_columns_; }
 int window_lines( void ) { return window_lines_; }
 
 
-/* assure at least a minimum size for buffer 'buf' */
+/* assure at least a minimum size for buffer 'buf' up to INT_MAX - 1 */
 bool resize_buffer( char ** const buf, int * const size, const unsigned min_size )
   {
   if( (unsigned)*size < min_size )
@@ -147,7 +147,7 @@ bool resize_buffer( char ** const buf, int * const size, const unsigned min_size
     if( min_size >= INT_MAX )
       { set_error_msg( "Line too long" ); return false; }
     const int new_size = ( ( min_size < 512 ) ? 512 :
-      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
+      ( min_size >= INT_MAX / 2 ) ? INT_MAX - 1 : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     disable_interrupts();
     if( *buf ) new_buf = realloc( *buf, new_size );
@@ -160,19 +160,4 @@ bool resize_buffer( char ** const buf, int * const size, const unsigned min_size
     enable_interrupts();
     }
   return true;
-  }
-
-
-/* return unescaped copy of escaped string */
-const char * strip_escapes( const char * p )
-  {
-  static char * buf = 0;
-  static int bufsz = 0;
-  const int len = strlen( p );
-  int i = 0;
-
-  if( !resize_buffer( &buf, &bufsz, len + 1 ) ) return 0;
-  /* assert: no trailing escape */
-  while( ( buf[i++] = ( ( *p == '\\' ) ? *++p : *p ) ) ) ++p;
-  return buf;
   }

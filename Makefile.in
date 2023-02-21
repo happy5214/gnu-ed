@@ -42,7 +42,7 @@ doc : info man
 info : $(VPATH)/doc/$(pkgname).info
 
 $(VPATH)/doc/$(pkgname).info : $(VPATH)/doc/$(pkgname).texi
-	cd $(VPATH)/doc && makeinfo $(pkgname).texi
+	cd $(VPATH)/doc && $(MAKEINFO) $(pkgname).texi
 
 man : $(VPATH)/doc/$(progname).1
 

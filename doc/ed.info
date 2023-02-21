@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2023 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.18, 4 February 2022).
+This manual is for GNU ed (version 1.19, 11 January 2023).
 
 * Menu:
 
@@ -35,7 +35,7 @@ This manual is for GNU ed (version 1.18, 4 February 2022).
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2022 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2023 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -288,8 +288,8 @@ is an exception, and may be appended to the end of most commands.
 address of the last line of that file. Similarly, the move command 'm' sets
 the current address to the address of the last line moved.
 
-   Related programs or routines are 'vi (1)', 'sed (1)', 'regex (3)', 'sh
-(1)'. Relevant documents are:
+   Related programs or routines are 'vi'(1), 'sed'(1), 'regex'(3), 'sh'(1).
+Relevant documents are:
 
      Unix User's Manual Supplementary Documents: 12 -- 13
 
@@ -309,8 +309,8 @@ The format for running 'ed' is:
 
    FILE specifies the name of a file to read. If FILE is prefixed with a
 bang (!), then it is interpreted as a shell command. In this case, what is
-read is the standard output of FILE executed via 'sh (1)'. To read a file
-whose name begins with a bang, prefix the name with a backslash ('\'). The
+read is the standard output of FILE executed via 'sh'. To read a file whose
+name begins with a bang (or a hyphen), prefix the name with './'. The
 default filename is set to FILE only if it is not prefixed with a bang.
 
    'ed' supports the following options: *Note Argument syntax:
@@ -333,7 +333,7 @@ default filename is set to FILE only if it is not prefixed with a bang.
 '-G'
 '--traditional'
      Forces backwards compatibility. This affects the behavior of the 'ed'
-     commands 'G', 'V', 'f', 'l', 'm', 't' and '!!'. If the default
+     commands 'G', 'V', 'f', 'l', 'm', 't', and '!!'. If the default
      behavior of these commands does not seem familiar, then try invoking
      'ed' with this switch.
 
@@ -348,22 +348,28 @@ default filename is set to FILE only if it is not prefixed with a bang.
      Specifies a command prompt string and turns prompting on. Showing the
      prompt string may be toggled on and off with the 'P' command.
 
+'-q'
+'--quiet'
+'--silent'
+     Suppress diagnostic messages written to standard error.
+
 '-r'
 '--restricted'
      Run in restricted mode. This mode disables editing of files out of the
      current directory and execution of shell commands.
 
 '-s'
-'--quiet'
-'--silent'
-     Suppresses diagnostics, the printing of byte counts by 'e', 'E', 'r'
-     and 'w' commands, and the '!' prompt after a '!' command. This option
-     may be useful if 'ed''s standard input is from a script.
+'--script'
+     Suppress the printing of byte counts by 'e', 'E', 'r', and 'w'
+     commands, and the '!' prompt after a '!' command. This option does not
+     suppress diagnostic messages written to standard error (see '-q'
+     above). '-s' may be useful if 'ed''s standard input is from a script.
 
 '-v'
 '--verbose'
-     Verbose mode; prints error explanations. This may be toggled on and off
-     with the 'H' command.
+     Turn help mode on; print a help message explaining the reason for each
+     '?' notification. This may be toggled on and off with the 'H' command.
+     Use this option to aid in debugging ed scripts.
 
 '--strip-trailing-cr'
      Strip the carriage returns at the end of text lines in DOS files. CRs
@@ -393,11 +399,14 @@ address '0' (zero). This means "at the beginning of the buffer", and is
 valid wherever it makes sense.
 
    An address range is two addresses separated either by a comma (',') or a
-semicolon (';'). In a semicolon-delimited range, the current address ('.')
-is set to the first address before the second address is calculated. This
-feature can be used to set the starting line for searches if the second
-address contains a regular expression. The value of the first address in a
-range cannot exceed the value of the second.
+semicolon (';'). The value of the first address in a range cannot exceed
+the value of the second.
+
+   In a semicolon-delimited range, the current address ('.') is set to the
+first address before the second address is calculated. This feature can be
+used to set the starting line for searches if the second address contains a
+regular expression. The address '0' (zero) is valid as a starting point so
+that '0;/RE/' can match RE in the first line of the buffer.
 
    Addresses can be omitted on either side of the comma or semicolon
 separator. If only the first address is given in a range, then the second
@@ -454,8 +463,8 @@ of addresses to a command that requires zero addresses.
      in a case-insensitive manner.
 
 ''x'
-     The apostrophe-x character pair addresses the line previously marked by
-     a 'k' (mark) command, where 'x' is a lower case letter from the
+     The apostrophe-x character pair addresses the line previously marked
+     by a 'k' (mark) command, where 'x' is a lower case letter from the
      portable character set '[a-z]'.
 
 
@@ -511,12 +520,12 @@ it is invalid to specify it together with the empty regular expression.
 POSIX basic regular expression syntax:
 
 'C'
-     Any character C not listed below, including '{', '}', '(', ')', '<'
+     Any character C not listed below, including '{', '}', '(', ')', '<',
      and '>', matches itself.
 
 '\C'
      Any backslash-escaped character C, other than '{', '}', '(', ')', '<',
-     '>', 'b', 'B', 'w', 'W', '+' and '?', matches itself.
+     '>', 'b', 'B', 'w', 'W', '+', and '?', matches itself.
 
 '.'
      Matches any single character.
@@ -541,7 +550,7 @@ POSIX basic regular expression syntax:
           [=COL-ELM=]
 
      where COL-ELM is a "collating element" are interpreted according to
-     'locale (5)'. See 'regex (7)' for an explanation of these constructs.
+     'locale'(5). See 'regex'(7) for an explanation of these constructs.
 
 '[^CHAR-CLASS]'
      Matches any single character, other than newline, not in CHAR-CLASS.
@@ -692,7 +701,8 @@ parenthesis).
 
      If FILE is prefixed with a bang (!), then it is interpreted as a shell
      command whose output is to be read, (*note shell escape command:: '!'
-     below). In this case the default filename is unchanged.
+     below). In this case the default filename is unchanged. To edit a file
+     whose name begins with a bang, prefix the name with './'.
 
      A warning is printed if any changes have been made in the buffer since
      the last 'w' command that wrote the entire buffer to a file.
@@ -703,7 +713,7 @@ parenthesis).
 
 'f FILE'
      Sets the default filename to FILE. If FILE is not specified, then the
-     default unescaped filename is printed.
+     default filename is printed.
 
 '(1,$)g/RE/[I]COMMAND-LIST'
      Global command. The global command makes two passes over the file. On
@@ -743,12 +753,14 @@ parenthesis).
      last non-empty command list.
 
 'h'
-     Help. Prints an explanation of the last error.
+     Prints a help message explaining the reason for the most recent '?'
+     notification.
 
 'H'
-     Toggles the printing of error explanations. By default, explanations
-     are not printed. It is recommended that ed scripts begin with this
-     command to aid in debugging.
+     Toggles the printing of help messages (see the 'h' command above). If
+     the help mode is being turned on, also prints the help message
+     corresponding to the most recent '?' notification. By default, help
+     messages are not printed.
 
 '(.)i'
      Inserts text in the buffer before the addressed line. The address '0'
@@ -819,7 +831,8 @@ parenthesis).
 
      If FILE is prefixed with a bang (!), then it is interpreted as a shell
      command whose output is to be read, (*note shell escape command:: '!'
-     below). In this case the default filename is unchanged.
+     below). In this case the default filename is unchanged. To read a file
+     whose name begins with a bang, prefix the name with './'.
 
 '(.,.)t(.)'
      Copies (i.e., transfers) the addressed lines to after the right-hand
@@ -854,7 +867,8 @@ parenthesis).
      (*note shell escape command:: '!' below). In this case the default
      filename is unchanged. Writing the buffer to a shell command does not
      prevent the warning to the user if an attempt is made to overwrite or
-     discard the buffer via the 'e' or 'q' commands.
+     discard the buffer via the 'e' or 'q' commands. To write to a file
+     whose name begins with a bang, prefix the name with './'.
 
 '(1,$)wq FILE'
      Writes the addressed lines to FILE, and then executes a 'q' command.
@@ -882,7 +896,7 @@ parenthesis).
      address of the last line printed.
 
 '!COMMAND'
-     Shell escape command. Executes COMMAND via 'sh (1)'. If the first
+     Shell escape command. Executes COMMAND via 'sh'. If the first
      character of COMMAND is '!', then it is replaced by the text of the
      previous '!COMMAND'. Thus, '!!' repeats the previous '!COMMAND'. 'ed'
      does not process COMMAND for backslash ('\') escapes. However, each
@@ -890,6 +904,13 @@ parenthesis).
      is removed from each escaped '%'. When the shell returns from
      execution, a '!' is printed to the standard output. The current
      address is unchanged.
+
+     The effect of ex(1) style '!' filtering can be achieved with the
+     following sequence of commands:
+          ADDR1,ADDR2w !COMMAND > tmp.txt 2>&1
+          ADDR2r tmp.txt
+          ADDR1,ADDR2d
+          !rm tmp.txt
 
 '(.,.)#'
      Begins a comment; the rest of the line, up to a newline, is ignored.
@@ -948,7 +969,7 @@ current address is unchanged. The last line modified is copied to the cut
 buffer.
 
    RE and REPLACEMENT may be delimited by any character other than <space>,
-<newline> and the characters used by the form of the 's' command shown
+<newline>, and the characters used by the form of the 's' command shown
 below. If the last delimiter is omitted, then the last line affected is
 printed as if the print suffix 'p' were specified. The last delimiter can't
 be omitted if the 's' command is part of a 'g' or 'v' COMMAND-LIST and is
@@ -988,16 +1009,11 @@ File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: The 's' Command,  
 If the terminal hangs up, 'ed' attempts to write the buffer to the file
 'ed.hup' or, if this fails, to '$HOME/ed.hup'.
 
-   'ed' processes FILE arguments for backslash escapes, i.e., in a
-filename, any character preceded by a backslash ('\') is interpreted
-literally. For example, 'ed 'hello\tworld'' will edit the file
-'hellotworld'.
-
    If a text (non-binary) file is not terminated by a newline character,
 then 'ed' appends one on reading/writing it. In the case of a binary file,
 'ed' does not append a newline on reading/writing. A binary file is one
 containing at least one ASCII NUL character. If the last line has been
-modified, reading an empty file, for example /dev/null, prior to writing
+modified, reading an empty file, for example '/dev/null', prior to writing
 prevents appending a newline to a binary file.
 
    In order to keep track of the text lines in the buffer, 'ed' uses a
@@ -1012,7 +1028,12 @@ File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 9 Diagnostics
 *************
 
-When an error occurs, if 'ed''s input is from a regular file or here
+'ed' prints two kinds of error mesages: diagnostic messages written to
+standard error and help messages written to standard output. Diagnostic
+messages may be suppresed with option '-q'. Help messages may be enabled
+with option '-v' and may be toggled with command 'H'.
+
+   When an error occurs, if 'ed''s input is from a regular file or here
 document, then it exits, otherwise it prints a '?' and returns to command
 mode. An explanation of the last error can be printed with the 'h' (help)
 command.
@@ -1508,17 +1529,17 @@ Tag Table:
 Node: Top535
 Node: Overview1764
 Node: Introduction to line editing4317
-Node: Invoking ed11588
-Node: Line addressing14245
-Node: Regular expressions18159
-Node: Commands24344
-Ref: print suffixes24679
-Ref: shell escape command36257
-Node: The 's' Command37340
-Node: Limitations40254
-Node: Diagnostics41449
-Node: Problems42094
-Node: GNU Free Documentation License42629
+Node: Invoking ed11584
+Node: Line addressing14496
+Node: Regular expressions18529
+Node: Commands24714
+Ref: print suffixes25049
+Ref: shell escape command36962
+Node: The 's' Command38266
+Node: Limitations41181
+Node: Diagnostics42163
+Node: Problems43082
+Node: GNU Free Documentation License43617
 
 End Tag Table
 

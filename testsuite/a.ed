@@ -30,6 +30,10 @@ u
 a
 hello world!!!!!
 .
+# match the first line
+0;/^hello world!!!$/a
+second line
+.
 a
 to be undone
 .

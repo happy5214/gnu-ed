@@ -1,36 +1,27 @@
-Changes in version 1.18:
+Changes in version 1.19:
 
-The shell escape command (!) now flushes stdout so that the modified command
-is always printed before being executed even if standard output is fully
-buffered (for example, a file). (Reported by Sören Tempel).
+Reading a non-existent file with commands 'e' or 'E' did set the 'modified'
+flag, which prevented a following 'e' command from succeeding.
+(Reported by Harry Graf).
 
-A couple of harmless memory leaks have been fixed. (They both happened just
-before ed exits). (Reported by Xosé Vázquez Pérez).
+The long name of option '-s' has been changed to '--script'.
+Option '-s' now only suppresses byte counts and the '!' prompt as mandated
+by POSIX. It no longer suppresses diagnostic messages written to stderr.
+(Both changes suggested by Andrew L. Moore).
 
-The pointer returned by the function 'strip_escapes' is now checked. (It may
-be null if memory is exhausted).
+The short name '-q' has been assigned to options '--quiet' and '--silent'.
+Option '-q' now only suppresses diagnostic messages written to stderr.
 
-The shell escape command (!) now removes the backslash from each escaped '%'
-character within the text of the shell command line.
-(Reported by Martin Thomsen).
+The help message showing the line where a script error happened when ed's
+input is from a regular file is now printed to stdout instead of stderr
+because it is enabled by the 'H' command.
 
-Case-insensitive regular expressions have been implemented as in GNU sed.
+Ed no longer processes file names for backslash escapes.
+(Suggested by Andrew L. Moore).
 
-Syntax errors in regular expressions, for example unmatched ( or \(, no
-longer overwrite a previously compiled regular expression, preventing a
-"No previous pattern" error.
+It has been documented in the manual that address 0 is valid as a starting
+point for searches so that '0;/RE/' can match the regular expression RE in
+the first line of the buffer.
 
-The option '--strip-trailing-cr', which removes carriage returns at end of
-text lines, has been added.
-
-Loading a file now fails if a line is longer than INT_MAX bytes or if the
-file contains more than INT_MAX lines (usually 2 Gi lines). (Instead of
-overflowing line addresses).
-
-In interactive mode ed now sets final exit status to 1 if a fatal error
-happens while reading the file passed in the command line.
-
-red now reports "Directory access restricted" instead of "Invalid filename"
-when trying to edit a file outside of the current directory.
-
-The new chapter "The 's' Command" has been added to the manual.
+It has been documented in the manual how to achieve the effect of ex style
+'!' filtering with a sequence of commands.

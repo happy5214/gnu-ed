@@ -9,7 +9,7 @@ heLp! world
 of it even for a single century. And it appears, therefore, to be
 hello
 world
-caos
+chaos
 agrarian regulations in their utmost extent, could remove the pressure
 heLp! world
 of this law which pervades all hello
@@ -18,11 +18,11 @@ heLp! world
 comparison of this. I see no way by which man can escape from the weight
 hello
 world
-caos
+chaos
 All other arguments are of slight and subordinate consideration in
 hello
 world
-caos
+chaos
 me appears insurmountable in the way to the perfectibility of society.
 heLp! world
 constantly keep their effects equal, form the great hello

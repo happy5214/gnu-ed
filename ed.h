@@ -1,7 +1,7 @@
 /* Global declarations for the ed editor.  */
 /* GNU ed - The GNU line editor.
-   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ void unmark_unterminated_line( const line_t * const lp );
 
 /* defined in main.c */
 bool extended_regexp( void );
-bool is_regular_file( const int fd );
+bool interactive();
 bool may_access_filename( const char * const name );
 bool restricted( void );
 bool scripted( void );
@@ -146,6 +146,5 @@ void enable_interrupts( void );
 bool resize_buffer( char ** const buf, int * const size, const unsigned min_size );
 void set_signals( void );
 void set_window_lines( const int lines );
-const char * strip_escapes( const char * p );
 int window_columns( void );
 int window_lines( void );

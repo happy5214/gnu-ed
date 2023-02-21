@@ -1,7 +1,7 @@
 /* global.c: global command routines for the ed line editor */
 /* GNU ed - The GNU line editor.
-   Copyright (C) 1993, 1994 Andrew Moore, Talke Studio
-   Copyright (C) 2006-2022 Antonio Diaz Diaz.
+   Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
+   Copyright (C) 2006-2023 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ bool set_active_node( const line_t * const lp )
     if( min_size >= INT_MAX )
       { set_error_msg( "Too many matching lines" ); return false; }
     const int new_size = ( ( min_size < 512 ) ? 512 :
-      ( min_size > INT_MAX / 2 ) ? INT_MAX : ( min_size / 512 ) * 1024 );
+      ( min_size >= INT_MAX / 2 ) ? INT_MAX - 1 : ( min_size / 512 ) * 1024 );
     void * new_buf = 0;
     disable_interrupts();
     if( active_list ) new_buf = realloc( active_list, new_size );

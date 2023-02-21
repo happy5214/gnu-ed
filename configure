@@ -1,12 +1,12 @@
 #! /bin/sh
 # configure script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2022 Antonio Diaz Diaz.
+# Copyright (C) 2006-2023 Antonio Diaz Diaz.
 #
 # This configure script is free software: you have unlimited permission
 # to copy, distribute, and modify it.
 
 pkgname=ed
-pkgversion=1.18
+pkgversion=1.19
 progname=ed
 srctrigger=doc/${pkgname}.texi
 
@@ -25,6 +25,7 @@ CC=gcc
 CPPFLAGS=
 CFLAGS='-Wall -W -O2'
 LDFLAGS=
+MAKEINFO=makeinfo
 
 # checking whether we are using GNU C.
 /bin/sh -c "${CC} --version" > /dev/null 2>&1 || { CC=cc ; CFLAGS=-O2 ; }
@@ -58,7 +59,7 @@ while [ $# != 0 ] ; do
 		echo "Options and variables: [defaults in brackets]"
 		echo "  -h, --help            display this help and exit"
 		echo "  -V, --version         output version information and exit"
-		echo "  --srcdir=DIR          find the sources in DIR [. or ..]"
+		echo "  --srcdir=DIR          find the source code in DIR [. or ..]"
 		echo "  --prefix=DIR          install into DIR [${prefix}]"
 		echo "  --exec-prefix=DIR     base directory for arch-dependent files [${exec_prefix}]"
 		echo "  --bindir=DIR          user executables directory [${bindir}]"
@@ -71,6 +72,7 @@ while [ $# != 0 ] ; do
 		echo "  CFLAGS=OPTIONS        command line options for the C compiler [${CFLAGS}]"
 		echo "  CFLAGS+=OPTIONS       append options to the current value of CFLAGS"
 		echo "  LDFLAGS=OPTIONS       command line options for the linker [${LDFLAGS}]"
+		echo "  MAKEINFO=NAME         makeinfo program to use [${MAKEINFO}]"
 		echo
 		exit 0 ;;
 	--version | -V)
@@ -100,6 +102,7 @@ while [ $# != 0 ] ; do
 	CFLAGS=*)      CFLAGS=${optarg} ;;
 	CFLAGS+=*)     CFLAGS="${CFLAGS} ${optarg}" ;;
 	LDFLAGS=*)    LDFLAGS=${optarg} ;;
+	MAKEINFO=*)  MAKEINFO=${optarg} ;;
 
 	--*)
 		echo "configure: WARNING: unrecognized option: '${option}'" 1>&2 ;;
@@ -119,7 +122,7 @@ while [ $# != 0 ] ; do
 	fi
 done
 
-# Find the source files, if location was not specified.
+# Find the source code, if location was not specified.
 srcdirtext=
 if [ -z "${srcdir}" ] ; then
 	srcdirtext="or . or .." ; srcdir=.
@@ -131,7 +134,7 @@ if [ -z "${srcdir}" ] ; then
 fi
 
 if [ ! -r "${srcdir}/${srctrigger}" ] ; then
-	echo "configure: Can't find sources in ${srcdir} ${srcdirtext}" 1>&2
+	echo "configure: Can't find source code in ${srcdir} ${srcdirtext}" 1>&2
 	echo "configure: (At least ${srctrigger} is missing)." 1>&2
 	exit 1
 fi
@@ -169,10 +172,11 @@ echo "CC = ${CC}"
 echo "CPPFLAGS = ${CPPFLAGS}"
 echo "CFLAGS = ${CFLAGS}"
 echo "LDFLAGS = ${LDFLAGS}"
+echo "MAKEINFO = ${MAKEINFO}"
 rm -f Makefile
 cat > Makefile << EOF
 # Makefile for GNU ed - The GNU line editor
-# Copyright (C) 2006-2022 Antonio Diaz Diaz.
+# Copyright (C) 2006-2023 Antonio Diaz Diaz.
 # This file was generated automatically by configure. Don't edit.
 #
 # This Makefile is free software: you have unlimited permission
@@ -193,6 +197,7 @@ CC = ${CC}
 CPPFLAGS = ${CPPFLAGS}
 CFLAGS = ${CFLAGS}
 LDFLAGS = ${LDFLAGS}
+MAKEINFO = ${MAKEINFO}
 EOF
 cat "${srcdir}/Makefile.in" >> Makefile
 
