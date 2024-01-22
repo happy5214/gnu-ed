@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 11 January 2023
-@set VERSION 1.19
+@set UPDATED 19 January 2024
+@set VERSION 1.20
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2023 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2024 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -47,7 +47,7 @@ This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 @menu
 * Overview::                        Overview of the @command{ed} command
 * Introduction to line editing::    Getting started with GNU @command{ed}
-* Invoking ed::                     Command line interface
+* Invoking ed::                     Command-line interface
 * Line addressing::                 Specifying lines/ranges in the buffer
 * Regular expressions::             Patterns for selecting text
 * Commands::                        Commands recognized by GNU @command{ed}
@@ -79,15 +79,15 @@ GNU ed is based on the editor algorithm described in Brian W. Kernighan and
 P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
 
 If invoked with a @var{file} argument, then a copy of @var{file} is read
-into the editor's buffer. Changes are made to this copy and not directly
-to @var{file} itself. Upon quitting @command{ed}, any changes not
-explicitly saved with a @samp{w} command are lost. In interactive mode, a
-non-existing @var{file} is reported but does not alter the exit status.
+into the editor's buffer. Changes are made to this copy and not directly to
+@var{file} itself. Upon quitting @command{ed}, any changes not explicitly
+saved with a @samp{w} command are lost. In interactive mode, a non-existing
+@var{file} is reported but does not alter the exit status.
 
-Editing is done in two distinct modes: @dfn{command} and @dfn{input}.
-When first invoked, @command{ed} is in command mode. In this mode
-commands are read from the standard input and executed to manipulate the
-contents of the editor buffer. A typical command might look like:
+Editing is done in two distinct modes: @dfn{command} and @dfn{input}. When
+first invoked, @command{ed} is in command mode. In this mode commands are
+read from the standard input and executed to manipulate the contents of the
+editor buffer. A typical command might look like:
 
 @example
 ,s/@var{old}/@var{new}/g
@@ -103,11 +103,17 @@ buffer. A @dfn{line} consists of the text up to and including a
 @key{newline} character. Input mode is terminated by entering a single
 period (@samp{.}) on a line.
 
-All @command{ed} commands operate on whole lines or ranges of lines;
-e.g., the @samp{d} command deletes lines; the @samp{m} command moves
-lines, and so on. It is possible to modify only a portion of a line by
-means of replacement, as in the example above. However even here, the
-@samp{s} command is applied to whole lines at a time.
+Any change made to the buffer sets the modified flag even if the change does
+not cause a change in the contents of the buffer; for example @samp{s/a/a/}.
+Reading an empty file (@samp{r @var{file}}) or terminating a command before
+it makes any change to the buffer (@samp{a@key{newline}.@key{newline}}) does
+not change the buffer, and therefore does not set the modified flag.
+
+All @command{ed} commands operate on whole lines or ranges of lines; e.g.,
+the @samp{d} command deletes lines; the @samp{m} command moves lines, and so
+on. It is possible to modify only a portion of a line by means of
+replacement, as in the example above. However even here, the @samp{s}
+command is applied to whole lines at a time.
 
 In general, @command{ed} commands consist of zero or more line addresses,
 followed by a single character command and possibly additional parameters;
@@ -128,8 +134,7 @@ default addresses are supplied.
 @command{ed} was created, along with the Unix operating system, by Ken
 Thompson and Dennis Ritchie. It is the refinement of its more complex,
 programmable predecessor, @cite{QED}, to which Thompson and Ritchie had
-already added pattern matching capabilities (@pxref{Regular
-expressions}).
+already added pattern matching capabilities (@pxref{Regular expressions}).
 
 For the purposes of this tutorial, a working knowledge of the Unix shell
 @command{sh} and the Unix file system is recommended, since @command{ed}
@@ -230,8 +235,7 @@ Now let's write the buffer contents to a file named @samp{junk} with the
 @end example
 
 Need we say? It's good practice to frequently write the buffer contents,
-since unwritten changes to the buffer will be lost when we exit
-@command{ed}.
+since unwritten changes to the buffer will be lost when we exit @command{ed}.
 
 The sample sessions below illustrate some basic concepts of line editing
 with @command{ed}. We begin by creating a file, @samp{sonnet}, with some
@@ -356,8 +360,9 @@ Addison-Wesley, 1981.
 The format for running @command{ed} is:
 
 @example
-ed [@var{options}] [@var{file}]
-red [@var{options}] [@var{file}]
+ed [@var{options}] [[+@var{line}] @var{file}]
+red [@var{options}] [[+@var{line}] @var{file}]
+ed [@var{options}] [[+@var{line}] '!@var{command} [@var{arguments}]']
 @end example
 
 @var{file} specifies the name of a file to read. If @var{file} is prefixed
@@ -366,6 +371,17 @@ what is read is the standard output of @var{file} executed via @command{sh}.
 To read a file whose name begins with a bang (or a hyphen), prefix the name
 with @file{./}. The default filename is set to @var{file} only if it is not
 prefixed with a bang.
+
+The file name may be preceded by @samp{+@var{line}} to set the current line
+to the line number specified. If @var{line} exceeds the number of lines in
+the file, the current line is set to the last line.
+
+The file name may be preceded by @samp{+/@var{re}} to set the current line
+to the first line matching the regular expression @var{re}, or by
+@samp{+?@var{re}} to set the current line to the last line matching
+@var{re}. If @var{re} does not match any line, ed fails immediately with
+exit status 1 unless the option @option{-l} is specified and standard input
+is not a regular file.
 
 @command{ed} supports the following
 @uref{http://www.nongnu.org/arg-parser/manual/arg_parser_manual.html#Argument-syntax,,options}:
@@ -437,9 +453,17 @@ line. CRs at other positions in the line, including a CR finishing an
 unterminated line, are not removed. The CRs are not restored when saving the
 buffer to a file.
 
+@item --unsafe-names
+@command{ed} rejects file names containing control characters 1 to 31 unless
+they are allowed with this option.
+
 @end table
 
-Exit status: 0 if no errors occurred; otherwise >0.
+Exit status: 0 for a normal exit, 1 for environmental problems
+(invalid command-line options, memory exhausted, command failed, etc),
+2 for problems with the input file (file not found, buffer modified,
+I/O errors), 3 for an internal consistency error (e.g., bug) which caused
+ed to panic.
 
 
 @node Line addressing
@@ -616,9 +640,8 @@ characters. The following literal expressions can also be used in
 [:blank:] [:graph:] [:punct:] [:xdigit:]
 @end example
 
-If @samp{-} appears as the first or last character of @var{char-class},
-then it matches itself. All other characters in @var{char-class} match
-themselves.
+If @samp{-} appears as the first or last character of @var{char-class}, then
+it matches itself. All other characters in @var{char-class} match themselves.
 
 Patterns in @var{char-class} of the form:
 @example
@@ -782,24 +805,30 @@ buffer.
 @item e @var{file}
 Edits @var{file}, and sets the default filename. If @var{file} is not
 specified, then the default filename is used. Any lines in the buffer are
-deleted before the new file is read. The current address is set to the
-address of the last line in the buffer.
+deleted before the new file is read. If @var{file} does not exist, a warning
+is printed in place of a byte count and the resulting buffer is left empty.
+The current address is set to the address of the last line in the buffer.
 
 If @var{file} is prefixed with a bang (!), then it is interpreted as a shell
 command whose output is to be read, (@pxref{shell escape command} @samp{!}
 below). In this case the default filename is unchanged. To edit a file whose
 name begins with a bang, prefix the name with @file{./}.
 
-A warning is printed if any changes have been made in the buffer since the
-last @samp{w} command that wrote the entire buffer to a file.
+A warning is printed if the buffer modified flag is set. If another @samp{e}
+or @samp{q} command is given with no intervening error or buffer-modifying
+command, it is executed without warning, and any changes to the buffer are
+lost.
 
 @item E @var{file}
 Edits @var{file} unconditionally. This is similar to the @samp{e} command,
 except that unwritten changes are discarded without warning.
 
 @item f @var{file}
-Sets the default filename to @var{file}. If @var{file} is not specified,
-then the default filename is printed.
+Sets the default filename to @var{file}, whether or not @var{file} names an
+existing file. If @var{file} is not specified, then the default filename is
+printed. Tilde expansion is performed on @var{file}; if @var{file} starts
+with @file{~/}, the @file{~} is expanded to specify your home directory
+@file{$HOME}.
 
 @item (1,$)g/@var{re}/[I]@var{command-list}
 Global command. The global command makes two passes over the file. On the
@@ -898,13 +927,14 @@ with the command-line option @option{-p}, the command prompt is by default
 turned off. The default prompt string is an asterisk (@samp{*}).
 
 @item q
-Quits @command{ed}. A warning is printed if any changes have been made
-in the buffer since the last @samp{w} command that wrote the entire
-buffer to a file.
+Quits @command{ed}. A warning is printed if the buffer modified flag is set.
+If another @samp{e} or @samp{q} command is given with no intervening error
+or buffer-modifying command, it is executed without warning, and any changes
+to the buffer are lost.
 
 @item Q
-Quits @command{ed} unconditionally. This is similar to the @samp{q}
-command, except that unwritten changes are discarded without warning.
+Quits @command{ed} unconditionally. This is similar to the @samp{q} command,
+except that unwritten changes are discarded without warning.
 
 @item ($)r @var{file}
 Reads @var{file} and appends it after the addressed line. If @var{file}
@@ -943,19 +973,19 @@ This is similar to the @samp{G} command except that it interactively
 edits the addressed lines not matching the regular expression @var{re}.
 
 @item (1,$)w @var{file}
-Writes the addressed lines to @var{file}. Any previous contents of
-@var{file} are lost without warning. If there is no default filename,
-then the default filename is set to @var{file}, otherwise it is
-unchanged. If no filename is specified, then the default filename is
-used. The current address is unchanged.
+Writes the addressed lines to @var{file}, automatically creating any missing
+parent directories. Any previous contents of @var{file} are lost without
+warning. If there is no default filename, then the default filename is set
+to @var{file}, otherwise it is unchanged. If no filename is specified, then
+the default filename is used. If the whole buffer is written, then the
+buffer modified flag is cleared. The current address is unchanged.
 
-If @var{file} is prefixed with a bang (!), then it is interpreted as a
-shell command and the addressed lines are written to its standard input,
+If @var{file} is prefixed with a bang (!), then it is interpreted as a shell
+command and the addressed lines are written to its standard input,
 (@pxref{shell escape command} @samp{!} below). In this case the default
-filename is unchanged. Writing the buffer to a shell command does not
-prevent the warning to the user if an attempt is made to overwrite or
-discard the buffer via the @samp{e} or @samp{q} commands. To write to a file
-whose name begins with a bang, prefix the name with @file{./}.
+filename is unchanged. Writing the buffer to a shell command does not clear
+the buffer modified flag. To write to a file whose name begins with a bang,
+prefix the name with @file{./}.
 
 @item (1,$)wq @var{file}
 Writes the addressed lines to @var{file}, and then executes a @samp{q}
@@ -1102,8 +1132,9 @@ substitution (if the search happened after the substitution).
 @node Limitations
 @chapter Limitations
 
-If the terminal hangs up, @command{ed} attempts to write the buffer to the
-file @file{ed.hup} or, if this fails, to @file{$HOME/ed.hup}.
+If the terminal hangs up and the buffer is modified and not empty,
+@command{ed} attempts to write the buffer to the file @file{ed.hup} or, if
+this fails, to @file{$HOME/ed.hup}.
 
 If a text (non-binary) file is not terminated by a newline character, then
 @command{ed} appends one on reading/writing it. In the case of a binary
@@ -1122,22 +1153,22 @@ line. This results in a per line overhead of @w{2 @samp{pointer}s},
 @node Diagnostics
 @chapter Diagnostics
 
-@command{ed} prints two kinds of error mesages: diagnostic messages written
-to standard error and help messages written to standard output. Diagnostic
-messages may be suppresed with option @option{-q}. Help messages may be
-enabled with option @option{-v} and may be toggled with command @samp{H}.
+@command{ed} prints two kinds of mesages: diagnostic messages (errors and
+warnings) written to standard error and help messages written to standard
+output. Diagnostic messages may be suppresed with option @option{-q}. Help
+messages may be enabled with option @option{-v} and may be toggled with
+command @samp{H}.
 
-When an error occurs, if @command{ed}'s input is from a regular file or
-here document, then it exits, otherwise it prints a @samp{?} and returns
-to command mode. An explanation of the last error can be printed with
-the @samp{h} (help) command.
+@command{ed} warns the first time that a command modifies a buffer loaded
+from a read-only file.
+
+When an error occurs, if @command{ed}'s standard input is a regular file or
+here document, then it exits, otherwise it prints a @samp{?} and returns to
+command mode. An explanation of the last error can be printed with the
+@samp{h} (help) command.
 
 If the @samp{u} (undo) command occurs in a global command list, then the
 command list is executed only once.
-
-Attempting to quit @command{ed} or edit another file before writing a
-modified buffer results in an error. If the command is entered a second
-time, it succeeds, but any changes to the buffer are lost.
 
 
 @node Problems

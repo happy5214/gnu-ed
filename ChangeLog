@@ -1,3 +1,22 @@
+2024-01-19  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.20 released.
+	* Implement options '+line', '+/RE', and '+?RE'.
+	  (Suggested by Matthew Polk and John Cowan).
+	* main.c: New option '--unsafe-names'.
+	  (print_filename): New function for file names with control chars.
+	  (may_access_filename): Reject file names ending with a slash.
+	* buffer.c (warned, set_warned): New functions.
+	* main_loop.c: Intervening cmds don't make a second 'e' or 'q' fail.
+	  (get_filename): Add tilde expansion. (Suggested by John Cowan).
+	  Warn on first modification of buffer loaded from read-only file.
+	  (Suggested by Dan Jacobson).
+	* io.c (write_file): Create missing intermediate directories.
+	* ed.texi: Improve description of commands 'e', 'f', 'q'.
+	* main.c, ed.texi: Improve description of exit status.
+	* configure, Makefile.in: New variable 'MAKEINFO'.
+	* INSTALL: Document use of CFLAGS+='--std=c99 -D_POSIX_C_SOURCE=2'.
+
 2023-01-11  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.19 released.
@@ -66,8 +85,8 @@
 2019-01-01  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.15 released.
-	* io.c (print_line): Make command 'l' print '\\' before every
-	  '$' within the text. (Reported by Ori Avtalion).
+	* io.c (print_line): Make command 'l' print '\\' before every '$'
+	  within the text. (Reported by Ori Avtalion).
 	* main_loop.c (extract_addresses): Fix address ',,' to mean '$,$'
 	  instead of '1,$'. (Reported by Matthieu Felix).
 	* regex.c (extract_replacement): Allow newlines even if global.
@@ -164,18 +183,18 @@
 2012-01-01  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 1.6 released.
-	* io.c (put_tty_line): Null characters where incorrectly shown
-	  by the command 'l'. (Reported by Martin Guy).
+	* io.c (put_tty_line): Null characters where incorrectly shown by
+	  the command 'l'. (Reported by Martin Guy).
 	* io.c (read_stream): Fix the condition deciding when to show the
 	  message "Newline appended".
-	* main_loop.c (exec_command): The 'modified' flag is now set
-	  when reading a non-empty file into an empty buffer.
+	* main_loop.c (exec_command): The 'modified' flag is now set when
+	  reading a non-empty file into an empty buffer.
 	* regex.c (translit_text): Fix typo that prevented using NUL
 	  characters in regular expressions.
-	* main_loop.c (exec_command): Return ERR if 'system' can't
-	  create a shell process.
-	* main_loop.c (main_loop): Flush stdout/stderr before reading a
-	  new command.
+	* main_loop.c (exec_command): Return ERR if 'system' can't create a
+	  shell process.
+	* main_loop.c (main_loop): Flush stdout/stderr before reading a new
+	  command.
 	* buffer.c (put_sbuf_line): Add size parameter.
 	* ed.1: Man page is now generated with 'help2man'.
 	* ed.1: All command-line options are now documented in the man page.
@@ -186,8 +205,8 @@
 
 	* Version 1.5 released.
 	* buffer.c (append_lines): Fix commands 'a', 'c', and 'i'.
-	  (When used in a global command list, the commands following
-	  them in the list were ignored).
+	  (When used in a global command list, the commands following them
+	  in the list were ignored).
 	* main_loop.c (exec_command): Fix command 'e'.
 	  (It quitted when invoked a second time with a modified buffer).
 	* main.c: New option '-r, --restricted'.
@@ -195,11 +214,11 @@
 	* Description of ed in the manual has been changed.
 	* testsuite: Modify some tests and remove obsolete POSIX tests.
 	* main_loop.c: Make variable 'ibufp' local to main_loop.
-	* Define type bool to make clear which functions and variables
-	  are Boolean.
+	* Define type bool to make clear which functions and variables are
+	  Boolean.
 	* Add 'const' to all pointer declarations accepting it.
 	* regex.c (replace_matching_text): Make se_max an enum.
-	* signal.c: Include termios.h
+	* signal.c: Include termios.h.
 	* Convert C99 style comments '//' to C89 style comments '/* */'.
 	* ed.texinfo: Fix an erratum.
 	* Change copyright holder from Andrew, Antonio to the FSF.
@@ -209,8 +228,8 @@
 
 	* Version 1.4 released.
 	* buffer.c, main_loop.c: Undo now restores the modified status.
-	* regex.c (search_and_replace): Fix a race condition with user
-	  interrupt.
+	* regex.c (search_and_replace):
+	  Fix a race condition with user interrupt.
 	* signal.c: Add new functions 'resize_line_buffer' and
 	  'resize_undo_buffer' to definitively fix the aliasing warnings.
 	* Some minor corrections have been made to the manual.
@@ -254,7 +273,7 @@
 	* Version 0.8 released.
 	* check.sh: Testsuite exits unsuccesfully in case of error.
 	* ed.1: Fix some minor problems in the manual page.
-	* ed.texinfo: Add 21kB of legalese (fdl.texinfo).
+	* ed.texinfo: Add 21 kB of legalese (fdl.texinfo).
 
 2007-07-18  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
@@ -264,11 +283,12 @@
 2007-06-29  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.6 released.
-	* Update license to GPL version 3 or later.
 	* signal.c (sigwinch_handler, set_signal):
 	  Fix two minor compatibility problems.
 	* main_loop.c (main_loop):
 	  Fix an infinite loop when reading an empty script.
+	* Update license to GPL version 3 or later.
+	  (This change was later discovered to be wrong. See 1.5 and 1.18).
 
 2007-03-09  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
@@ -347,7 +367,7 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew L. Moore
-Copyright (C) 2006-2023 Antonio Diaz Diaz.
+Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable,
 but just in case, you have unlimited permission to copy, distribute, and

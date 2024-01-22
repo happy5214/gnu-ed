@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Ed: (ed).                     The GNU line editor
 END-INFO-DIR-ENTRY
 
-   Copyright (C) 1993, 1994, 2006-2023 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2024 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -18,13 +18,13 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.19, 11 January 2023).
+This manual is for GNU ed (version 1.20, 19 January 2024).
 
 * Menu:
 
 * Overview::                        Overview of the 'ed' command
 * Introduction to line editing::    Getting started with GNU 'ed'
-* Invoking ed::                     Command line interface
+* Invoking ed::                     Command-line interface
 * Line addressing::                 Specifying lines/ranges in the buffer
 * Regular expressions::             Patterns for selecting text
 * Commands::                        Commands recognized by GNU 'ed'
@@ -35,7 +35,7 @@ This manual is for GNU ed (version 1.19, 11 January 2023).
 * GNU Free Documentation License::  How you can copy and share this manual
 
 
-   Copyright (C) 1993, 1994, 2006-2023 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 2006-2024 Free Software Foundation, Inc.
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or any
@@ -80,6 +80,12 @@ adding text to a file. In this mode, no commands are available; instead,
 the standard input is written directly to the editor buffer. A "line"
 consists of the text up to and including a <newline> character. Input mode
 is terminated by entering a single period ('.') on a line.
+
+   Any change made to the buffer sets the modified flag even if the change
+does not cause a change in the contents of the buffer; for example 's/a/a/'.
+Reading an empty file ('r FILE') or terminating a command before it makes
+any change to the buffer ('a<newline>.<newline>') does not change the
+buffer, and therefore does not set the modified flag.
 
    All 'ed' commands operate on whole lines or ranges of lines; e.g., the
 'd' command deletes lines; the 'm' command moves lines, and so on. It is
@@ -304,14 +310,25 @@ File: ed.info,  Node: Invoking ed,  Next: Line addressing,  Prev: Introduction t
 
 The format for running 'ed' is:
 
-     ed [OPTIONS] [FILE]
-     red [OPTIONS] [FILE]
+     ed [OPTIONS] [[+LINE] FILE]
+     red [OPTIONS] [[+LINE] FILE]
+     ed [OPTIONS] [[+LINE] '!COMMAND [ARGUMENTS]']
 
    FILE specifies the name of a file to read. If FILE is prefixed with a
 bang (!), then it is interpreted as a shell command. In this case, what is
 read is the standard output of FILE executed via 'sh'. To read a file whose
 name begins with a bang (or a hyphen), prefix the name with './'. The
 default filename is set to FILE only if it is not prefixed with a bang.
+
+   The file name may be preceded by '+LINE' to set the current line to the
+line number specified. If LINE exceeds the number of lines in the file, the
+current line is set to the last line.
+
+   The file name may be preceded by '+/RE' to set the current line to the
+first line matching the regular expression RE, or by '+?RE' to set the
+current line to the last line matching RE. If RE does not match any line,
+ed fails immediately with exit status 1 unless the option '-l' is specified
+and standard input is not a regular file.
 
    'ed' supports the following options: *Note Argument syntax:
 (arg_parser)Argument syntax.
@@ -378,8 +395,15 @@ default filename is set to FILE only if it is not prefixed with a bang.
      finishing an unterminated line, are not removed. The CRs are not
      restored when saving the buffer to a file.
 
+'--unsafe-names'
+     'ed' rejects file names containing control characters 1 to 31 unless
+     they are allowed with this option.
 
-   Exit status: 0 if no errors occurred; otherwise >0.
+
+   Exit status: 0 for a normal exit, 1 for environmental problems (invalid
+command-line options, memory exhausted, command failed, etc), 2 for
+problems with the input file (file not found, buffer modified, I/O errors),
+3 for an internal consistency error (e.g., bug) which caused ed to panic.
 
 
 File: ed.info,  Node: Line addressing,  Next: Regular expressions,  Prev: Invoking ed,  Up: Top
@@ -696,24 +720,30 @@ parenthesis).
 'e FILE'
      Edits FILE, and sets the default filename. If FILE is not specified,
      then the default filename is used. Any lines in the buffer are deleted
-     before the new file is read. The current address is set to the address
-     of the last line in the buffer.
+     before the new file is read. If FILE does not exist, a warning is
+     printed in place of a byte count and the resulting buffer is left
+     empty. The current address is set to the address of the last line in
+     the buffer.
 
      If FILE is prefixed with a bang (!), then it is interpreted as a shell
      command whose output is to be read, (*note shell escape command:: '!'
      below). In this case the default filename is unchanged. To edit a file
      whose name begins with a bang, prefix the name with './'.
 
-     A warning is printed if any changes have been made in the buffer since
-     the last 'w' command that wrote the entire buffer to a file.
+     A warning is printed if the buffer modified flag is set. If another 'e'
+     or 'q' command is given with no intervening error or buffer-modifying
+     command, it is executed without warning, and any changes to the buffer
+     are lost.
 
 'E FILE'
      Edits FILE unconditionally. This is similar to the 'e' command, except
      that unwritten changes are discarded without warning.
 
 'f FILE'
-     Sets the default filename to FILE. If FILE is not specified, then the
-     default filename is printed.
+     Sets the default filename to FILE, whether or not FILE names an
+     existing file. If FILE is not specified, then the default filename is
+     printed. Tilde expansion is performed on FILE; if FILE starts with
+     '~/', the '~' is expanded to specify your home directory '$HOME'.
 
 '(1,$)g/RE/[I]COMMAND-LIST'
      Global command. The global command makes two passes over the file. On
@@ -812,9 +842,10 @@ parenthesis).
      default turned off. The default prompt string is an asterisk ('*').
 
 'q'
-     Quits 'ed'. A warning is printed if any changes have been made in the
-     buffer since the last 'w' command that wrote the entire buffer to a
-     file.
+     Quits 'ed'. A warning is printed if the buffer modified flag is set.
+     If another 'e' or 'q' command is given with no intervening error or
+     buffer-modifying command, it is executed without warning, and any
+     changes to the buffer are lost.
 
 'Q'
      Quits 'ed' unconditionally. This is similar to the 'q' command, except
@@ -856,19 +887,20 @@ parenthesis).
      the addressed lines not matching the regular expression RE.
 
 '(1,$)w FILE'
-     Writes the addressed lines to FILE. Any previous contents of FILE are
-     lost without warning. If there is no default filename, then the
-     default filename is set to FILE, otherwise it is unchanged. If no
-     filename is specified, then the default filename is used. The current
-     address is unchanged.
+     Writes the addressed lines to FILE, automatically creating any missing
+     parent directories. Any previous contents of FILE are lost without
+     warning. If there is no default filename, then the default filename is
+     set to FILE, otherwise it is unchanged. If no filename is specified,
+     then the default filename is used. If the whole buffer is written,
+     then the buffer modified flag is cleared. The current address is
+     unchanged.
 
      If FILE is prefixed with a bang (!), then it is interpreted as a shell
      command and the addressed lines are written to its standard input,
      (*note shell escape command:: '!' below). In this case the default
      filename is unchanged. Writing the buffer to a shell command does not
-     prevent the warning to the user if an attempt is made to overwrite or
-     discard the buffer via the 'e' or 'q' commands. To write to a file
-     whose name begins with a bang, prefix the name with './'.
+     clear the buffer modified flag. To write to a file whose name begins
+     with a bang, prefix the name with './'.
 
 '(1,$)wq FILE'
      Writes the addressed lines to FILE, and then executes a 'q' command.
@@ -1006,8 +1038,9 @@ File: ed.info,  Node: Limitations,  Next: Diagnostics,  Prev: The 's' Command,  
 8 Limitations
 *************
 
-If the terminal hangs up, 'ed' attempts to write the buffer to the file
-'ed.hup' or, if this fails, to '$HOME/ed.hup'.
+If the terminal hangs up and the buffer is modified and not empty, 'ed'
+attempts to write the buffer to the file 'ed.hup' or, if this fails, to
+'$HOME/ed.hup'.
 
    If a text (non-binary) file is not terminated by a newline character,
 then 'ed' appends one on reading/writing it. In the case of a binary file,
@@ -1028,22 +1061,21 @@ File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 9 Diagnostics
 *************
 
-'ed' prints two kinds of error mesages: diagnostic messages written to
-standard error and help messages written to standard output. Diagnostic
-messages may be suppresed with option '-q'. Help messages may be enabled
-with option '-v' and may be toggled with command 'H'.
+'ed' prints two kinds of mesages: diagnostic messages (errors and warnings)
+written to standard error and help messages written to standard output.
+Diagnostic messages may be suppresed with option '-q'. Help messages may be
+enabled with option '-v' and may be toggled with command 'H'.
 
-   When an error occurs, if 'ed''s input is from a regular file or here
+   'ed' warns the first time that a command modifies a buffer loaded from a
+read-only file.
+
+   When an error occurs, if 'ed''s standard input is a regular file or here
 document, then it exits, otherwise it prints a '?' and returns to command
 mode. An explanation of the last error can be printed with the 'h' (help)
 command.
 
    If the 'u' (undo) command occurs in a global command list, then the
 command list is executed only once.
-
-   Attempting to quit 'ed' or edit another file before writing a modified
-buffer results in an error. If the command is entered a second time, it
-succeeds, but any changes to the buffer are lost.
 
 
 File: ed.info,  Node: Problems,  Next: GNU Free Documentation License,  Prev: Diagnostics,  Up: Top
@@ -1528,18 +1560,18 @@ use in free software.
 Tag Table:
 Node: Top535
 Node: Overview1764
-Node: Introduction to line editing4317
-Node: Invoking ed11584
-Node: Line addressing14496
-Node: Regular expressions18529
-Node: Commands24714
-Ref: print suffixes25049
-Ref: shell escape command36962
-Node: The 's' Command38266
-Node: Limitations41181
-Node: Diagnostics42163
-Node: Problems43082
-Node: GNU Free Documentation License43617
+Node: Introduction to line editing4668
+Node: Invoking ed11935
+Node: Line addressing15812
+Node: Regular expressions19845
+Node: Commands26030
+Ref: print suffixes26365
+Ref: shell escape command38821
+Node: The 's' Command40125
+Node: Limitations43040
+Node: Diagnostics44063
+Node: Problems44898
+Node: GNU Free Documentation License45433
 
 End Tag Table
 

@@ -1,7 +1,7 @@
 /* regex.c: regular expression interface routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2023 Antonio Diaz Diaz.
+   Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -63,25 +63,28 @@ static void nul_to_newline( char * const s, const int len )
   { translit_text( s, len, '\0', '\n' ); }
 
 
-/* expand a POSIX character class */
+bool islf_or_nul( const unsigned char ch ) { return ch == '\n' || ch == 0; }
+
+/* expand and skip a POSIX character class */
 static const char * parse_char_class( const char * p )
   {
   char c, d;
 
   if( *p == '^' ) ++p;
   if( *p == ']' ) ++p;
-  for( ; *p != ']' && *p != '\n'; ++p )
+  for( ; *p != ']' && !islf_or_nul( *p ); ++p )
     if( *p == '[' && ( ( d = p[1] ) == '.' || d == ':' || d == '=' ) )
       for( ++p, c = *++p; *p != ']' || c != d; ++p )
-        if( ( c = *p ) == '\n' )
+        if( islf_or_nul( c = *p ) )
           return 0;
   return ( ( *p == ']' ) ? p : 0 );
   }
 
 
 /* Copy a pattern string from the command buffer. If successful, return a
-   pointer to the copy and point *ibufpp to the closing delimiter or final
-   newline. */
+   pointer to the copy and point *ibufpp to the closing delimiter, final
+   newline, or terminating zero.
+   Do not copy the closing delimiter or final newline. */
 static char * extract_pattern( const char ** const ibufpp, const char delimiter )
   {
   static char * buf = 0;
@@ -89,14 +92,14 @@ static char * extract_pattern( const char ** const ibufpp, const char delimiter 
   const char * nd = *ibufpp;
   int len;
 
-  while( *nd != delimiter && *nd != '\n' )
+  while( *nd != delimiter && !islf_or_nul( *nd ) )
     {
     if( *nd == '[' )
       {
       nd = parse_char_class( ++nd );
       if( !nd ) { set_error_msg( "Unbalanced brackets ([])" ); return 0; }
       }
-    else if( *nd == '\\' && *++nd == '\n' )
+    else if( *nd == '\\' && islf_or_nul( *++nd ) )
       { set_error_msg( "Trailing backslash (\\)" ); return 0; }
     ++nd;
     }
@@ -144,9 +147,9 @@ static regex_t * get_compiled_regex( const char ** const ibufpp )
   {
   const char delimiter = **ibufpp;
 
-  if( delimiter == ' ' || delimiter == '\n' )
+  if( delimiter == ' ' || islf_or_nul( delimiter ) )
     { set_error_msg( inv_pat_del ); return 0; }
-  if( *++*ibufpp == delimiter || **ibufpp == '\n' )	/* empty RE */
+  if( *++*ibufpp == delimiter || islf_or_nul( **ibufpp ) )	/* empty RE */
     {
     if( !last_regexp ) { set_error_msg( no_prev_pat ); return 0; }
     if( **ibufpp == delimiter && *++*ibufpp == 'I' )	/* remove delimiter */

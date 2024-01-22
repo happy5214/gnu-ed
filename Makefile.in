@@ -32,10 +32,13 @@ main.o : main.c
 %.o : %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
+# prevent 'make' from trying to remake source files
+$(VPATH)/configure $(VPATH)/Makefile.in $(VPATH)/doc/$(pkgname).texi : ;
+%.h %.c : ;
+
 $(objs)       : Makefile ed.h
 carg_parser.o : carg_parser.h
 main.o        : carg_parser.h
-
 
 doc : info man
 

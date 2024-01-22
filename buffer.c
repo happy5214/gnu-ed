@@ -1,7 +1,7 @@
 /* buffer.c: scratch-file buffer routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2023 Antonio Diaz Diaz.
+   Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -31,13 +31,13 @@
 
 static int current_addr_ = 0;	/* current address in editor buffer */
 static int last_addr_ = 0;	/* last address in editor buffer */
-static bool isbinary_ = false;	/* if set, buffer contains ASCII NULs */
-static bool modified_ = false;	/* if set, buffer modified since last write */
+static bool isbinary_ = false;	/* buffer contains ASCII NULs */
+static unsigned char modified_ = false;	/* 1=modified | 2=warned */
 
 static bool seek_write = false;	/* seek before writing */
 static FILE * sfp = 0;		/* scratch file pointer */
 static long sfpos = 0;		/* scratch file position */
-static line_t buffer_head;	/* editor buffer ( linked list of line_t )*/
+static line_t buffer_head;	/* editor buffer ( linked list of line_t ) */
 static line_t yank_buffer_head;
 
 
@@ -52,10 +52,13 @@ int last_addr( void ) { return last_addr_; }
 bool isbinary( void ) { return isbinary_; }
 void set_binary( void ) { isbinary_ = true; }
 
-bool modified( void ) { return modified_; }
-void set_modified( const bool m ) { modified_ = m; }
+bool modified( void ) { return modified_ & 1; }		/* ignore warned */
+void set_modified( const bool b ) { modified_ = b != 0; }  /* clear warned */
+bool warned( void ) { return modified_ == 3; }
+void set_warned( const bool b ) { if( b ) modified_ |= 2; else modified_ &= 1; }
 
-
+/* line 0 does not contain text, but it is part of the linked list of line_t.
+   Therefore inc_addr and dec_addr must cycle through addr 0. */
 int inc_addr( int addr )
   { if( ++addr > last_addr_ ) addr = 0; return addr; }
 
@@ -400,10 +403,9 @@ bool open_sbuf( void )
 
 int path_max( const char * filename )
   {
-  long result;
   if( !filename ) filename = "/";
   errno = 0;
-  result = pathconf( filename, _PC_PATH_MAX );
+  long result = pathconf( filename, _PC_PATH_MAX );
   if( result < 0 ) { if( errno ) result = 256; else result = 1024; }
   else if( result < 256 ) result = 256;
   return result;
@@ -557,7 +559,7 @@ void clear_undo_stack( void )
   u_idx = 0;
   u_current_addr = current_addr_;
   u_last_addr = last_addr_;
-  u_modified = modified_;
+  u_modified = modified();
   }
 
 
@@ -618,7 +620,7 @@ bool undo( const bool isglobal )
   int n;
   const int o_current_addr = current_addr_;
   const int o_last_addr = last_addr_;
-  const bool o_modified = modified_;
+  const bool o_modified = modified();
 
   if( u_idx <= 0 || u_current_addr < 0 || u_last_addr < 0 )
     { set_error_msg( "Nothing to undo" ); return false; }

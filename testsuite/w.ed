@@ -1,10 +1,12 @@
 H
 5w ./!.z
 6W ./!.z
-0r !cat < ./!.z
-r ./!.z
-!rm -f ./!.z
-15w \x2dhyphen\x2dprefixed\x2dfile
-r \x2dhyphen\x2dprefixed\x2dfile
-!rm -f '\x2dhyphen\x2dprefixed\x2dfile'
+7,8W ./!.z
+9,13w \x2dhyphen\x2dprefixed\x2dfile
+1,4w to/some/far-away/place
+0r to/some/far-away/place
+.r !cat < ./!.z
+.r \x2dhyphen\x2dprefixed\x2dfile
+!rm -f ./!.z '\x2dhyphen\x2dprefixed\x2dfile' to/some/far-away/place
+!rmdir to/some/far-away to/some to
 wq out.o
