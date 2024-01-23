@@ -1,7 +1,7 @@
 /* signal.c: signal and miscellaneous routines for the ed line editor. */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2023 Antonio Diaz Diaz.
+   Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -39,6 +39,26 @@ static bool sighup_pending = false;
 static bool sigint_pending = false;
 
 
+const char * home_directory( void )
+  {
+  static bool first_time = true;
+  static char * buf = 0;
+  static int bufsz = 0;
+
+  if( first_time )
+    {
+    first_time = false;
+    const char * const hd = getenv( "HOME" );
+    if( !hd || !hd[0] ) return 0;
+    const int hdsize = strlen( hd );
+    if( !resize_buffer( &buf, &bufsz, hdsize + 1 ) ) return 0;
+    memcpy( buf, hd, hdsize );
+    buf[hdsize] = 0;
+    }
+  return buf;
+  }
+
+
 static void sighup_handler( int signum )
   {
   if( signum ) {}			/* keep compiler happy */
@@ -47,16 +67,16 @@ static void sighup_handler( int signum )
   const char hb[] = "ed.hup";
   if( last_addr() <= 0 || !modified() ||
       write_file( hb, "w", 1, last_addr() ) >= 0 ) exit( 0 );
-  char * const s = getenv( "HOME" );
-  if( !s || !s[0] ) exit( 1 );
-  const int len = strlen( s );
-  const int need_slash = s[len-1] != '/';
-  char * const hup = ( len + need_slash + (int)sizeof hb < path_max( 0 ) ) ?
-                     (char *)malloc( len + need_slash + sizeof hb ) : 0;
+  const char * const hd = home_directory();
+  if( !hd || !hd[0] ) exit( 1 );
+  const int hdsize = strlen( hd );
+  const int need_slash = hd[hdsize-1] != '/';
+  char * const hup = ( hdsize + need_slash + (int)sizeof hb < path_max( 0 ) ) ?
+                     (char *)malloc( hdsize + need_slash + sizeof hb ) : 0;
   if( !hup ) exit( 1 );			/* hup file name */
-  memcpy( hup, s, len );
-  if( need_slash ) hup[len] = '/';
-  memcpy( hup + len + need_slash, hb, sizeof hb );
+  memcpy( hup, hd, hdsize );
+  if( need_slash ) hup[hdsize] = '/';
+  memcpy( hup + hdsize + need_slash, hb, sizeof hb );
   if( write_file( hup, "w", 1, last_addr() ) >= 0 ) exit( 0 );
   exit( 1 );				/* hup file write failed */
   }

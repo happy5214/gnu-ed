@@ -39,6 +39,12 @@ w out.o
 a
 hello
 .
-g/hello/Q
+g/hello/f test.bin\
+E\
+!:\
+e test.bin\
+q\
+# not reached in global command\
+w out.o
 # not reached
 w out.o

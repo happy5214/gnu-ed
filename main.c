@@ -1,5 +1,5 @@
 /* GNU ed - The GNU line editor.
-   Copyright (C) 2006-2023 Antonio Diaz Diaz.
+   Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,9 +16,10 @@
 */
 /*
    Exit status: 0 for a normal exit, 1 for environmental problems
-   (file not found, invalid command line options, I/O errors, etc), 2 to
-   indicate a corrupt or invalid input file, 3 for an internal consistency
-   error (e.g., bug) which caused ed to panic.
+   (invalid command-line options, memory exhausted, command failed, etc),
+   2 for problems with the input file (file not found, buffer modified,
+   I/O errors), 3 for an internal consistency error (e.g., bug) which caused
+   ed to panic.
 */
 /*
  * CREDITS
@@ -32,6 +33,9 @@
  *
  */
 
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,18 +47,18 @@
 
 
 static const char * const program_name = "ed";
-static const char * const program_year = "2023";
+static const char * const program_year = "2024";
 static const char * invocation_name = "ed";		/* default value */
 
-static bool extended_regexp_ = false;	/* if set, use EREs */
-static bool quiet_ = false;		/* if set, suppress diagnostics */
-static bool restricted_ = false;	/* if set, run in restricted mode */
-static bool scripted_ = false;		/* if set, suppress byte counts and
-					   '!' prompt */
-static bool strip_cr_ = false;		/* if set, strip trailing CRs */
-static bool traditional_ = false;	/* if set, be backwards compatible */
+static bool extended_regexp_ = false;	/* use EREs */
+static bool quiet = false;		/* suppress diagnostics */
+static bool restricted_ = false;	/* run in restricted mode */
+static bool safe_names = true;		/* reject chars 1-31 in file names */
+static bool scripted_ = false;		/* suppress byte counts and ! prompt */
+static bool strip_cr_ = false;		/* strip trailing CRs */
+static bool traditional_ = false;	/* be backwards compatible */
 
-/* Access functions for command line flags. */
+/* Access functions for command-line flags. */
 bool extended_regexp( void ) { return extended_regexp_; }
 bool restricted( void ) { return restricted_; }
 bool scripted( void ) { return scripted_; }
@@ -71,8 +75,11 @@ static void show_help( void )
           "'standard' text editor in the sense that it is the original editor for\n"
           "Unix, and thus widely available. For most purposes, however, it is\n"
           "superseded by full-screen editors such as GNU Emacs or GNU Moe.\n"
-          "\nUsage: %s [options] [file]\n", invocation_name );
-  printf( "\nOptions:\n"
+          "\nUsage: %s [options] [[+line] file]\n", invocation_name );
+  printf( "\nThe file name may be preceded by '+line', '+/RE', or '+?RE' to set the\n"
+          "current line to the line number specified or to the first or last line\n"
+          "matching the regular expression 'RE'.\n"
+          "\nOptions:\n"
           "  -h, --help                 display this help and exit\n"
           "  -V, --version              output version information and exit\n"
           "  -E, --extended-regexp      use extended regular expressions\n"
@@ -84,12 +91,14 @@ static void show_help( void )
           "  -s, --script               suppress byte counts and '!' prompt\n"
           "  -v, --verbose              be verbose; equivalent to the 'H' command\n"
           "      --strip-trailing-cr    strip carriage returns at end of text lines\n"
+          "      --unsafe-names         allow control characters 1-31 in file names\n"
           "\nStart edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
           "\nExit status: 0 for a normal exit, 1 for environmental problems\n"
-          "(file not found, invalid command line options, I/O errors, etc), 2 to\n"
-          "indicate a corrupt or invalid input file, 3 for an internal consistency\n"
-          "error (e.g., bug) which caused ed to panic.\n"
+          "(invalid command-line options, memory exhausted, command failed, etc),\n"
+          "2 for problems with the input file (file not found, buffer modified,\n"
+          "I/O errors), 3 for an internal consistency error (e.g., bug) which caused\n"
+          "ed to panic.\n"
           "\nReport bugs to bug-ed@gnu.org\n"
           "Ed home page: http://www.gnu.org/software/ed/ed.html\n"
           "General help using GNU software: http://www.gnu.org/gethelp\n" );
@@ -107,11 +116,41 @@ static void show_version( void )
   }
 
 
+void print_filename( const char * const filename, const bool to_stdout )
+  {
+  FILE * const fp = to_stdout ? stdout : stderr;
+  if( safe_names ) { fputs( filename, fp ); return; }
+  const char * p;
+  for( p = filename; *p; ++p )
+    {
+    const unsigned char ch = *p;
+    if( ch == '\\' ) { putc( ch, fp ); putc( ch, fp ); continue; }
+    if( ch >= 32 ) { putc( ch, fp ); continue; }
+    putc( '\\', fp );
+    putc( ( ( ch >> 6 ) & 7 ) + '0', fp );
+    putc( ( ( ch >> 3 ) & 7 ) + '0', fp );
+    putc( ( ch & 7 ) + '0', fp );
+    }
+  }
+
+
+void show_warning( const char * const filename, const char * const msg )
+  {
+  if( !quiet )
+    {
+    if( filename && filename[0] )
+      { print_filename( filename, false ); fputs( ": ", stderr ); }
+    fprintf( stderr, "%s\n", msg );
+    }
+  }
+
+
 void show_strerror( const char * const filename, const int errcode )
   {
-  if( !quiet_ )
+  if( !quiet )
     {
-    if( filename && filename[0] ) fprintf( stderr, "%s: ", filename );
+    if( filename && filename[0] )
+      { print_filename( filename, false ); fputs( ": ", stderr ); }
     fprintf( stderr, "%s\n", strerror( errcode ) );
     }
   }
@@ -129,6 +168,19 @@ static void show_error( const char * const msg, const int errcode, const bool he
   }
 
 
+static int parse_addr( const char * const arg )
+  {
+  char * tail;
+  errno = 0;
+  const long tmp = strtol( arg, &tail, 10 );
+  if( errno == 0 && tail != arg && tmp >= 1 && tmp <= INT_MAX ) return tmp;
+  if( !quiet )
+    fprintf( stderr, "%s: %s: Invalid line number; must be >= 1.\n",
+             program_name, arg );
+  exit( 1 );
+  }
+
+
 /* Return true if stdin is not a regular file.
    Piped scripts count as interactive (do not force ed to exit on error). */
 bool interactive()
@@ -140,6 +192,9 @@ bool interactive()
 
 bool may_access_filename( const char * const name )
   {
+  const int len = strlen( name );
+  if( len <= 0 || name[len-1] == '/' )
+    { set_error_msg( "Is a directory" ); return false; }
   if( restricted_ )
     {
     if( name[0] == '!' )
@@ -147,16 +202,22 @@ bool may_access_filename( const char * const name )
     if( strcmp( name, ".." ) == 0 || strchr( name, '/' ) )
       { set_error_msg( "Directory access restricted" ); return false; }
     }
+  if( safe_names )
+    {
+    const char * p;
+    for( p = name; *p; ++p ) if( *p <= 31 && *p >= 1 )
+      { set_error_msg( "Control characters 1-31 not allowed in file names" );
+        return false; }
+    }
   return true;
   }
 
 
 int main( const int argc, const char * const argv[] )
   {
-  int argind;
   bool initial_error = false;		/* fatal error reading file */
   bool loose = false;
-  enum { opt_cr = 256 };
+  enum { opt_cr = 256, opt_un };
   const struct ap_Option options[] =
     {
     { 'E', "extended-regexp",      ap_no  },
@@ -171,6 +232,7 @@ int main( const int argc, const char * const argv[] )
     { 'v', "verbose",              ap_no  },
     { 'V', "version",              ap_no  },
     { opt_cr, "strip-trailing-cr", ap_no  },
+    { opt_un, "unsafe-names",      ap_no  },
     {  0, 0,                       ap_no } };
 
   struct Arg_parser parser;
@@ -181,7 +243,8 @@ int main( const int argc, const char * const argv[] )
   if( ap_error( &parser ) )				/* bad option */
     { show_error( ap_error( &parser ), 0, true ); return 1; }
 
-  for( argind = 0; argind < ap_arguments( &parser ); ++argind )
+  int argind = 0;
+  for( ; argind < ap_arguments( &parser ); ++argind )
     {
     const int code = ap_code( &parser, argind );
     const char * const arg = ap_argument( &parser, argind );
@@ -193,41 +256,65 @@ int main( const int argc, const char * const argv[] )
       case 'h': show_help(); return 0;
       case 'l': loose = true; break;
       case 'p': if( set_prompt( arg ) ) break; else return 1;
-      case 'q': quiet_ = true; break;
+      case 'q': quiet = true; break;
       case 'r': restricted_ = true; break;
       case 's': scripted_ = true; break;
       case 'v': set_verbose(); break;
       case 'V': show_version(); return 0;
       case opt_cr: strip_cr_ = true; break;
-      default : show_error( "internal error: uncaught option.", 0, false );
-                return 3;
+      case opt_un: safe_names = false; break;
+      default: show_error( "internal error: uncaught option.", 0, false );
+               return 3;
       }
     } /* end process options */
 
   setlocale( LC_ALL, "" );
   if( !init_buffers() ) return 1;
 
-  while( argind < ap_arguments( &parser ) )
+  const char * start_re_arg = 0;		/* '+/RE' or '+?RE' */
+  int start_addr = 0;				/* '+line' */
+  for( ; argind < ap_arguments( &parser ); ++argind )
     {
     const char * const arg = ap_argument( &parser, argind );
-    if( strcmp( arg, "-" ) == 0 ) { scripted_ = true; ++argind; continue; }
+    /* a hyphen operand '-' is equivalent to the option '-s' */
+    if( strcmp( arg, "-" ) == 0 ) { scripted_ = true; continue; }
+    if( arg[0] == '+' )
+      {
+      const unsigned char ch = arg[1];
+      if( ch == '/' || ch == '?' ) start_re_arg = arg;	/* store for later */
+      else if( isdigit( ch ) ) start_addr = parse_addr( arg + 1 );
+      else { if( !quiet ) fprintf( stderr, "%s: %s: Invalid line number or "
+                     "regular expression.\n", program_name, arg ); return 1; }
+      continue;
+      }
     if( may_access_filename( arg ) )
       {
-      /* this read can't be undone because u_current_addr = u_last_addr = -1 */
-      const int ret = read_file( arg, 0 );
-      if( ret < 0 && !interactive() ) return 2;
       if( arg[0] != '!' && !set_def_filename( arg ) ) return 1;
+      /* first e can't be undone because u_current_addr = u_last_addr = -1 */
+      const int ret = first_e_command( arg );	/* line count, < 0 if error */
+      if( ret < 0 && !interactive() ) return 2;
       if( ret == -2 ) initial_error = true;
+      if( ret > 0 && start_addr > 0 )
+        { if( start_addr <= last_addr() ) set_current_addr( start_addr ); }
+      else if( ret > 0 && start_re_arg )
+        {
+        set_current_addr( 0 );		/* start searching from address 0 */
+        const char * p = start_re_arg + 1;
+        const int addr = next_matching_node_addr( &p );
+        if( addr > 0 && addr <= last_addr() ) set_current_addr( addr );
+        else
+          {
+          set_current_addr( ( start_re_arg[1] == '/' ) ? 1 : last_addr() );
+          if( !quiet )
+            fprintf( stderr, "%s: %s: No match found.\n", start_re_arg, arg );
+          if( !interactive() ) return 1;
+          }
+        }
       }
-    else
-      {
-      if( !interactive() ) return 2;
-      initial_error = true;
-      }
-    break;
+    else { initial_error = true; if( !interactive() ) return 2; }
+    if( initial_error ) show_warning( arg, error_msg() );
+    break;		/* extra arguments after file are ignored */
     }
   ap_free( &parser );
-
-  if( initial_error ) fputs( "?\n", stdout );
   return main_loop( initial_error, loose );
   }

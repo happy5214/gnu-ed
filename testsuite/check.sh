@@ -1,6 +1,6 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2023 Antonio Diaz Diaz.
+# Copyright (C) 2006-2024 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute, and modify it.
@@ -23,10 +23,37 @@ cd "${objdir}"/tmp || framework_failure
 
 cat "${testdir}"/test.txt > test.txt || framework_failure
 cat "${testdir}"/test.bin > test.bin || framework_failure
-touch zero || framework_failure
+touch empty || framework_failure			# used also by r1.ed
 fail=0
+test_failed() { fail=1 ; printf " $1" ; [ -z "$2" ] || printf "($2)" ; }
 
 printf "testing ed-%s...\n" "$2"
+
+"${ED}" -q nx_file < empty
+[ $? = 2 ] || test_failed $LINENO
+"${ED}" -q +0 test.txt < empty				# invalid line number
+[ $? = 1 ] || test_failed $LINENO
+"${ED}" -qs +/foobar test.txt < empty			# no match
+[ $? = 1 ] || test_failed $LINENO
+"${ED}" -qs +?foobar test.txt < empty			# no match
+[ $? = 1 ] || test_failed $LINENO
+"${ED}" -qs +/[a-z test.txt < empty			# syntax error
+[ $? = 1 ] || test_failed $LINENO
+"${ED}" -qs -l +/foobar test.txt < empty		# -l has no effect
+[ $? = 1 ] || test_failed $LINENO
+echo "q" | "${ED}" -qs +/foobar test.txt || test_failed $LINENO
+echo "p" | "${ED}" -s +7 test.txt | grep -q 'animated' || test_failed $LINENO
+echo "p" | "${ED}" -s +7 test.txt | grep -q 'the' && test_failed $LINENO
+echo "p" | "${ED}" -s +/which test.txt | grep -q 'must' || test_failed $LINENO
+echo "p" | "${ED}" -s +?which test.txt | grep -q 'ease' || test_failed $LINENO
+echo "p" | "${ED}" -s +/[A-Z] test.txt | grep -q 'two' || test_failed $LINENO
+echo "p" | "${ED}" -s +?[A-Z] test.txt | grep -q 'even' || test_failed $LINENO
+# test that a second 'e' succeeds
+printf "a\nHello world!\n.\ne test.txt\nf foo.txt\nf\nh\nH\nH\nkx\nl\nn\np\nP\nP\ny\n.z\n# comment\n=\n!:\n.\ne test.txt\n8p\n" | "${ED}" -s | grep -q 'agrarian' || test_failed $LINENO
+echo "q" | "${ED}" -q 'name_with_bell.txt' && test_failed $LINENO
+echo "q" | "${ED}" -q --unsafe-names 'name_with_bell.txt' || test_failed $LINENO
+
+if [ ${fail} != 0 ] ; then echo ; fi
 
 # Run the .err scripts first with a regular file connected to standard
 # input, since these don't generate output; they exit with non-zero status.
@@ -68,12 +95,12 @@ for i in "${testdir}"/*.err ; do
 	rm -f out.ro
 done
 
-# Run the .ed scripts and compare their output against the .r files,
-# which contain the correct output.
+# Run the .ed scripts and compare their output against the .r files, which
+# contain the correct output.
 # The .ed scripts should exit with zero status.
 for i in "${testdir}"/*.ed ; do
 	base=`echo "$i" | sed 's,^.*/,,;s,\.ed$,,'`	# remove dir and ext
-	if "${ED}" -s test.txt < "$i" > /dev/null 2> out.log ; then
+	if "${ED}" test.txt < "$i" > out.log 2>&1 ; then
 		if cmp -s out.o "${testdir}"/${base}.r ; then
 			true
 		else
@@ -89,7 +116,7 @@ for i in "${testdir}"/*.ed ; do
 	rm -f out.o out.log
 done
 
-rm -f test.txt test.bin zero
+rm -f test.txt test.bin empty
 
 if [ ${fail} = 0 ] ; then
 	echo "tests completed successfully."

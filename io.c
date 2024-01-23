@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2023 Antonio Diaz Diaz.
+   Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "ed.h"
 
@@ -278,21 +280,23 @@ static long read_stream( const char * const filename, FILE * const fp,
 /* Read a named file/pipe into the buffer.
    Return line count, -1 if file not found, -2 if fatal error.
 */
-int read_file( const char * const filename, const int addr )
+int read_file( const char * const filename, const int addr,
+               bool * const read_onlyp )
   {
   FILE * fp;
-  long size;		/* number of bytes read */
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "r" );
-  else fp = fopen( filename, "r" );
+  else if( !( fp = fopen( filename, "r+" ) ) && errno != ENOENT &&
+           ( fp = fopen( filename, "r" ) ) && read_onlyp && !modified() )
+    *read_onlyp = true;
   if( !fp )
     {
     show_strerror( filename, errno );
     set_error_msg( "Cannot open input file" );
     return -1;
     }
-  size = read_stream( filename, fp, addr );
+  const long size = read_stream( filename, fp, addr );	/* file size in bytes */
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -2;
   if( ret != 0 )
@@ -302,7 +306,39 @@ int read_file( const char * const filename, const int addr )
     return -2;
     }
   if( !scripted() ) printf( "%lu\n", size );
-  return current_addr() - addr;
+  return current_addr() - addr;	/* current_addr updated by add_line_node */
+  }
+
+
+static bool make_dirs( const char * const name )
+  {
+  int i = strlen( name );
+  while( i > 0 && name[i-1] != '/' ) --i;	/* remove last component */
+  while( i > 0 && name[i-1] == '/' ) --i;	/* remove slash(es) */
+  if( i <= 0 ) return true;			/* dirname is '/' or empty */
+  const int dirsize = i;	/* size of dirname without trailing slash */
+  char * const partial = (char *)malloc( dirsize + 1 );
+  if( !partial ) return false;
+
+  for( i = 0; i < dirsize; )
+    {
+    while( i < dirsize && name[i] == '/' ) ++i;
+    const int first = i;
+    while( i < dirsize && name[i] != '/' ) ++i;
+    if( first < i )
+      {
+      memcpy( partial, name, i ); partial[i] = 0;
+      const unsigned mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+      struct stat st;
+      if( stat( partial, &st ) == 0 )
+        { if( !S_ISDIR( st.st_mode ) )
+            { free( partial ); errno = ENOTDIR; return false; } }
+      else if( mkdir( partial, mode ) != 0 && errno != EEXIST )
+        { free( partial ); return false; }
+      /* if EEXIST, another process created the dir */
+      }
+    }
+  free( partial ); return true;
   }
 
 
@@ -344,26 +380,25 @@ int write_file( const char * const filename, const char * const mode,
                 const int from, const int to )
   {
   FILE * fp;
-  long size;		/* number of bytes written */
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "w" );
-  else fp = fopen( filename, mode );
-  if( !fp )
+  else
     {
-    show_strerror( filename, errno );
-    set_error_msg( "Cannot open output file" );
-    return -1;
+    if( !make_dirs( filename ) )
+      { show_strerror( filename, errno );
+        set_error_msg( "Error creating intermediate directory" ); return -1; }
+    fp = fopen( filename, mode );
     }
-  size = write_stream( filename, fp, from, to );
+  if( !fp )
+    { show_strerror( filename, errno );
+      set_error_msg( "Cannot open output file" ); return -1; }
+  const long size = write_stream( filename, fp, from, to );	/* bytes written */
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -1;
   if( ret != 0 )
-    {
-    show_strerror( filename, errno );
-    set_error_msg( "Cannot close output file" );
-    return -1;
-    }
+    { show_strerror( filename, errno );
+      set_error_msg( "Cannot close output file" ); return -1; }
   if( !scripted() ) printf( "%lu\n", size );
   return ( from && from <= to ) ? to - from + 1 : 0;
   }

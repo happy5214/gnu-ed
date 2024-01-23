@@ -24,6 +24,10 @@ extracted from the archive.
 	cd ed[version]
 	./configure
 
+   If you choose a C standard, enable the POSIX features explicitly:
+
+	./configure CFLAGS+='--std=c99 -D_POSIX_C_SOURCE=2'
+
 3. Run make.
 
 	make
@@ -31,7 +35,8 @@ extracted from the archive.
 4. Optionally, type 'make check' to run the tests that come with ed.
 
 5. Type 'make install' to install the program and any data files and
-   documentation.
+   documentation. You need root privileges to install into a prefix owned
+   by root.
 
    Or type 'make install-compress', which additionally compresses the
    info manual and the man page after installation.
@@ -59,7 +64,7 @@ After running 'configure', you can run 'make' and 'make install' as
 explained above.
 
 
-Copyright (C) 2006-2023 Antonio Diaz Diaz.
+Copyright (C) 2006-2024 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute, and modify it.
