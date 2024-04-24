@@ -1,4 +1,8 @@
-Changes in version 1.20.1:
+Changes in version 1.20.2:
+
+A bug has been fixed that made global commands like 'g/x/s/x/x', with the last
+delimiter omitted, print every substituted line twice.
+(Bug introduced in 1.18. Reported by Douglas McIlroy).
 
 New command-line options '+line', '+/RE', and '+?RE' have been implemented to
 set the current line to the line number specified or to the first or last line

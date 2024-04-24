@@ -6,7 +6,7 @@
 # to copy, distribute, and modify it.
 
 pkgname=ed
-pkgversion=1.20.1
+pkgversion=1.20.2
 progname=ed
 srctrigger=doc/${pkgname}.texi
 
