@@ -1,3 +1,9 @@
+2024-04-22  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.20.2 released.
+	* main_loop.c (command_s): Fix g/x/s/x/x, which failed to skip the
+	  final newline, printing lines twice. (Reported by Douglas McIlroy).
+
 2024-02-14  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.20.1 released.

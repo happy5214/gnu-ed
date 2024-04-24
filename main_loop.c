@@ -466,7 +466,8 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
     if( !extract_replacement( ibufpp, isglobal ) ) return false;
     pflags = 0; snum = 1;
     bool ignore_case = false;
-    if( **ibufpp == '\n' ) pflags = pf_p;	/* omitted last delimiter */
+    if( **ibufpp == '\n' )			/* omitted last delimiter */
+      { ++*ibufpp; pflags = pf_p; }		/* skip newline for global */
     else
       { if( **ibufpp == delimiter ) ++*ibufpp;		/* skip delimiter */
         if( !get_command_s_suffix( ibufpp, &pflags, &snum, &ignore_case ) )

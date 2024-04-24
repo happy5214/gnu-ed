@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.20.1, 14 February 2024).
+This manual is for GNU ed (version 1.20.2, 22 April 2024).
 
 * Menu:
 
@@ -1558,19 +1558,19 @@ use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview1767
-Node: Introduction to line editing4671
-Node: Invoking ed11938
-Node: Line addressing15815
-Node: Regular expressions19848
-Node: Commands26033
-Ref: print suffixes26368
-Ref: shell escape command38764
-Node: The 's' Command40068
-Node: Limitations42983
-Node: Diagnostics44006
-Node: Problems44841
-Node: GNU Free Documentation License45376
+Node: Overview1764
+Node: Introduction to line editing4668
+Node: Invoking ed11935
+Node: Line addressing15812
+Node: Regular expressions19845
+Node: Commands26030
+Ref: print suffixes26365
+Ref: shell escape command38761
+Node: The 's' Command40065
+Node: Limitations42980
+Node: Diagnostics44003
+Node: Problems44838
+Node: GNU Free Documentation License45373
 
 End Tag Table
 
