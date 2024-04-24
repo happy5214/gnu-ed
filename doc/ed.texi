@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 19 January 2024
-@set VERSION 1.20
+@set UPDATED 14 February 2024
+@set VERSION 1.20.1
 
 @dircategory Basics
 @direntry
@@ -973,12 +973,12 @@ This is similar to the @samp{G} command except that it interactively
 edits the addressed lines not matching the regular expression @var{re}.
 
 @item (1,$)w @var{file}
-Writes the addressed lines to @var{file}, automatically creating any missing
-parent directories. Any previous contents of @var{file} are lost without
-warning. If there is no default filename, then the default filename is set
-to @var{file}, otherwise it is unchanged. If no filename is specified, then
-the default filename is used. If the whole buffer is written, then the
-buffer modified flag is cleared. The current address is unchanged.
+Writes the addressed lines to @var{file}. Any previous contents of
+@var{file} are lost without warning. If there is no default filename, then
+the default filename is set to @var{file}, otherwise it is unchanged. If no
+filename is specified, then the default filename is used. If the whole
+buffer is written, then the buffer modified flag is cleared. The current
+address is unchanged.
 
 If @var{file} is prefixed with a bang (!), then it is interpreted as a shell
 command and the addressed lines are written to its standard input,

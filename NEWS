@@ -1,4 +1,4 @@
-Changes in version 1.20:
+Changes in version 1.20.1:
 
 New command-line options '+line', '+/RE', and '+?RE' have been implemented to
 set the current line to the line number specified or to the first or last line
@@ -22,8 +22,6 @@ variable HOME. (Suggested by John Cowan).
 
 Ed now warns the first time that a command modifies a buffer loaded from a
 read-only file. (Suggested by Dan Jacobson).
-
-Ed now creates missing intermediate directories when writing to a file.
 
 It has been documented that 'e' creates an empty buffer if file does not exist.
 
