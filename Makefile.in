@@ -34,7 +34,8 @@ main.o : main.c
 
 # prevent 'make' from trying to remake source files
 $(VPATH)/configure $(VPATH)/Makefile.in $(VPATH)/doc/$(pkgname).texi : ;
-%.h %.c : ;
+MAKEFLAGS += -r
+.SUFFIXES :
 
 $(objs)       : Makefile ed.h
 carg_parser.o : carg_parser.h

@@ -19,9 +19,7 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 #include "ed.h"
 
@@ -291,54 +289,16 @@ int read_file( const char * const filename, const int addr,
            ( fp = fopen( filename, "r" ) ) && read_onlyp && !modified() )
     *read_onlyp = true;
   if( !fp )
-    {
-    show_strerror( filename, errno );
-    set_error_msg( "Cannot open input file" );
-    return -1;
-    }
+    { show_strerror( filename, errno );
+      set_error_msg( "Cannot open input file" ); return -1; }
   const long size = read_stream( filename, fp, addr );	/* file size in bytes */
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -2;
   if( ret != 0 )
-    {
-    show_strerror( filename, errno );
-    set_error_msg( "Cannot close input file" );
-    return -2;
-    }
+    { show_strerror( filename, errno );
+      set_error_msg( "Cannot close input file" ); return -2; }
   if( !scripted() ) printf( "%lu\n", size );
   return current_addr() - addr;	/* current_addr updated by add_line_node */
-  }
-
-
-static bool make_dirs( const char * const name )
-  {
-  int i = strlen( name );
-  while( i > 0 && name[i-1] != '/' ) --i;	/* remove last component */
-  while( i > 0 && name[i-1] == '/' ) --i;	/* remove slash(es) */
-  if( i <= 0 ) return true;			/* dirname is '/' or empty */
-  const int dirsize = i;	/* size of dirname without trailing slash */
-  char * const partial = (char *)malloc( dirsize + 1 );
-  if( !partial ) return false;
-
-  for( i = 0; i < dirsize; )
-    {
-    while( i < dirsize && name[i] == '/' ) ++i;
-    const int first = i;
-    while( i < dirsize && name[i] != '/' ) ++i;
-    if( first < i )
-      {
-      memcpy( partial, name, i ); partial[i] = 0;
-      const unsigned mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
-      struct stat st;
-      if( stat( partial, &st ) == 0 )
-        { if( !S_ISDIR( st.st_mode ) )
-            { free( partial ); errno = ENOTDIR; return false; } }
-      else if( mkdir( partial, mode ) != 0 && errno != EEXIST )
-        { free( partial ); return false; }
-      /* if EEXIST, another process created the dir */
-      }
-    }
-  free( partial ); return true;
   }
 
 
@@ -383,13 +343,7 @@ int write_file( const char * const filename, const char * const mode,
   int ret;
 
   if( *filename == '!' ) fp = popen( filename + 1, "w" );
-  else
-    {
-    if( !make_dirs( filename ) )
-      { show_strerror( filename, errno );
-        set_error_msg( "Error creating intermediate directory" ); return -1; }
-    fp = fopen( filename, mode );
-    }
+  else fp = fopen( filename, mode );
   if( !fp )
     { show_strerror( filename, errno );
       set_error_msg( "Cannot open output file" ); return -1; }

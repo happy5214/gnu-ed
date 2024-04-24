@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.20, 19 January 2024).
+This manual is for GNU ed (version 1.20.1, 14 February 2024).
 
 * Menu:
 
@@ -887,13 +887,12 @@ parenthesis).
      the addressed lines not matching the regular expression RE.
 
 '(1,$)w FILE'
-     Writes the addressed lines to FILE, automatically creating any missing
-     parent directories. Any previous contents of FILE are lost without
-     warning. If there is no default filename, then the default filename is
-     set to FILE, otherwise it is unchanged. If no filename is specified,
-     then the default filename is used. If the whole buffer is written,
-     then the buffer modified flag is cleared. The current address is
-     unchanged.
+     Writes the addressed lines to FILE. Any previous contents of FILE are
+     lost without warning. If there is no default filename, then the
+     default filename is set to FILE, otherwise it is unchanged. If no
+     filename is specified, then the default filename is used. If the whole
+     buffer is written, then the buffer modified flag is cleared. The
+     current address is unchanged.
 
      If FILE is prefixed with a bang (!), then it is interpreted as a shell
      command and the addressed lines are written to its standard input,
@@ -1559,19 +1558,19 @@ use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview1764
-Node: Introduction to line editing4668
-Node: Invoking ed11935
-Node: Line addressing15812
-Node: Regular expressions19845
-Node: Commands26030
-Ref: print suffixes26365
-Ref: shell escape command38821
-Node: The 's' Command40125
-Node: Limitations43040
-Node: Diagnostics44063
-Node: Problems44898
-Node: GNU Free Documentation License45433
+Node: Overview1767
+Node: Introduction to line editing4671
+Node: Invoking ed11938
+Node: Line addressing15815
+Node: Regular expressions19848
+Node: Commands26033
+Ref: print suffixes26368
+Ref: shell escape command38764
+Node: The 's' Command40068
+Node: Limitations42983
+Node: Diagnostics44006
+Node: Problems44841
+Node: GNU Free Documentation License45376
 
 End Tag Table
 
