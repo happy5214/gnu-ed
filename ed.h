@@ -1,7 +1,7 @@
 /* Global declarations for the ed editor.  */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2024 Antonio Diaz Diaz.
+   Copyright (C) 2006-2025 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,10 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __cplusplus
-enum Bool { false = 0, true = 1 };
-typedef enum Bool bool;
-#endif
+#include <stdbool.h>
 
 enum Pflags			/* print suffixes */
   {

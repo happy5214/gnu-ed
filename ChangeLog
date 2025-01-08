@@ -1,3 +1,14 @@
+2025-01-05  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.21 released.
+	* io.c (read_file, write_file): Ignore exit status of shell command.
+	  Bug introduced in version 1.6. (Reported by Andrew L. Moore).
+	* ed.h: Replace enum Bool with stdbool.h to fix compilation in C23.
+	  (Reported by Alexander Jones).
+	* io.c (read_stream): Suppress 'Newline inserted/appended' with '-s'.
+	  (Reported by Artyom Bologov).
+	* ed.texi: New chapter 'Syntax of command-line arguments'.
+
 2024-04-22  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.20.2 released.
@@ -14,16 +25,16 @@
 	* Version 1.20 released.
 	* Implement options '+line', '+/RE', and '+?RE'.
 	  (Suggested by Matthew Polk and John Cowan).
-	* main.c: New option '--unsafe-names'.
+	* New option '--unsafe-names'.
+	* main.c: (may_access_filename): Reject file names ending with a slash.
 	  (print_filename): New function for file names with control chars.
-	  (may_access_filename): Reject file names ending with a slash.
 	* buffer.c (warned, set_warned): New functions.
 	* main_loop.c: Intervening cmds don't make a second 'e' or 'q' fail.
 	  (get_filename): Add tilde expansion. (Suggested by John Cowan).
 	  Warn on first modification of buffer loaded from read-only file.
 	  (Suggested by Dan Jacobson).
 	* io.c (write_file): Create missing intermediate directories.
-	* ed.texi: Improve description of commands 'e', 'f', 'q'.
+	* ed.texi: Improve descriptions of commands 'e', 'f', 'q'.
 	* main.c, ed.texi: Improve description of exit status.
 	* configure, Makefile.in: New variable 'MAKEINFO'.
 	* INSTALL: Document use of CFLAGS+='--std=c99 -D_POSIX_C_SOURCE=2'.
@@ -46,6 +57,7 @@
 2022-02-04  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.18 released.
+	* New option '--strip-trailing-cr'.
 	* main_loop.c (get_shell_command): Flush stdout after printing cmd.
 	  (Reported by Sören Tempel).
 	* signal.c (sighup_handler): Fix a memory leak just before exiting.
@@ -57,7 +69,6 @@
 	  (Reported by Martin Thomsen).
 	* main_loop.c, regex.c: Implement case-insensitive REs.
 	* regex.c (compile_regex): Don't overwrite previous regex if error.
-	* main.c: New option '--strip-trailing-cr'.
 	* buffer.c (push_undo_atom): Fail if stack grows larger than INT_MAX.
 	  (too_many_lines): Fail if buffer grows larger than INT_MAX lines.
 	* global.c (set_active_node): Fail if list grows larger than INT_MAX.
@@ -74,8 +85,7 @@
 	* Version 1.17 released.
 	* main_loop.c (exec_global): Make commands 'q' and 'Q' work in a
 	  global command. (Reported by J. A. Harris).
-	* main.c: New option '-E, --extended-regexp'.
-	  (Suggested by Shawn Wagner).
+	* New option '-E, --extended-regexp'. (Suggested by Shawn Wagner).
 	* io.c (read_stream_line, write_stream): Add filename parameter.
 	  Print the file name in case of error. (Reported by Dan Jacobson).
 	* global.c: Integrate 'resize_line_buffer' into 'set_active_node'.
@@ -220,7 +230,7 @@
 	  in the list were ignored).
 	* main_loop.c (exec_command): Fix command 'e'.
 	  (It quitted when invoked a second time with a modified buffer).
-	* main.c: New option '-r, --restricted'.
+	* New option '-r, --restricted'.
 	* 'red' has been converted to a script invoking 'ed --restricted'.
 	* Description of ed in the manual has been changed.
 	* testsuite: Modify some tests and remove obsolete POSIX tests.
@@ -282,7 +292,7 @@
 2007-08-18  Antonio Diaz Diaz  <ant_diaz@teleline.es>
 
 	* Version 0.8 released.
-	* check.sh: Testsuite exits unsuccesfully in case of error.
+	* check.sh: Exit unsuccesfully in case of error.
 	* ed.1: Fix some minor problems in the manual page.
 	* ed.texinfo: Add 21 kB of legalese (fdl.texinfo).
 
@@ -319,8 +329,7 @@
 	* main_loop.c (exec_command): Modify commands 'c' and 'i' to treat
 	  address 0 as a synonym for address 1, as per POSIX.
 	* The pause mode has been removed.
-	* main.c: New option '-l, --loose-exit-status'.
-	* main.c: New option '-v, --verbose'.
+	* New options '-l, --loose-exit-status' and '-v, --verbose'.
 	* carg_parser.c: New argument parser that replaces 'getopt_long'.
 	* 'configure' and 'Makefile.in' have been replaced.
 	* Remove recursive make for testsuite.
@@ -378,7 +387,7 @@ Dec 1993  François Pinard  <pinard@icule>
 
 Copyright (C) 1993 François Pinard
 Copyright (C) 1994 Andrew L. Moore
-Copyright (C) 2006-2024 Antonio Diaz Diaz.
+Copyright (C) 2006-2025 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable, but just
 in case, you have unlimited permission to copy, distribute, and modify it.
