@@ -1,7 +1,7 @@
 /* io.c: i/o routines for the ed line editor */
 /* GNU ed - The GNU line editor.
    Copyright (C) 1993, 1994 Andrew L. Moore, Talke Studio
-   Copyright (C) 2006-2024 Antonio Diaz Diaz.
+   Copyright (C) 2006-2025 Antonio Diaz Diaz.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -263,10 +263,11 @@ static long read_stream( const char * const filename, FILE * const fp,
       }
     enable_interrupts();
     }
-  if( addr && appended && total_size && o_unterminated_last_line )
-    fputs( "Newline inserted\n", stdout );		/* before stream */
-  else if( newline_added && ( !appended || !isbinary() ) )
-    fputs( "Newline appended\n", stdout );		/* after stream */
+  if( !scripted() )
+    { if( addr && appended && total_size && o_unterminated_last_line )
+        fputs( "Newline inserted\n", stdout );		/* before stream */
+      else if( newline_added && ( !appended || !isbinary() ) )
+        fputs( "Newline appended\n", stdout ); }	/* after stream */
   if( !appended && isbinary() && !o_isbinary && newline_added )
     ++total_size;
   if( appended && isbinary() && ( newline_added || total_size == 0 ) )
@@ -294,7 +295,7 @@ int read_file( const char * const filename, const int addr,
   const long size = read_stream( filename, fp, addr );	/* file size in bytes */
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -2;
-  if( ret != 0 )
+  if( ret < 0 )
     { show_strerror( filename, errno );
       set_error_msg( "Cannot close input file" ); return -2; }
   if( !scripted() ) printf( "%lu\n", size );
@@ -350,7 +351,7 @@ int write_file( const char * const filename, const char * const mode,
   const long size = write_stream( filename, fp, from, to );	/* bytes written */
   if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
   if( size < 0 ) return -1;
-  if( ret != 0 )
+  if( ret < 0 )
     { show_strerror( filename, errno );
       set_error_msg( "Cannot close output file" ); return -1; }
   if( !scripted() ) printf( "%lu\n", size );

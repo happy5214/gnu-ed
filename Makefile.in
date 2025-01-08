@@ -3,8 +3,8 @@ DISTNAME = $(pkgname)-$(pkgversion)
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL) -m 755
 INSTALL_SCRIPT = $(INSTALL) -m 755
-INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIR = $(INSTALL) -d -m 755
+INSTALL_DATA = $(INSTALL) -m 644
 SHELL = /bin/sh
 CAN_RUN_INSTALLINFO = $(SHELL) -c "install-info --version" > /dev/null 2>&1
 

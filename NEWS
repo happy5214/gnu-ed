@@ -1,42 +1,12 @@
-Changes in version 1.20.2:
+Changes in version 1.21:
 
-A bug has been fixed that made global commands like 'g/x/s/x/x', with the last
-delimiter omitted, print every substituted line twice.
-(Bug introduced in 1.18. Reported by Douglas McIlroy).
+'r !command' and 'w !command' ignore again the exit status of 'command'.
+Bug introduced in version 1.6. (Reported by Andrew L. Moore).
 
-New command-line options '+line', '+/RE', and '+?RE' have been implemented to
-set the current line to the line number specified or to the first or last line
-matching the regular expression 'RE'.
-(Suggested by Matthew Polk and John Cowan).
+Include stdbool.h instead of defining bool to fix compilation in C23.
+(Reported by Alexander Jones).
 
-File names containing control characters 1 to 31 are now rejected unless they
-are allowed with the command-line option '--unsafe-names'.
+The messages "Newline inserted" and "Newline appended" are now suppressed in
+scripted mode (-s). (Reported by Artyom Bologov).
 
-File names containing control characters 1 to 31 are now printed using octal
-escape sequences.
-
-Ed now rejects file names ending with a slash.
-
-Intervening commands that don't set the modified flag no longer make a second
-'e' or 'q' command fail with a 'buffer modified' warning.
-
-Tilde expansion is now performed on file names supplied to commands; if a file
-name starts with '~/', the tilde (~) is expanded to the contents of the
-variable HOME. (Suggested by John Cowan).
-
-Ed now warns the first time that a command modifies a buffer loaded from a
-read-only file. (Suggested by Dan Jacobson).
-
-It has been documented that 'e' creates an empty buffer if file does not exist.
-
-It has been documented that 'f' sets the default filename, whether or not its
-argument names an existing file.
-
-The description of the exit status has been improved in '--help' and in the
-manual.
-
-The variable MAKEINFO has been added to configure and Makefile.in.
-
-It has been documented in INSTALL that when choosing a C standard, the POSIX
-features need to be enabled explicitly:
-  ./configure CFLAGS+='--std=c99 -D_POSIX_C_SOURCE=2'
+The chapter 'Syntax of command-line arguments' has been added to the manual.

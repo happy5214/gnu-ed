@@ -1,6 +1,6 @@
 #! /bin/sh
 # check script for GNU ed - The GNU line editor
-# Copyright (C) 2006-2024 Antonio Diaz Diaz.
+# Copyright (C) 2006-2025 Antonio Diaz Diaz.
 #
 # This script is free software; you have unlimited permission
 # to copy, distribute, and modify it.
@@ -21,8 +21,8 @@ if [ -d tmp ] ; then rm -rf tmp ; fi
 mkdir tmp
 cd "${objdir}"/tmp || framework_failure
 
-cat "${testdir}"/test.txt > test.txt || framework_failure
-cat "${testdir}"/test.bin > test.bin || framework_failure
+cp "${testdir}"/test.txt test.txt || framework_failure
+cp "${testdir}"/test.bin test.bin || framework_failure
 touch empty || framework_failure			# used also by r1.ed
 fail=0
 test_failed() { fail=1 ; printf " $1" ; [ -z "$2" ] || printf "($2)" ; }
@@ -56,7 +56,7 @@ echo "q" | "${ED}" -q --unsafe-names 'name_with_bell.txt' || test_failed $LINEN
 if [ ${fail} != 0 ] ; then echo ; fi
 
 # Run the .err scripts first with a regular file connected to standard
-# input, since these don't generate output; they exit with non-zero status.
+# input, since these don't generate output; they exit with nonzero status.
 for i in "${testdir}"/*.err ; do
 	if "${ED}" -s test.txt < "$i" > /dev/null 2>&1 ; then
 		echo "*** The script $i exited abnormally ***"
@@ -75,7 +75,7 @@ for i in "${testdir}"/*.err ; do
 	fi
 done
 
-# Run the .err scripts again as pipes - these should exit with non-zero
+# Run the .err scripts again as pipes - these should exit with nonzero
 # status without altering the contents of the buffer; the produced
 # 'out.ro' must be identical to 'test.txt'.
 for i in "${testdir}"/*.err ; do
@@ -123,7 +123,7 @@ if [ ${fail} = 0 ] ; then
 	cd "${objdir}" && rm -r tmp
 else
 	echo "tests failed."
-	echo "Please, send a bug report to bug-ed@gnu.org."
+	echo "Please, send a bug report to bug-ed@gnu.org"
 	echo "Include the (compressed) contents of '${objdir}/tmp' in the report."
 fi
 exit ${fail}

@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 22 April 2024
-@set VERSION 1.20.2
+@set UPDATED 5 January 2025
+@set VERSION 1.21
 
 @dircategory Basics
 @direntry
@@ -15,7 +15,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1993, 1994, 2006-2024 Free Software Foundation, Inc.
+Copyright @copyright{} 1993, 1994, 2006-2025 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -48,6 +48,7 @@ This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 * Overview::                        Overview of the @command{ed} command
 * Introduction to line editing::    Getting started with GNU @command{ed}
 * Invoking ed::                     Command-line interface
+* Argument syntax::                 By convention, options start with a hyphen
 * Line addressing::                 Specifying lines/ranges in the buffer
 * Regular expressions::             Patterns for selecting text
 * Commands::                        Commands recognized by GNU @command{ed}
@@ -59,6 +60,8 @@ This manual is for GNU ed (version @value{VERSION}, @value{UPDATED}).
 @end menu
 
 @sp 1
+@noindent
+Written by Andrew L. Moore, François Pinard, and Antonio Diaz Diaz
 @insertcopying
 @end ifnottex
 
@@ -238,7 +241,7 @@ Need we say? It's good practice to frequently write the buffer contents,
 since unwritten changes to the buffer will be lost when we exit @command{ed}.
 
 The sample sessions below illustrate some basic concepts of line editing
-with @command{ed}. We begin by creating a file, @samp{sonnet}, with some
+with @command{ed}. We begin by creating a file, @file{sonnet}, with some
 help from Shakespeare. As with the shell, all input to @command{ed} must
 be followed by a @key{newline} character. Commands beginning with
 @samp{#} are taken as comments and ignored. Input mode lines that begin
@@ -254,7 +257,7 @@ Clouds and eclipses stain both moon and sun,
 And loathsome canker lives in sweetest bud.
 .
 # Entering a single period on a line returns @command{ed} to command mode.
-# Now write the buffer to the file @samp{sonnet} and quit:
+# Now write the buffer to the file @file{sonnet} and quit:
 w sonnet
 183
 # @command{ed} reports the number of characters written.
@@ -265,7 +268,7 @@ total 2
 $
 @end example
 
-In the next example, some typos are corrected in the file @samp{sonnet}.
+In the next example, some typos are corrected in the file @file{sonnet}.
 
 @example
 $ ed sonnet
@@ -383,11 +386,8 @@ to the first line matching the regular expression @var{re}, or by
 exit status 1 unless the option @option{-l} is specified and standard input
 is not a regular file.
 
-@command{ed} supports the following
-@uref{http://www.nongnu.org/arg-parser/manual/arg_parser_manual.html#Argument-syntax,,options}:
-@ifnothtml
-@xref{Argument syntax,,,arg_parser}.
-@end ifnothtml
+@noindent
+@command{ed} supports the following options: @xref{Argument syntax}.
 
 @table @code
 @item -h
@@ -435,7 +435,8 @@ current directory and execution of shell commands.
 @item -s
 @itemx --script
 Suppress the printing of byte counts by @samp{e}, @samp{E}, @samp{r}, and
-@samp{w} commands, and the @samp{!} prompt after a @samp{!} command. This
+@samp{w} commands, and the @samp{!} prompt after a @samp{!} command.
+Suppress also the messages "Newline inserted" and "Newline appended". This
 option does not suppress diagnostic messages written to standard error (see
 @option{-q} above). @option{-s} may be useful if @command{ed}'s standard
 input is from a script.
@@ -464,6 +465,53 @@ Exit status: 0 for a normal exit, 1 for environmental problems
 2 for problems with the input file (file not found, buffer modified,
 I/O errors), 3 for an internal consistency error (e.g., bug) which caused
 ed to panic.
+
+
+@node Argument syntax
+@chapter Syntax of command-line arguments
+@cindex argument syntax
+
+POSIX recommends these conventions for command-line arguments.
+
+@itemize @bullet
+@item A command-line argument is an option if it begins with a hyphen
+(@samp{-}).
+
+@item Option names are single alphanumeric characters.
+
+@item Certain options require an argument.
+
+@item An option and its argument may or may not appear as separate tokens.
+(In other words, the whitespace separating them is optional).
+Thus, @w{@option{-o foo}} and @option{-ofoo} are equivalent.
+
+@item One or more options without arguments, followed by at most one option
+that takes an argument, may follow a hyphen in a single token.
+Thus, @option{-abc} is equivalent to @w{@option{-a -b -c}}.
+
+@item Options typically precede other non-option arguments.
+
+@item The argument @samp{--} terminates all options; any following arguments
+are treated as non-option arguments, even if they begin with a hyphen.
+
+@item A token consisting of a single hyphen character is interpreted as an
+ordinary non-option argument. By convention, it is used to specify standard
+input, standard output, or a file named @samp{-}.
+@end itemize
+
+@noindent
+GNU adds @dfn{long options} to these conventions:
+
+@itemize @bullet
+@item A long option consists of two hyphens (@samp{--}) followed by a name
+made of alphanumeric characters and hyphens. Option names are typically one
+to three words long, with hyphens to separate words. Abbreviations can be
+used for the long option names as long as the abbreviations are unique.
+
+@item A long option and its argument may or may not appear as separate
+tokens. In the latter case they must be separated by an equal sign @samp{=}.
+Thus, @w{@option{--foo bar}} and @option{--foo=bar} are equivalent.
+@end itemize
 
 
 @node Line addressing

@@ -1,3 +1,5 @@
+See the file INSTALL for compilation and installation instructions.
+
 Description
 
 GNU ed is a line-oriented text editor. It is used to create, display, modify
@@ -10,16 +12,15 @@ editors such as GNU Emacs or GNU Moe.
 
 Extensions to and deviations from the POSIX standard are described below.
 
-See the file INSTALL for compilation and installation instructions.
-
-Try 'ed --help' for usage instructions.
-
 Report bugs to bug-ed@gnu.org
 
 Ed home page: http://www.gnu.org/software/ed/ed.html
 
 For a description of the ed algorithm, see Brian W. Kernighan and
 P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
+
+Ed uses Arg_parser for command-line argument parsing:
+http://www.nongnu.org/arg-parser/arg_parser.html
 
 GNU ed(1) is not strictly POSIX compliant, as described in the
 POSIX 1003.1-2004 document. The following is a summary of omissions and
@@ -103,7 +104,7 @@ The test file extensions have the following meanings:
 
 The output of the .ed scripts is written to files with .o extension and
 compared with their corresponding .r result files. The .err scripts should
-exit with non-zero status without altering the contents of the buffer.
+exit with nonzero status without altering the contents of the buffer.
 
 If any test fails, the error messages look like:
 
@@ -113,7 +114,7 @@ or:
 
 
 Copyright (C) 1993, 1994 Andrew L. Moore
-Copyright (C) 2006-2024 Antonio Diaz Diaz.
+Copyright (C) 2006-2025 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute, and modify it.
