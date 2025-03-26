@@ -230,7 +230,7 @@ bool build_active_list( const char ** const ibufpp, const int first_addr,
   const regex_t * const exp = get_compiled_regex( ibufpp );
   if( !exp ) return false;
   clear_active_list();
-  const line_t * lp = search_line_node( first_addr );
+  const line_node * lp = search_line_node( first_addr );
   for( addr = first_addr; addr <= second_addr; ++addr, lp = lp->q_forw )
     {
     char * const s = get_sbuf_line( lp );
@@ -256,7 +256,7 @@ int next_matching_node_addr( const char ** const ibufpp )
     addr = ( forward ? inc_addr( addr ) : dec_addr( addr ) );
     if( addr )
       {
-      const line_t * const lp = search_line_node( addr );
+      const line_node * const lp = search_line_node( addr );
       char * const s = get_sbuf_line( lp );
       if( !s ) return -1;
       if( isbinary() ) nul_to_newline( s, lp->len );
@@ -353,7 +353,7 @@ static int replace_matched_text( char ** txtbufp, int * const txtbufszp,
 /* Produce new text with one or all matches replaced in a line.
    Return size of the new line text, 0 if no change, -1 if error */
 static int line_replace( char ** txtbufp, int * const txtbufszp,
-                         const line_t * const lp, const int snum )
+                         const line_node * const lp, const int snum )
   {
   enum { se_max = 30 };	/* max subexpressions in a regular expression */
   regmatch_t rm[se_max];
@@ -418,14 +418,14 @@ bool search_and_replace( const int first_addr, const int second_addr,
 
   for( lc = 0; lc <= second_addr - first_addr; ++lc, ++addr )
     {
-    const line_t * const lp = search_line_node( addr );
+    const line_node * const lp = search_line_node( addr );
     const int size = line_replace( &txtbuf, &txtbufsz, lp, snum );
     if( size < 0 ) return false;
     if( size )
       {
       const char * txt = txtbuf;
       const char * const eot = txtbuf + size;
-      undo_t * up = 0;
+      undo_atom * up = 0;
       disable_interrupts();
       if( !delete_lines( addr, addr, isglobal ) )
         { enable_interrupts(); return false; }

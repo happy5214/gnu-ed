@@ -79,6 +79,7 @@ static void show_help( void )
   printf( "\nThe file name may be preceded by '+line', '+/RE', or '+?RE' to set the\n"
           "current line to the line number specified or to the first or last line\n"
           "matching the regular expression 'RE'.\n"
+          "\nThe environment variable LINES can be used to set the initial window size.\n"
           "\nOptions:\n"
           "  -h, --help                 display this help and exit\n"
           "  -V, --version              output version information and exit\n"

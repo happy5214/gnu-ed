@@ -84,10 +84,10 @@ bool set_prompt( const char * const s )
 void set_verbose( void ) { verbose = true; }
 
 
-static const line_t * mark[26];			/* line markers */
+static const line_node * mark[26];		/* line markers */
 static int markno;				/* line marker count */
 
-static bool mark_line_node( const line_t * const lp, int c )
+static bool mark_line_node( const line_node * const lp, int c )
   {
   c -= 'a';
   if( c < 0 || c >= 26 ) { set_error_msg( inv_mark_ch ); return false; }
@@ -97,7 +97,7 @@ static bool mark_line_node( const line_t * const lp, int c )
   }
 
 
-void unmark_line_node( const line_t * const lp )
+void unmark_line_node( const line_node * const lp )
   {
   int i;
   for( i = 0; markno && i < 26; ++i )
@@ -712,7 +712,7 @@ static int exec_global( const char ** const ibufpp, const int pflags,
   clear_undo_stack();
   while( true )
     {
-    const line_t * const lp = next_active_node();
+    const line_node * const lp = next_active_node();
     if( !lp ) break;
     set_current_addr( get_line_node_addr( lp ) );
     if( current_addr() < 0 ) return ERR;

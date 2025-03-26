@@ -24,14 +24,14 @@
 #include "ed.h"
 
 
-static const line_t * unterminated_line = 0;	/* last line has no '\n' */
+static const line_node * unterminated_line = 0;	/* last line has no '\n' */
 static int linenum_ = 0;			/* script line number */
 
 int linenum( void ) { return linenum_; }
 
 void reset_unterminated_line( void ) { unterminated_line = 0; }
 
-void unmark_unterminated_line( const line_t * const lp )
+void unmark_unterminated_line( const line_node * const lp )
   { if( unterminated_line == lp ) unterminated_line = 0; }
 
 static bool unterminated_last_line( void )
@@ -80,8 +80,8 @@ static void print_line( const char * p, int len, const int pflags )
 /* print a range of lines to stdout */
 bool print_lines( int from, const int to, const int pflags )
   {
-  line_t * const ep = search_line_node( inc_addr( to ) );
-  line_t * bp = search_line_node( from );
+  line_node * const ep = search_line_node( inc_addr( to ) );
+  line_node * bp = search_line_node( from );
 
   if( !from ) { invalid_address(); return false; }
   while( bp != ep )
@@ -234,8 +234,8 @@ static const char * read_stream_line( const char * const filename,
 static long read_stream( const char * const filename, FILE * const fp,
                          const int addr )
   {
-  line_t * lp = search_line_node( addr );
-  undo_t * up = 0;
+  line_node * lp = search_line_node( addr );
+  undo_atom * up = 0;
   long total_size = 0;		/* number of bytes read */
   const bool o_isbinary = isbinary();
   const bool appended = ( addr == last_addr() );
@@ -309,7 +309,7 @@ int read_file( const char * const filename, const int addr,
 static long write_stream( const char * const filename, FILE * const fp,
                           int from, const int to )
   {
-  line_t * lp = search_line_node( from );
+  line_node * lp = search_line_node( from );
   long size = 0;		/* number of bytes written */
 
   while( from && from <= to )

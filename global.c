@@ -26,7 +26,8 @@
 #include "ed.h"
 
 
-static const line_t **active_list = 0;	/* list of lines active in a global command */
+/* list of lines active in a global command */
+static const line_node **active_list = 0;
 static int active_size = 0;	/* size (in bytes) of active_list */
 static int active_len = 0;	/* number of lines in active_list */
 static int active_idx = 0;	/* active_list index ( non-decreasing ) */
@@ -45,7 +46,7 @@ void clear_active_list( void )
 
 
 /* return the next global-active line node */
-const line_t * next_active_node( void )
+const line_node * next_active_node( void )
   {
   while( active_idx < active_len && !active_list[active_idx] )
     ++active_idx;
@@ -54,9 +55,9 @@ const line_t * next_active_node( void )
 
 
 /* add a line node to the global-active list */
-bool set_active_node( const line_t * const lp )
+bool set_active_node( const line_node * const lp )
   {
-  const unsigned min_size = ( active_len + 1 ) * sizeof (line_t **);
+  const unsigned min_size = ( active_len + 1 ) * sizeof (line_node **);
   if( (unsigned)active_size < min_size )
     {
     if( min_size >= INT_MAX )
@@ -71,7 +72,7 @@ bool set_active_node( const line_t * const lp )
       { show_strerror( 0, errno );
         set_error_msg( mem_msg ); enable_interrupts(); return false; }
     active_size = new_size;
-    active_list = (const line_t **)new_buf;
+    active_list = (const line_node **)new_buf;
     enable_interrupts();
     }
   active_list[active_len++] = lp;
@@ -80,7 +81,7 @@ bool set_active_node( const line_t * const lp )
 
 
 /* remove a range of lines from the global-active list */
-void unset_active_nodes( const line_t * bp, const line_t * const ep )
+void unset_active_nodes( const line_node * bp, const line_node * const ep )
   {
   while( bp != ep )
     {

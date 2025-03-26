@@ -1,3 +1,12 @@
+2025-03-24  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.21.1 released.
+	* buffer.c: Remove unused <sys/file.h> and <sys/stat.h>.
+	  (Reported by Michael Mikonos and Alexander Jones).
+	* signal.c (window_lines): Read initial size from LINES.
+	  (Suggested by Artyom Bologov).
+	* Rename 'line_t' to 'line_node' and 'undo_t' to 'undo_atom'.
+
 2025-01-05  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.21 released.
@@ -328,8 +337,9 @@
 	* signal.c: Fix signal handling for SIGINT.
 	* main_loop.c (exec_command): Modify commands 'c' and 'i' to treat
 	  address 0 as a synonym for address 1, as per POSIX.
-	* The pause mode has been removed.
-	* New options '-l, --loose-exit-status' and '-v, --verbose'.
+	* The pause mode has been removed. (Suggested by Karl Berry).
+	* New option '-l, --loose-exit-status'. (Suggested by Karl Berry).
+	* New option '-v, --verbose'.
 	* carg_parser.c: New argument parser that replaces 'getopt_long'.
 	* 'configure' and 'Makefile.in' have been replaced.
 	* Remove recursive make for testsuite.

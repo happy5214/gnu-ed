@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 5 January 2025
-@set VERSION 1.21
+@set UPDATED 24 March 2025
+@set VERSION 1.21.1
 
 @dircategory Basics
 @direntry
@@ -1057,8 +1057,10 @@ overwritten by subsequent @samp{c}, @samp{d}, @samp{j}, @samp{s}, or
 Scroll. Prints @var{n} lines at a time starting at addressed line, and sets
 window size to @var{n}. If @var{n} is not specified, then the current window
 size is used. Window size defaults to screen size minus two lines, or to 22
-if screen size can't be determined. The current address is set to the
-address of the last line printed.
+if screen size can't be determined. The environment variable @var{LINES} can
+be used to set the initial window size. @var{LINES} and @var{n} are not
+limited by screen size. The current address is set to the address of the
+last line printed.
 
 @anchor{shell escape command}
 @item !@var{command}

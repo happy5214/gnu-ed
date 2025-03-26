@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.21, 5 January 2025).
+This manual is for GNU ed (version 1.21.1, 24 March 2025).
 
 * Menu:
 
@@ -968,8 +968,10 @@ parenthesis).
      Scroll. Prints N lines at a time starting at addressed line, and sets
      window size to N. If N is not specified, then the current window size
      is used. Window size defaults to screen size minus two lines, or to 22
-     if screen size can't be determined. The current address is set to the
-     address of the last line printed.
+     if screen size can't be determined. The environment variable LINES can
+     be used to set the initial window size. LINES and N are not limited by
+     screen size. The current address is set to the address of the last
+     line printed.
 
 '!COMMAND'
      Shell escape command. Executes COMMAND via 'sh'. If the first
@@ -1603,20 +1605,20 @@ use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview1906
-Node: Introduction to line editing4810
-Node: Invoking ed12077
-Node: Argument syntax15999
-Node: Line addressing17761
-Node: Regular expressions21798
-Node: Commands27983
-Ref: print suffixes28318
-Ref: shell escape command40714
-Node: The 's' Command42018
-Node: Limitations44933
-Node: Diagnostics45956
-Node: Problems46793
-Node: GNU Free Documentation License47328
+Node: Overview1907
+Node: Introduction to line editing4811
+Node: Invoking ed12078
+Node: Argument syntax16000
+Node: Line addressing17762
+Node: Regular expressions21799
+Node: Commands27984
+Ref: print suffixes28319
+Ref: shell escape command40844
+Node: The 's' Command42148
+Node: Limitations45063
+Node: Diagnostics46086
+Node: Problems46923
+Node: GNU Free Documentation License47458
 
 End Tag Table
 

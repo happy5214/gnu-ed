@@ -1,12 +1,7 @@
-Changes in version 1.21:
+Changes in version 1.21.1:
 
-'r !command' and 'w !command' ignore again the exit status of 'command'.
-Bug introduced in version 1.6. (Reported by Andrew L. Moore).
+Fix a compilation failure caused by the inclusion of the unused and obsolete
+header <sys/file.h>. (Reported by Michael Mikonos).
 
-Include stdbool.h instead of defining bool to fix compilation in C23.
-(Reported by Alexander Jones).
-
-The messages "Newline inserted" and "Newline appended" are now suppressed in
-scripted mode (-s). (Reported by Artyom Bologov).
-
-The chapter 'Syntax of command-line arguments' has been added to the manual.
+Ed now reads the initial window size for the z command from the environment
+variable LINES. (Suggested by Artyom Bologov).

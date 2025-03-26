@@ -27,23 +27,23 @@ enum Pflags			/* print suffixes */
   };
 
 
-typedef struct line		/* Line node */
+typedef struct line_node		/* Line node */
   {
-  struct line * q_forw;
-  struct line * q_back;
+  struct line_node * q_forw;
+  struct line_node * q_back;
   long pos;			/* position of text in scratch buffer */
   int len;			/* length of line ('\n' is not stored) */
   }
-line_t;
+line_node;
 
 
-typedef struct
+typedef struct				/* Undo atom */
   {
   enum { UADD = 0, UDEL = 1, UMOV = 2, VMOV = 3 } type;
-  line_t * head;			/* head of list */
-  line_t * tail;			/* tail of list */
+  line_node * head;			/* head of list */
+  line_node * tail;			/* tail of list */
   }
-undo_t;
+undo_atom;
 
 #ifndef max
 #define max( a, b ) ( (( a ) > ( b )) ? ( a ) : ( b ) )
@@ -63,8 +63,8 @@ bool copy_lines( const int first_addr, const int second_addr, const int addr );
 int current_addr( void );
 int dec_addr( int addr );
 bool delete_lines( const int from, const int to, const bool isglobal );
-int get_line_node_addr( const line_t * const lp );
-char * get_sbuf_line( const line_t * const lp );
+int get_line_node_addr( const line_node * const lp );
+char * get_sbuf_line( const line_node * const lp );
 int inc_addr( int addr );
 int inc_current_addr( void );
 bool init_buffers( void );
@@ -79,22 +79,22 @@ bool open_sbuf( void );
 int path_max( const char * filename );
 bool put_lines( const int addr );
 const char * put_sbuf_line( const char * const buf, const int size );
-line_t * search_line_node( const int addr );
+line_node * search_line_node( const int addr );
 void set_binary( void );
 void set_current_addr( const int addr );
 void set_modified( const bool b );
 void set_warned( const bool b );
 bool yank_lines( const int from, const int to );
 void clear_undo_stack( void );
-undo_t * push_undo_atom( const int type, const int from, const int to );
+undo_atom * push_undo_atom( const int type, const int from, const int to );
 void reset_undo_state( void );
 bool undo( const bool isglobal );
 
 /* defined in global.c */
 void clear_active_list( void );
-const line_t * next_active_node( void );
-bool set_active_node( const line_t * const lp );
-void unset_active_nodes( const line_t * bp, const line_t * const ep );
+const line_node * next_active_node( void );
+bool set_active_node( const line_node * const lp );
+void unset_active_nodes( const line_node * bp, const line_node * const ep );
 
 /* defined in io.c */
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
@@ -107,7 +107,7 @@ int read_file( const char * const filename, const int addr,
 int write_file( const char * const filename, const char * const mode,
                 const int from, const int to );
 void reset_unterminated_line( void );
-void unmark_unterminated_line( const line_t * const lp );
+void unmark_unterminated_line( const line_node * const lp );
 
 /* defined in main.c */
 bool extended_regexp( void );
@@ -130,7 +130,7 @@ bool set_def_filename( const char * const s );
 void set_error_msg( const char * const msg );
 bool set_prompt( const char * const s );
 void set_verbose( void );
-void unmark_line_node( const line_t * const lp );
+void unmark_line_node( const line_node * const lp );
 
 /* defined in regex.c */
 bool build_active_list( const char ** const ibufpp, const int first_addr,

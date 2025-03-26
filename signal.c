@@ -33,8 +33,10 @@
 
 jmp_buf jmp_state;			/* jumps to main_loop */
 static int mutex = 0;			/* if > 0, signals stay pending */
+static int user_lines = -1;		/* LINES or argument of z command */
+					/* if > 0, overrides window_lines_ */
 static int window_lines_ = 22;		/* scroll lines set by sigwinch_handler */
-static int window_columns_ = 72;
+static int window_columns_ = 76;
 static bool sighup_pending = false;
 static bool sigint_pending = false;
 
@@ -106,7 +108,7 @@ static void sigwinch_handler( int signum )
     {
     /* Sanity check values of environment vars */
     if( ws.ws_row > 2 && ws.ws_row < 600 ) window_lines_ = ws.ws_row - 2;
-    if( ws.ws_col > 8 && ws.ws_col < 1800 ) window_columns_ = ws.ws_col - 8;
+    if( ws.ws_col > 8 && ws.ws_col < 1800 ) window_columns_ = ws.ws_col - 4;
     }
 #endif
   if( signum ) {}			/* keep compiler happy */
@@ -154,9 +156,26 @@ void set_signals( void )
   }
 
 
-void set_window_lines( const int lines ) { window_lines_ = lines; }
+void set_window_lines( const int lines ) { user_lines = lines; }
 int window_columns( void ) { return window_columns_; }
-int window_lines( void ) { return window_lines_; }
+
+
+int window_lines( void )
+  {
+  if( user_lines < 0 )				/* set initial size */
+    {
+    const char * const p = getenv( "LINES" );
+    if( p && p[0] )
+      {
+      char * tail;
+      errno = 0;
+      const long n = strtol( p, &tail, 10 );
+      if( errno == 0 && tail != p && n > 0 && n <= INT_MAX ) user_lines = n;
+      }
+    if( user_lines < 0 ) user_lines = 0;	/* LINES not found or invalid */
+    }
+  return ( user_lines > 0 ) ? user_lines : window_lines_;
+  }
 
 
 /* assure at least a minimum size for buffer 'buf' up to INT_MAX - 1 */
