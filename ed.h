@@ -37,9 +37,10 @@ typedef struct line_node		/* Line node */
 line_node;
 
 
-typedef struct				/* Undo atom */
+enum { UADD = 0, UDEL = 1, UMOV = 2, VMOV = 3 };
+typedef struct undo_atom		/* Undo atom */
   {
-  enum { UADD = 0, UDEL = 1, UMOV = 2, VMOV = 3 } type;
+  int type;
   line_node * head;			/* head of list */
   line_node * tail;			/* tail of list */
   }

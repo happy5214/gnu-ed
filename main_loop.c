@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "ed.h"
 
@@ -324,7 +325,7 @@ static bool get_third_addr( const char ** const ibufpp, int * const addr )
 
 
 /* set default range and return true if address range is valid */
-static bool check_addr_range( const int n, const int m, const int addr_cnt )
+static bool set_addr_range( const int n, const int m, const int addr_cnt )
   {
   if( addr_cnt == 0 ) { first_addr = n; second_addr = m; }
   if( first_addr < 1 || first_addr > second_addr || second_addr > last_addr() )
@@ -333,13 +334,13 @@ static bool check_addr_range( const int n, const int m, const int addr_cnt )
   }
 
 /* set defaults to current_addr and return true if address range is valid */
-static bool check_addr_range2( const int addr_cnt )
+static bool set_addr_range2( const int addr_cnt )
   {
-  return check_addr_range( current_addr(), current_addr(), addr_cnt );
+  return set_addr_range( current_addr(), current_addr(), addr_cnt );
   }
 
 /* set default second_addr and return true if second_addr is valid */
-static bool check_second_addr( const int addr, const int addr_cnt )
+static bool set_second_addr( const int addr, const int addr_cnt )
   {
   if( addr_cnt == 0 ) second_addr = addr;
   if( second_addr < 1 || second_addr > last_addr() )
@@ -424,9 +425,10 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
     sf_p = 0x02,	/* complement previous print suffix */
     sf_r = 0x04,	/* use regex of last search (if newer) */
     sf_none = 0x08	/* make sflags != 0 if no flags at all */
-    } sflags = 0;	/* if sflags != 0, repeat last substitution */
+    };
+  int sflags = 0;	/* if sflags != 0, repeat last substitution */
 
-  if( !check_addr_range2( addr_cnt ) ) return false;
+  if( !set_addr_range2( addr_cnt ) ) return false;
   do {
     bool error = false;
     if( **ibufpp >= '1' && **ibufpp <= '9' )
@@ -483,6 +485,68 @@ static bool command_s( const char ** const ibufpp, int * const pflagsp,
   }
 
 
+/* Return a tmpname in the form "${TMPDIR}/ed-<coded_pid>".
+   The pid is coded in little endian order.
+*/
+static const char * get_tmpname( const bool init )
+  {
+  static char * buf = 0;
+  static int bufsz = 0;
+  if( !buf && init )
+    {
+    enum { num_codes = 36 };
+    const char * const codes = "0123456789abcdefghijklmnopqrstuvwxyz";
+    const char * p = getenv( "TMPDIR" );
+    if( !p ) p = "/tmp";
+    const char * const prefix = "/ed-";
+    int pos = strlen( p ) + strlen( prefix );
+    if( !resize_buffer( &buf, &bufsz, pos + 7 + 1 ) ) return 0;
+    snprintf( buf, bufsz, "%s%s", p, prefix );
+    unsigned n = getpid();
+    do buf[pos++] = codes[n % num_codes]; while( n /= num_codes );
+    buf[pos] = 0;
+    }
+  return buf;
+  }
+
+
+static bool command_shell( const char ** const ibufpp, const int addr_cnt,
+                           const bool isglobal )
+  {
+  const char * fnp = get_shell_command( ibufpp );
+  if( !fnp ) return false;
+  if( addr_cnt == 0 )		/* shell escape command */
+    {
+    if( system( fnp + 1 ) < 0 )
+      { set_error_msg( "Can't create shell process" ); return false; }
+    if( !scripted() ) fputs( "!\n", stdout );
+    return true;
+    }
+  /* filter lines through command */
+  if( !set_addr_range2( addr_cnt ) ) return false;
+  const char * p;
+  for( p = fnp + 1; *p; ++p )
+    if( *p == '<' || *p == '>' )
+      { set_error_msg( "Redirection not allowed" ); return false; }
+  const char * const tmpname = get_tmpname( true );
+  if( !tmpname ) { set_error_msg( mem_msg ); return false; }
+  const int len = strlen( fnp ) + 3 + strlen( tmpname ) + 5 + 1;
+  char * command = (char *)malloc( len );
+  if( !command ) { set_error_msg( mem_msg ); return false; }
+  snprintf( command, len, "%s > %s 2>&1", fnp, tmpname );
+  if( write_file( command, "w", first_addr, second_addr ) < 0 )
+    { remove( tmpname ); return false; }
+  if( !isglobal ) clear_undo_stack();
+  if( !delete_lines( first_addr, second_addr, isglobal ) )
+    { remove( tmpname ); return false; }
+  const int line_count =
+    read_file( tmpname, current_addr() - ( current_addr() >= first_addr ), 0 );
+  if( current_addr() <= 0 && last_addr() > 0 ) set_current_addr( 1 );
+  remove( tmpname );
+  return line_count >= 0;
+  }
+
+
 static int exec_global( const char ** const ibufpp, const int pflags,
                         const bool interactive );
 
@@ -504,7 +568,7 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
               if( !append_lines( ibufpp, second_addr, false, isglobal ) )
                 return ERR;
               break;
-    case 'c': if( !check_addr_range2( addr_cnt ) ||
+    case 'c': if( !set_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
               if( !delete_lines( first_addr, second_addr, isglobal ) ||
@@ -512,7 +576,7 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
                                  current_addr() >= first_addr, isglobal ) )
                 return ERR;
               break;
-    case 'd': if( !check_addr_range2( addr_cnt ) ||
+    case 'd': if( !set_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
               if( !delete_lines( first_addr, second_addr, isglobal ) )
@@ -547,7 +611,7 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
     case 'V': if( isglobal )
                 { set_error_msg( "Cannot nest global commands" ); return ERR; }
               n = ( c == 'g' || c == 'G' );	/* mark matching lines */
-              if( !check_addr_range( 1, last_addr(), addr_cnt ) ||
+              if( !set_addr_range( 1, last_addr(), addr_cnt ) ||
                   !build_active_list( ibufpp, first_addr, second_addr, n ) )
                 return ERR;
               n = ( c == 'G' || c == 'V' );		/* interactive */
@@ -566,7 +630,7 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
               if( !append_lines( ibufpp, second_addr, true, isglobal ) )
                 return ERR;
               break;
-    case 'j': if( !check_addr_range( current_addr(), current_addr() + 1, addr_cnt ) ||
+    case 'j': if( !set_addr_range( current_addr(), current_addr() + 1, addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
               if( first_addr < second_addr &&
@@ -581,13 +645,13 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
     case 'l': n = pf_l; goto pflabel;
     case 'n': n = pf_n; goto pflabel;
     case 'p': n = pf_p;
-pflabel:      if( !check_addr_range2( addr_cnt ) ||
+pflabel:      if( !set_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags ) ||
                   !print_lines( first_addr, second_addr, pflags | n ) )
                 return ERR;
               pflags = 0;
               break;
-    case 'm': if( !check_addr_range2( addr_cnt ) ||
+    case 'm': if( !set_addr_range2( addr_cnt ) ||
                   !get_third_addr( ibufpp, &addr ) ) return ERR;
               if( addr >= first_addr && addr < second_addr )
                 { set_error_msg( "Invalid destination" ); return ERR; }
@@ -616,7 +680,7 @@ pflabel:      if( !check_addr_range2( addr_cnt ) ||
     case 's': if( !command_s( ibufpp, &pflags, addr_cnt, isglobal ) )
                 return ERR;
               break;
-    case 't': if( !check_addr_range2( addr_cnt ) ||
+    case 't': if( !set_addr_range2( addr_cnt ) ||
                   !get_third_addr( ibufpp, &addr ) ||
                   !get_command_suffix( ibufpp, &pflags ) ) return ERR;
               if( !isglobal ) clear_undo_stack();
@@ -634,7 +698,7 @@ pflabel:      if( !check_addr_range2( addr_cnt ) ||
               if( !fnp ) return ERR;
               if( addr_cnt == 0 && last_addr() == 0 )
                 first_addr = second_addr = 0;
-              else if( !check_addr_range( 1, last_addr(), addr_cnt ) )
+              else if( !set_addr_range( 1, last_addr(), addr_cnt ) )
                 return ERR;
               if( !def_filename[0] && fnp[0] != '!' && !set_def_filename( fnp ) )
                 return ERR;
@@ -651,11 +715,11 @@ pflabel:      if( !check_addr_range2( addr_cnt ) ||
               if( !isglobal ) clear_undo_stack();
               if( !put_lines( second_addr ) ) return ERR;
               break;
-    case 'y': if( !check_addr_range2( addr_cnt ) ||
+    case 'y': if( !set_addr_range2( addr_cnt ) ||
                   !get_command_suffix( ibufpp, &pflags ) ||
                   !yank_lines( first_addr, second_addr ) ) return ERR;
               break;
-    case 'z': if( !check_second_addr( current_addr() + !isglobal, addr_cnt ) )
+    case 'z': if( !set_second_addr( current_addr() + !isglobal, addr_cnt ) )
                 return ERR;
               if( **ibufpp > '0' && **ibufpp <= '9' )
                 { if( parse_int( &n, ibufpp ) ) set_window_lines( n );
@@ -669,14 +733,9 @@ pflabel:      if( !check_addr_range2( addr_cnt ) ||
     case '=': if( !get_command_suffix( ibufpp, &pflags ) ) return ERR;
               printf( "%d\n", addr_cnt ? second_addr : last_addr() );
               break;
-    case '!': if( unexpected_address( addr_cnt ) ) return ERR;
-              fnp = get_shell_command( ibufpp );
-              if( !fnp ) return ERR;
-              if( system( fnp + 1 ) < 0 )
-                { set_error_msg( "Can't create shell process" ); return ERR; }
-              if( !scripted() ) fputs( "!\n", stdout );
+    case '!': if( !command_shell( ibufpp, addr_cnt, isglobal ) ) return ERR;
               break;
-    case '\n': if( !check_second_addr( current_addr() +
+    case '\n': if( !set_second_addr( current_addr() +
                      ( traditional() || !isglobal ), addr_cnt ) ||
                    !print_lines( second_addr, second_addr, 0 ) ) return ERR;
               break;
@@ -758,7 +817,8 @@ int main_loop( const bool initial_error, const bool loose )
   status = setjmp( jmp_state );
   if( status == 0 )			/* direct invocation of setjmp */
     { enable_interrupts(); if( initial_error ) status = err_status = 1; }
-  else { status = -1; fputs( "\n?\n", stdout ); set_error_msg( "Interrupt" ); }
+  else { status = -1; fputs( "\n?\n", stdout ); set_error_msg( "Interrupt" );
+         if( get_tmpname( false ) ) remove( get_tmpname( false ) ); }
 
   while( true )
     {

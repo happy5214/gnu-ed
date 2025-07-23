@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 24 March 2025
-@set VERSION 1.21.1
+@set UPDATED 20 July 2025
+@set VERSION 1.22
 
 @dircategory Basics
 @direntry
@@ -434,12 +434,12 @@ current directory and execution of shell commands.
 
 @item -s
 @itemx --script
-Suppress the printing of byte counts by @samp{e}, @samp{E}, @samp{r}, and
-@samp{w} commands, and the @samp{!} prompt after a @samp{!} command.
-Suppress also the messages "Newline inserted" and "Newline appended". This
-option does not suppress diagnostic messages written to standard error (see
-@option{-q} above). @option{-s} may be useful if @command{ed}'s standard
-input is from a script.
+Suppress the printing of byte counts by @samp{e}, @samp{E}, @samp{r},
+@samp{w}, and @samp{!} commands, and the @samp{!} prompt after a @samp{!}
+command. Suppress also the messages "Newline inserted" and "Newline
+appended". This option does not suppress diagnostic messages written to
+standard error (see @option{-q} above). @option{-s} may be useful if
+@command{ed}'s standard input is from a script.
 
 @item -v
 @itemx --verbose
@@ -1064,6 +1064,7 @@ last line printed.
 
 @anchor{shell escape command}
 @item !@var{command}
+@itemx [2addr]!@var{command}
 Shell escape command. Executes @var{command} via @command{sh}. If the first
 character of @var{command} is @samp{!}, then it is replaced by the text of
 the previous @samp{!@var{command}}. Thus, @samp{!!} repeats the previous
@@ -1073,14 +1074,13 @@ with the default filename, and the backslash is removed from each escaped
 @samp{%}. When the shell returns from execution, a @samp{!} is printed to
 the standard output. The current address is unchanged.
 
-The effect of ex(1) style @samp{!} filtering can be achieved with the
-following sequence of commands:
-@example
-@var{addr1},@var{addr2}w !@var{command} > tmp.txt 2>&1
-@var{addr2}r tmp.txt
-@var{addr1},@var{addr2}d
-!rm tmp.txt
-@end example
+If one or two addresses are specified, the addressed lines are written to
+the standard input of @var{command} and then replaced with the lines read
+from the standard output and standard error of @var{command}. Two byte
+counts are printed; one for the bytes written to @var{command} and the other
+for the bytes read from @var{command}. The current address is set to the
+address of the last line read or, if there were none, to the line before the
+first addressed line.
 
 @item (.,.)#
 Begins a comment; the rest of the line, up to a newline, is ignored. If a
@@ -1203,7 +1203,7 @@ line. This results in a per line overhead of @w{2 @samp{pointer}s},
 @node Diagnostics
 @chapter Diagnostics
 
-@command{ed} prints two kinds of mesages: diagnostic messages (errors and
+@command{ed} prints two kinds of messages: diagnostic messages (errors and
 warnings) written to standard error and help messages written to standard
 output. Diagnostic messages may be suppresed with option @option{-q}. Help
 messages may be enabled with option @option{-v} and may be toggled with

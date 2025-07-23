@@ -1,3 +1,11 @@
+2025-07-20  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.22 released.
+	* main_loop.c (command_shell): Implement ex(1) style filter.
+	  (Suggested by Shawn Wagner, Andrew L. Moore, and John Cowan).
+	* global.c, regex.c, signal.c: Remove unused headers.
+	  (Reported by Alexander Jones).
+
 2025-03-24  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.21.1 released.

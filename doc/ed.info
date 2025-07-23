@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.21.1, 24 March 2025).
+This manual is for GNU ed (version 1.22, 20 July 2025).
 
 * Menu:
 
@@ -378,7 +378,7 @@ and standard input is not a regular file.
 
 '-s'
 '--script'
-     Suppress the printing of byte counts by 'e', 'E', 'r', and 'w'
+     Suppress the printing of byte counts by 'e', 'E', 'r', 'w', and '!'
      commands, and the '!' prompt after a '!' command. Suppress also the
      messages "Newline inserted" and "Newline appended". This option does
      not suppress diagnostic messages written to standard error (see '-q'
@@ -974,6 +974,7 @@ parenthesis).
      line printed.
 
 '!COMMAND'
+'[2addr]!COMMAND'
      Shell escape command. Executes COMMAND via 'sh'. If the first
      character of COMMAND is '!', then it is replaced by the text of the
      previous '!COMMAND'. Thus, '!!' repeats the previous '!COMMAND'. 'ed'
@@ -983,12 +984,13 @@ parenthesis).
      execution, a '!' is printed to the standard output. The current
      address is unchanged.
 
-     The effect of ex(1) style '!' filtering can be achieved with the
-     following sequence of commands:
-          ADDR1,ADDR2w !COMMAND > tmp.txt 2>&1
-          ADDR2r tmp.txt
-          ADDR1,ADDR2d
-          !rm tmp.txt
+     If one or two addresses are specified, the addressed lines are written
+     to the standard input of COMMAND and then replaced with the lines read
+     from the standard output and standard error of COMMAND. Two byte
+     counts are printed; one for the bytes written to COMMAND and the other
+     for the bytes read from COMMAND. The current address is set to the
+     address of the last line read or, if there were none, to the line
+     before the first addressed line.
 
 '(.,.)#'
      Begins a comment; the rest of the line, up to a newline, is ignored.
@@ -1107,10 +1109,11 @@ File: ed.info,  Node: Diagnostics,  Next: Problems,  Prev: Limitations,  Up: Top
 10 Diagnostics
 **************
 
-'ed' prints two kinds of mesages: diagnostic messages (errors and warnings)
-written to standard error and help messages written to standard output.
-Diagnostic messages may be suppresed with option '-q'. Help messages may be
-enabled with option '-v' and may be toggled with command 'H'.
+'ed' prints two kinds of messages: diagnostic messages (errors and
+warnings) written to standard error and help messages written to standard
+output. Diagnostic messages may be suppresed with option '-q'. Help
+messages may be enabled with option '-v' and may be toggled with command
+'H'.
 
    'ed' warns the first time that a command modifies a buffer loaded from a
 read-only file.
@@ -1605,20 +1608,20 @@ use in free software.
 
 Tag Table:
 Node: Top535
-Node: Overview1907
-Node: Introduction to line editing4811
-Node: Invoking ed12078
-Node: Argument syntax16000
-Node: Line addressing17762
-Node: Regular expressions21799
-Node: Commands27984
-Ref: print suffixes28319
-Ref: shell escape command40844
-Node: The 's' Command42148
-Node: Limitations45063
-Node: Diagnostics46086
-Node: Problems46923
-Node: GNU Free Documentation License47458
+Node: Overview1904
+Node: Introduction to line editing4808
+Node: Invoking ed12075
+Node: Argument syntax16002
+Node: Line addressing17764
+Node: Regular expressions21801
+Node: Commands27986
+Ref: print suffixes28321
+Ref: shell escape command40846
+Node: The 's' Command42423
+Node: Limitations45338
+Node: Diagnostics46361
+Node: Problems47199
+Node: GNU Free Documentation License47734
 
 End Tag Table
 

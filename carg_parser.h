@@ -49,8 +49,8 @@
 extern "C" {
 #endif
 
-/* ap_yme = yes but maybe empty */
-typedef enum ap_Has_arg { ap_no, ap_yes, ap_maybe, ap_yme } ap_Has_arg;
+/* ap_yesme = yes but maybe empty */
+typedef enum ap_Has_arg { ap_no, ap_yes, ap_maybe, ap_yesme } ap_Has_arg;
 
 typedef struct ap_Option
   {
@@ -73,10 +73,10 @@ typedef struct Arg_parser
   ap_Record * data;
   char * error;
   int data_size;
-  int error_size;
   } Arg_parser;
 
 
+/* Return 0 only if out of memory. */
 char ap_init( Arg_parser * const ap,
               const int argc, const char * const argv[],
               const ap_Option options[], const char in_order );
