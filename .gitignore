@@ -1,0 +1,8 @@
+ed
+red
+config.status
+Makefile
+tmp/*
+**/*.o
+**/*.tar
+**/*.lz
