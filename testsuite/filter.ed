@@ -1,6 +1,10 @@
 H
-6,10w !sort > tmp.txt 2>&1
-10r tmp.txt
-6,10d
-!rm tmp.txt
+6,10!sort
+s/^/10 /
+1!:
+s/^/ 1 /
+$!:
+s/^/11 /
+$-1,$!sort
+s/^/11 /
 wq out.o

@@ -1,7 +1,5 @@
-Changes in version 1.21.1:
+Changes in version 1.22:
 
-Fix a compilation failure caused by the inclusion of the unused and obsolete
-header <sys/file.h>. (Reported by Michael Mikonos).
-
-Ed now reads the initial window size for the z command from the environment
-variable LINES. (Suggested by Artyom Bologov).
+The shell escape command (!) now accepts line addresses to filter the
+addressed lines through a shell command. (ex(1) style filter).
+(Suggested by Shawn Wagner, Andrew L. Moore, and John Cowan).

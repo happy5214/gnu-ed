@@ -17,11 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stddef.h>
-#include <errno.h>
 #include <regex.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "ed.h"
@@ -77,7 +73,7 @@ static const char * parse_char_class( const char * p )
       for( ++p, c = *++p; *p != ']' || c != d; ++p )
         if( islf_or_nul( c = *p ) )
           return 0;
-  return ( ( *p == ']' ) ? p : 0 );
+  return ( *p == ']' ) ? p : 0;
   }
 
 
@@ -202,7 +198,7 @@ bool set_subst_regex( const char * const pat, const bool ignore_case )
     subst_regexp = exp;
     }
   enable_interrupts();
-  return ( exp ? true : false );
+  return exp ? true : false;
   }
 
 
@@ -401,7 +397,7 @@ static int line_replace( char ** txtbufp, int * const txtbufszp,
     memcpy( *txtbufp + offset, txt, i );		/* tail copy */
     memcpy( *txtbufp + offset + i, "\n", 2 );
     }
-  return ( changed ? offset + i + 1 : 0 );
+  return changed ? offset + i + 1 : 0;
   }
 
 

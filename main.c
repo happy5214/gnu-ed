@@ -219,7 +219,7 @@ int main( const int argc, const char * const argv[] )
   bool initial_error = false;		/* fatal error reading file */
   bool loose = false;
   enum { opt_cr = 256, opt_un };
-  const struct ap_Option options[] =
+  const ap_Option options[] =
     {
     { 'E', "extended-regexp",      ap_no  },
     { 'G', "traditional",          ap_no  },
@@ -236,7 +236,7 @@ int main( const int argc, const char * const argv[] )
     { opt_un, "unsafe-names",      ap_no  },
     { 0, 0,                        ap_no  } };
 
-  struct Arg_parser parser;
+  Arg_parser parser;
   if( argc > 0 ) invocation_name = argv[0];
 
   if( !ap_init( &parser, argc, argv, options, 0 ) )
@@ -248,8 +248,8 @@ int main( const int argc, const char * const argv[] )
   for( ; argind < ap_arguments( &parser ); ++argind )
     {
     const int code = ap_code( &parser, argind );
-    const char * const arg = ap_argument( &parser, argind );
     if( !code ) break;					/* no more options */
+    const char * const arg = ap_argument( &parser, argind );
     switch( code )
       {
       case 'E': extended_regexp_ = true; break;
