@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 20 July 2025
-@set VERSION 1.22
+@set UPDATED 5 August 2025
+@set VERSION 1.22.1
 
 @dircategory Basics
 @direntry
@@ -76,7 +76,7 @@ scripts. A restricted version of ed, red, can only edit files in the current
 directory and cannot execute shell commands. Ed is the 'standard' text
 editor in the sense that it is the original editor for Unix, and thus widely
 available. For most purposes, however, it is superseded by full-screen
-editors such as GNU Emacs or GNU Moe.
+editors.
 
 GNU ed is based on the editor algorithm described in Brian W. Kernighan and
 P. J. Plauger's book "Software Tools in Pascal", Addison-Wesley, 1981.
@@ -1074,7 +1074,7 @@ with the default filename, and the backslash is removed from each escaped
 @samp{%}. When the shell returns from execution, a @samp{!} is printed to
 the standard output. The current address is unchanged.
 
-If one or two addresses are specified, the addressed lines are written to
+If one or more addresses are specified, the addressed lines are written to
 the standard input of @var{command} and then replaced with the lines read
 from the standard output and standard error of @var{command}. Two byte
 counts are printed; one for the bytes written to @var{command} and the other

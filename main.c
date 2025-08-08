@@ -74,7 +74,7 @@ static void show_help( void )
           "the current directory and cannot execute shell commands. Ed is the\n"
           "'standard' text editor in the sense that it is the original editor for\n"
           "Unix, and thus widely available. For most purposes, however, it is\n"
-          "superseded by full-screen editors such as GNU Emacs or GNU Moe.\n"
+          "superseded by full-screen editors.\n"
           "\nUsage: %s [options] [[+line] file]\n", invocation_name );
   printf( "\nThe file name may be preceded by '+line', '+/RE', or '+?RE' to set the\n"
           "current line to the line number specified or to the first or last line\n"

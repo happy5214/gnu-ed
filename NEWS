@@ -1,3 +1,9 @@
+Changes in version 1.22.1:
+
+Ed now departs from POSIX and ignores SIGPIPE to prevent commands like
+'w !:' or ',!:' from terminating ed. A broken pipe is now detected as any
+other write error. (Reported by Sergei Trofimovich).
+
 Changes in version 1.22:
 
 The shell escape command (!) now accepts line addresses to filter the

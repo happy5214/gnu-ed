@@ -149,6 +149,7 @@ void set_signals( void )
   if( isatty( 0 ) ) set_signal( SIGWINCH, sigwinch_handler );
 #endif
   set_signal( SIGHUP, sighup_handler );
+  set_signal( SIGPIPE, SIG_IGN );
   set_signal( SIGQUIT, SIG_IGN );
   set_signal( SIGINT, sigint_handler );
   }

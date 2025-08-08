@@ -38,7 +38,7 @@ static char set_argument( Arg_parser * const ap, const char * const argument )
   const int len = strlen( argument );
   p->argument = (char *)malloc( len + 1 );
   if( !p->argument ) return 0;
-  strncpy( p->argument, argument, len + 1 );
+  memcpy( p->argument, argument, len + 1 );
   return 1;
   }
 
@@ -66,7 +66,7 @@ static char push_back_option( Arg_parser * const ap, const int code,
     p->parsed_name = (char *)malloc( len + 2 + 1 );
     if( !p->parsed_name ) return 0;
     p->parsed_name[0] = p->parsed_name[1] = '-';
-    strncpy( p->parsed_name + 2, long_name, len + 1 );
+    memcpy( p->parsed_name + 2, long_name, len + 1 );
     }
   else
     {
@@ -96,9 +96,9 @@ static char set_error( Arg_parser * const ap, const char * const s1,
   void * tmp = ap_resize_buffer( ap->error, l1 + l2 + l3 + 1 );
   if( !tmp ) return 0;
   ap->error = (char *)tmp;
-  strncpy( ap->error, s1, l1 );
-  strncpy( ap->error + l1, s2, l2 );
-  strncpy( ap->error + l1 + l2, s3, l3 + 1 );
+  memcpy( ap->error, s1, l1 );
+  memcpy( ap->error + l1, s2, l2 );
+  memcpy( ap->error + l1 + l2, s3, l3 + 1 );
   return 1;
   }
 

@@ -1,3 +1,9 @@
+2025-08-05  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.22.1 released.
+	* signal.c (set_signals): Ignore SIGPIPE. ('w !:' terminated ed).
+	  (Reported by Sergei Trofimovich).
+
 2025-07-20  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.22 released.
@@ -195,7 +201,7 @@
 2014-01-22  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.10 released.
-	* ed.texinfo: Rename to ed.texi.
+	* ed.texinfo, fdl.texinfo: Rename to ed.texi, fdl.texi.
 
 2013-06-18  Antonio Diaz Diaz  <antonio@gnu.org>
 

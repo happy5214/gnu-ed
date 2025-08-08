@@ -66,7 +66,7 @@ const char * error_msg( void ) { return errmsg; }
 void set_error_msg( const char * const msg )
   {
   strncpy( errmsg, msg, sizeof errmsg );
-  errmsg[sizeof(errmsg)-1] = 0;
+  errmsg[(sizeof errmsg)-1] = 0;
   }
 
 bool set_prompt( const char * const s )

@@ -8,7 +8,7 @@ scripts. A restricted version of ed, red, can only edit files in the current
 directory and cannot execute shell commands. Ed is the 'standard' text
 editor in the sense that it is the original editor for Unix, and thus widely
 available. For most purposes, however, it is superseded by full-screen
-editors such as GNU Emacs or GNU Moe.
+editors.
 
 Extensions to and deviations from the POSIX standard are described below.
 
@@ -67,6 +67,9 @@ EXTENSIONS
 
 DEVIATIONS
 ----------
+  * Ed ignores SIGPIPE to prevent commands like 'w !:' or ',!:' from
+    terminating ed. A broken pipe is detected as any other write error.
+
   * To support the BSD 's' command (see EXTENSIONS above), substitution
     patterns cannot be delimited by the digits '1' to '9' or by the
     characters 'r', 'g' and 'p'. In contrast, POSIX specifies that any
