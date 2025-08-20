@@ -161,7 +161,8 @@ static const char * get_shell_command( const char ** const ibufpp )
   if( !resize_buffer( &shcmd, &shcmdsz, i + 1 ) ) return 0;
   memcpy( shcmd, buf, i );
   shcmd[i] = 0; shcmdlen = i;
-  if( replacement ) { printf( "%s\n", shcmd + 1 ); fflush( stdout ); }
+  if( replacement )
+    { print_escaped( shcmd + 1, true ); putchar('\n'); fflush( stdout ); }
   return shcmd;
   }
 
@@ -603,7 +604,7 @@ static int exec_command( const char ** const ibufpp, const bool isglobal )
               if( fnp[0] == '!' )
                 { set_error_msg( "Invalid redirection" ); return ERR; }
               if( fnp[0] && !set_def_filename( fnp ) ) return ERR;
-              print_filename( def_filename, true ); putchar('\n');
+              print_escaped( def_filename, true ); putchar('\n');
               break;
     case 'g':
     case 'v':

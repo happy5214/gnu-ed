@@ -53,7 +53,7 @@ static const char * invocation_name = "ed";		/* default value */
 static bool extended_regexp_ = false;	/* use EREs */
 static bool quiet = false;		/* suppress diagnostics */
 static bool restricted_ = false;	/* run in restricted mode */
-static bool safe_names = true;		/* reject chars 1-31 in file names */
+static bool safe_names = true;		/* reject control chars in file names */
 static bool scripted_ = false;		/* suppress byte counts and ! prompt */
 static bool strip_cr_ = false;		/* strip trailing CRs */
 static bool traditional_ = false;	/* be backwards compatible */
@@ -92,7 +92,7 @@ static void show_help( void )
           "  -s, --script               suppress byte counts and '!' prompt\n"
           "  -v, --verbose              be verbose; equivalent to the 'H' command\n"
           "      --strip-trailing-cr    strip carriage returns at end of text lines\n"
-          "      --unsafe-names         allow control characters 1-31 in file names\n"
+          "      --unsafe-names         allow control characters in file names\n"
           "\nStart edit by reading in 'file' if given.\n"
           "If 'file' begins with a '!', read output of shell command.\n"
           "\nExit status: 0 for a normal exit, 1 for environmental problems\n"
@@ -117,17 +117,16 @@ static void show_version( void )
   }
 
 
-void print_filename( const char * const filename, const bool to_stdout )
+void print_escaped( const char * p, const bool to_stdout )
   {
   FILE * const fp = to_stdout ? stdout : stderr;
-  if( safe_names ) { fputs( filename, fp ); return; }
-  const char * p;
-  for( p = filename; *p; ++p )
+  for( ; *p; ++p )
     {
     const unsigned char ch = *p;
     if( ch == '\\' ) { putc( ch, fp ); putc( ch, fp ); continue; }
-    if( ch >= 32 ) { putc( ch, fp ); continue; }
+    if( ch >= 32 && ch <= 126 ) { putc( ch, fp ); continue; }
     putc( '\\', fp );
+    const char e = escchar( ch ); if( e ) { putc( e, fp ); continue; }
     putc( ( ( ch >> 6 ) & 7 ) + '0', fp );
     putc( ( ( ch >> 3 ) & 7 ) + '0', fp );
     putc( ( ch & 7 ) + '0', fp );
@@ -140,7 +139,7 @@ void show_warning( const char * const filename, const char * const msg )
   if( !quiet )
     {
     if( filename && filename[0] )
-      { print_filename( filename, false ); fputs( ": ", stderr ); }
+      { print_escaped( filename, false ); fputs( ": ", stderr ); }
     fprintf( stderr, "%s\n", msg );
     }
   }
@@ -151,7 +150,7 @@ void show_strerror( const char * const filename, const int errcode )
   if( !quiet )
     {
     if( filename && filename[0] )
-      { print_filename( filename, false ); fputs( ": ", stderr ); }
+      { print_escaped( filename, false ); fputs( ": ", stderr ); }
     fprintf( stderr, "%s\n", strerror( errcode ) );
     }
   }
@@ -203,13 +202,15 @@ bool may_access_filename( const char * const name )
     if( strcmp( name, ".." ) == 0 || strchr( name, '/' ) )
       { set_error_msg( "Directory access restricted" ); return false; }
     }
-  if( safe_names )
-    {
-    const char * p;
-    for( p = name; *p; ++p ) if( *p <= 31 && *p >= 1 )
-      { set_error_msg( "Control characters 1-31 not allowed in file names" );
+  const char * p;
+  for( p = name; *p; ++p )
+    if( *p == '\n' )
+      { set_error_msg( "Newline character not allowed in file names" );
         return false; }
-    }
+  if( safe_names )
+    for( p = name; *p; ++p ) if( ( *p <= 31 && *p >= 1 ) || *p == 127 )
+      { set_error_msg( "Control characters not allowed in file names" );
+        return false; }
   return true;
   }
 
