@@ -1,3 +1,9 @@
+Changes in version 1.22.2:
+Newline characters are no longer allowed in file names even if
+'--unsafe-names' is specified.
+
+The file name is now printed escaped also when replaced into a shell command.
+
 Changes in version 1.22.1:
 
 Ed now departs from POSIX and ignores SIGPIPE to prevent commands like

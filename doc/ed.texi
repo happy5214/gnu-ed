@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 5 August 2025
-@set VERSION 1.22.1
+@set UPDATED 18 August 2025
+@set VERSION 1.22.2
 
 @dircategory Basics
 @direntry
@@ -455,8 +455,9 @@ unterminated line, are not removed. The CRs are not restored when saving the
 buffer to a file.
 
 @item --unsafe-names
-@command{ed} rejects file names containing control characters 1 to 31 unless
-they are allowed with this option.
+@command{ed} rejects file names containing control characters unless they
+are allowed with this option. Newline characters in file names are rejected
+even if this option is specified.
 
 @end table
 
@@ -675,12 +676,12 @@ Any backslash-escaped character @var{c}, other than @samp{@{},
 Matches any single character.
 
 @item [@var{char-class}]
-Matches any single character in @var{char-class}. To include a @samp{]}
-in @var{char-class}, it must be the first character. A range of
-characters may be specified by separating the end characters of the
-range with a @samp{-}, e.g., @samp{a-z} specifies the lower case
-characters. The following literal expressions can also be used in
-@var{char-class} to specify sets of characters:
+Matches any single character in @var{char-class}. To include a @samp{]} in
+@var{char-class}, it must be the first character. A range of characters may
+be specified by separating the end characters of the range with a @samp{-},
+e.g., @samp{a-z} specifies the lower case characters. The following literal
+expressions can also be used in @var{char-class} to specify sets of
+characters:
 
 @example
 [:alnum:] [:cntrl:] [:lower:] [:space:]

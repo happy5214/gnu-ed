@@ -1,3 +1,11 @@
+2025-08-18  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.22.2 released.
+	* main.c: (may_access_filename): Reject file names with newlines.
+	  (print_filename): Rename to 'print_escaped'.
+	  (print_escaped): Always check file name for control chars.
+	* main_loop.c (get_shell_command): Use 'print_escaped'.
+
 2025-08-05  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.22.1 released.
@@ -83,13 +91,12 @@
 	* New option '--strip-trailing-cr'.
 	* main_loop.c (get_shell_command): Flush stdout after printing cmd.
 	  (Reported by Sören Tempel).
+	  Remove backslash from escaped '%'. (Reported by Martin Thomsen).
 	* signal.c (sighup_handler): Fix a memory leak just before exiting.
 	* carg_parser.c (ap_init): Likewise.
 	  (Both reported by Xosé Vázquez Pérez).
 	* io.c (read_file, write_file): Check ptr returned by strip_escapes.
 	* main_loop.c (get_shell_command, exec_command): Likewise.
-	* main_loop.c (get_shell_command): Remove backslash from escaped '%'.
-	  (Reported by Martin Thomsen).
 	* main_loop.c, regex.c: Implement case-insensitive REs.
 	* regex.c (compile_regex): Don't overwrite previous regex if error.
 	* buffer.c (push_undo_atom): Fail if stack grows larger than INT_MAX.

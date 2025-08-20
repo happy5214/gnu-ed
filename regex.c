@@ -318,7 +318,7 @@ static int replace_matched_text( char ** txtbufp, int * const txtbufszp,
   {
   int i;
 
-  for( i = 0 ; i < rlen; ++i )
+  for( i = 0; i < rlen; ++i )
     {
     int n;
     if( rbuf[i] == '&' )

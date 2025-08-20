@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.22.1, 5 August 2025).
+This manual is for GNU ed (version 1.22.2, 18 August 2025).
 
 * Menu:
 
@@ -398,8 +398,9 @@ and standard input is not a regular file.
      restored when saving the buffer to a file.
 
 '--unsafe-names'
-     'ed' rejects file names containing control characters 1 to 31 unless
-     they are allowed with this option.
+     'ed' rejects file names containing control characters unless they are
+     allowed with this option. Newline characters in file names are rejected
+     even if this option is specified.
 
 
 Exit status: 0 for a normal exit, 1 for environmental problems (invalid
@@ -1603,20 +1604,20 @@ free software.
 
 Tag Table:
 Node: Top529
-Node: Overview1898
-Node: Introduction to line editing4746
-Node: Invoking ed11959
-Node: Argument syntax15874
-Node: Line addressing17636
-Node: Regular expressions21652
-Node: Commands27822
-Ref: print suffixes28157
-Ref: shell escape command40670
-Node: The 's' Command42248
-Node: Limitations45142
-Node: Diagnostics46159
-Node: Problems46988
-Node: GNU Free Documentation License47520
+Node: Overview1899
+Node: Introduction to line editing4747
+Node: Invoking ed11960
+Node: Argument syntax15952
+Node: Line addressing17714
+Node: Regular expressions21730
+Node: Commands27900
+Ref: print suffixes28235
+Ref: shell escape command40748
+Node: The 's' Command42326
+Node: Limitations45220
+Node: Diagnostics46237
+Node: Problems47066
+Node: GNU Free Documentation License47598
 
 End Tag Table
 

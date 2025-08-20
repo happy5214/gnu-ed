@@ -98,6 +98,7 @@ bool set_active_node( const line_node * const lp );
 void unset_active_nodes( const line_node * bp, const line_node * const ep );
 
 /* defined in io.c */
+unsigned char escchar( const unsigned char ch );
 bool get_extended_line( const char ** const ibufpp, int * const lenp,
                         const bool strip_escaped_newlines );
 const char * get_stdin_line( int * const sizep );
@@ -114,7 +115,7 @@ void unmark_unterminated_line( const line_node * const lp );
 bool extended_regexp( void );
 bool interactive();
 bool may_access_filename( const char * const name );
-void print_filename( const char * const filename, const bool to_stdout );
+void print_escaped( const char * p, const bool to_stdout );
 bool restricted( void );
 bool scripted( void );
 void show_strerror( const char * const filename, const int errcode );

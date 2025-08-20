@@ -39,11 +39,17 @@ static bool unterminated_last_line( void )
            unterminated_line == search_line_node( last_addr() ); }
 
 
+unsigned char escchar( const unsigned char ch )
+  {
+  const char * const escapes = "\a\b\f\n\r\t\v";
+  const char * const escchars = "abfnrtv";
+  const char * const p = strchr( escapes, ch );
+  return ( ch && p ) ? escchars[p-escapes] : 0;
+  }
+
 /* print text to stdout */
 static void print_line( const char * p, int len, const int pflags )
   {
-  const char escapes[] = "\a\b\f\n\r\t\v";
-  const char escchars[] = "abfnrtv";
   int col = 0;
 
   if( pflags & pf_n ) { printf( "%d\t", current_addr() ); col = 8; }
@@ -59,9 +65,9 @@ static void print_line( const char * p, int len, const int pflags )
           putchar( ch ); }
       else
         {
-        const char * const p = strchr( escapes, ch );
         ++col; putchar('\\');
-        if( ch && p ) putchar( escchars[p-escapes] );
+        const char e = escchar( ch );
+        if( e ) putchar( e );
         else
           {
           col += 2;
