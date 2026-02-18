@@ -26,7 +26,7 @@
 
 static char is_number( const char * const p )
   {
-  return isdigit( *p ) || ( *p == '.' && isdigit( p[1] ) ) ||
+  return isdigit( (unsigned char)(p[*p=='.']) ) ||
          strcmp( p, "inf" ) == 0 || strcmp( p, "Inf" ) == 0 ||
          strcmp( p, "INF" ) == 0;
   }

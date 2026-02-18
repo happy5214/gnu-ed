@@ -55,7 +55,7 @@ const line_node * next_active_node( void )
 /* add a line node to the global-active list */
 bool set_active_node( const line_node * const lp )
   {
-  const unsigned min_size = ( active_len + 1 ) * sizeof (line_node **);
+  const unsigned min_size = ( active_len + 1 ) * sizeof active_list[0];
   if( (unsigned)active_size < min_size )
     {
     if( min_size >= INT_MAX )

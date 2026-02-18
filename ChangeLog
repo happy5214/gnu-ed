@@ -1,3 +1,11 @@
+2026-02-06  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.22.5 released.
+	* global.c (set_active_node): Use 'sizeof active_list[0]' instead of
+	  'sizeof (line_node **)'. (Reported by Mikel Olasagasti Uranga).
+	* main.c: (may_access_filename): s/Is a directory/Invalid filename/.
+	  (Reported by Douglas McIlroy).
+
 2026-01-03  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.22.4 released.

@@ -196,7 +196,7 @@ bool may_access_filename( const char * const name )
   {
   const int len = strlen( name );
   if( len <= 0 || name[len-1] == '/' )
-    { set_error_msg( "Is a directory" ); return false; }
+    { set_error_msg( "Invalid filename" ); return false; }
   if( restricted_ )
     {
     if( name[0] == '!' )

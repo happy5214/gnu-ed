@@ -1,3 +1,11 @@
+Changes in version 1.22.5:
+
+Use 'sizeof active_list[0]' instead of 'sizeof (line_node **)'.
+(Reported by Mikel Olasagasti Uranga).
+
+A file name ending in slash '/' is now diagnosed as 'Invalid filename'
+instead of 'Is a directory'. (Reported by Douglas McIlroy).
+
 Changes in version 1.22.4:
 
 'make check' now skips the checking of file names with non-ASCII non-UTF-8
