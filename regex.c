@@ -323,18 +323,18 @@ static int replace_matched_text( char ** txtbufp, int * const txtbufszp,
     int n;
     if( rbuf[i] == '&' )
       {
-      int j = rm[0].rm_so; int k = rm[0].rm_eo;
+      int j = rm[0].rm_so; const int k = rm[0].rm_eo;
       if( !resize_buffer( txtbufp, txtbufszp, offset - j + k ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
     else if( rbuf[i] == '\\' && rbuf[++i] >= '1' && rbuf[i] <= '9' &&
              ( n = rbuf[i] - '0' ) <= re_nsub )
       {
-      int j = rm[n].rm_so; int k = rm[n].rm_eo;
+      int j = rm[n].rm_so; const int k = rm[n].rm_eo;
       if( !resize_buffer( txtbufp, txtbufszp, offset - j + k ) ) return -1;
       while( j < k ) (*txtbufp)[offset++] = txt[j++];
       }
-    else		/* preceding 'if' skipped escaping backslashes */
+    else		/* preceding 'if' skipped escaping backslash */
       {
       if( !resize_buffer( txtbufp, txtbufszp, offset + 1 ) ) return -1;
       (*txtbufp)[offset++] = rbuf[i];

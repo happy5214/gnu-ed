@@ -26,7 +26,7 @@
 
 /* list of lines active in a global command */
 static const line_node **active_list = 0;
-static int active_size = 0;	/* size (in bytes) of active_list */
+static int active_size = 0;	/* capacity (in lines) of active_list */
 static int active_len = 0;	/* number of lines in active_list */
 static int active_idx = 0;	/* active_list index ( non-decreasing ) */
 static int active_idxm = 0;	/* active_list index ( modulo active_len ) */
@@ -55,17 +55,17 @@ const line_node * next_active_node( void )
 /* add a line node to the global-active list */
 bool set_active_node( const line_node * const lp )
   {
-  const unsigned min_size = ( active_len + 1 ) * sizeof active_list[0];
-  if( (unsigned)active_size < min_size )
+  if( active_len >= active_size )
     {
-    if( min_size >= INT_MAX )
+    enum { max_lines = INT_MAX / sizeof active_list[0] };
+    if( active_len >= max_lines )
       { set_error_msg( "Too many matching lines" ); return false; }
-    const int new_size = ( ( min_size < 512 ) ? 512 :
-      ( min_size >= INT_MAX / 2 ) ? INT_MAX - 1 : ( min_size / 512 ) * 1024 );
+    const int new_size = ( ( active_len < 64 ) ? 64 :
+      ( active_len >= max_lines / 2 ) ? max_lines : active_len * 2 );
     void * new_buf = 0;
     disable_interrupts();
-    if( active_list ) new_buf = realloc( active_list, new_size );
-    else new_buf = malloc( new_size );
+    if( !active_list ) new_buf = malloc( new_size * sizeof active_list[0] );
+    else new_buf = realloc( active_list, new_size * sizeof active_list[0] );
     if( !new_buf )
       { show_strerror( 0, errno );
         set_error_msg( mem_msg ); enable_interrupts(); return false; }

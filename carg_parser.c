@@ -191,8 +191,7 @@ static char parse_short_option( Arg_parser * const ap,
     {
     int index = -1, i;
     const unsigned char c = opt[cind];
-    char code_str[2];
-    code_str[0] = c; code_str[1] = 0;
+    const char code_str[2] = { opt[cind], 0 };
 
     if( c != 0 )
       for( i = 0; options[i].code; ++i )
@@ -200,7 +199,7 @@ static char parse_short_option( Arg_parser * const ap,
           { index = i; break; }
 
     if( index < 0 )
-      return set_error( ap, "invalid option -- '", code_str, "'" );
+      return set_error( ap, "invalid option -- '", &code_str[0], "'" );
 
     if( !push_back_option( ap, c, 0 ) ) return 0;
     if( opt[++cind] == 0 ) { ++*argindp; cind = 0; }	/* opt finished */
@@ -213,7 +212,7 @@ static char parse_short_option( Arg_parser * const ap,
     else if( options[index].has_arg == ap_yes || options[index].has_arg == ap_yesme )
       {
       if( !arg || ( options[index].has_arg == ap_yes && !arg[0] ) )
-        return set_error( ap, "option requires an argument -- '", code_str, "'" );
+        return set_error( ap, "option requires an argument -- '", &code_str[0], "'" );
       ++*argindp; cind = 0;
       if( !set_argument( ap, arg ) ) return 0;	/* argument may be empty */
       }

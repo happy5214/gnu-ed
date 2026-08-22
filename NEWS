@@ -1,3 +1,19 @@
+Changes in version 1.22.6:
+
+Some changes have been made to the code to pacify gcc's static analyzer.
+(Reported by Mikel Olasagasti Uranga).
+
+'regex(7)' has been added to the --help output and to section 'SEE ALSO' in
+the man page.
+
+It has been documented in the manual that the cut buffer is deleted when a
+new file is read with 'e' or 'E'. (Reported by Tim Chase).
+
+It has been documented in the manual that using a regular expression inside
+the command-list of a global command may cause the "last regular expression
+processed" to differ between the first and subsequent executions of the
+command-list. (Reported by Artyom Bologov).
+
 Changes in version 1.22.5:
 
 Use 'sizeof active_list[0]' instead of 'sizeof (line_node **)'.

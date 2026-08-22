@@ -18,7 +18,7 @@ File: ed.info,  Node: Top,  Next: Overview,  Up: (dir)
 The GNU ed line editor
 **********************
 
-This manual is for GNU ed (version 1.22.5, 6 February 2026).
+This manual is for GNU ed (version 1.22.6, 20 August 2026).
 
 * Menu:
 
@@ -580,6 +580,10 @@ characters, the longest sequence starting at that point is matched.
 
 An empty regular expression is equivalent to the last regular expression
 processed. Therefore '/RE/s//REPLACEMENT/' replaces RE with REPLACEMENT.
+Note that if a regular expression is used inside the COMMAND-LIST of a
+global command, the "last regular expression processed" may differ between
+the first and subsequent executions of the COMMAND-LIST. *Note global
+command::.
 
 As a GNU extension, a regular expression /RE/ may be followed by the suffix
 'I' which makes 'ed' match RE in a case-insensitive manner. Note that the
@@ -852,10 +856,10 @@ parenthesis).
      line. Else, the current address is unchanged.
 
 '(.)kx'
-     Marks a line with a lower case letter 'x'. The line can then be
-     addressed as ''x' (i.e., a single quote followed by 'x') in subsequent
-     commands. The mark is not cleared until the line is deleted or
-     otherwise modified. The current address is unchanged.
+     Marks the addressed line with a lower case letter 'x'. The line can
+     then be addressed as ''x' (i.e., a single quote followed by 'x') in
+     subsequent commands. The mark is not cleared until the line is deleted
+     or otherwise modified. The current address is unchanged.
 
 '(.,.)l'
      List command. Prints the addressed lines unambiguously. The end of each
@@ -960,9 +964,10 @@ parenthesis).
      copied.
 
 '(.,.)y'
-     Copies (yanks) the addressed lines to the cut buffer. The cut buffer is
-     overwritten by subsequent 'c', 'd', 'j', 's', or 'y' commands. The
-     current address is unchanged.
+     Copies (yanks) the addressed lines to the cut buffer. The current
+     address is unchanged. The cut buffer is overwritten by subsequent 'c',
+     'd', 'j', 's', or 'y' commands. The cut buffer is deleted when a new
+     file is read with 'e' or 'E'.
 
 '(.+1)zN'
      Scroll. Prints N lines at a time starting at addressed line, and sets
@@ -1605,20 +1610,21 @@ free software.
 
 Tag Table:
 Node: Top529
-Node: Overview1900
-Node: Introduction to line editing4748
-Node: Invoking ed11961
-Node: Argument syntax16017
-Node: Line addressing17779
-Node: Regular expressions21795
-Node: Commands27965
-Ref: print suffixes28300
-Ref: shell escape command40813
-Node: The 's' Command42391
-Node: Limitations45285
-Node: Diagnostics46302
-Node: Problems47131
-Node: GNU Free Documentation License47663
+Node: Overview1899
+Node: Introduction to line editing4747
+Node: Invoking ed11960
+Node: Argument syntax16016
+Node: Line addressing17778
+Node: Regular expressions21794
+Node: Commands28191
+Ref: print suffixes28526
+Ref: global command32108
+Ref: shell escape command41123
+Node: The 's' Command42701
+Node: Limitations45595
+Node: Diagnostics46612
+Node: Problems47441
+Node: GNU Free Documentation License47973
 
 End Tag Table
 

@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 6 February 2026
-@set VERSION 1.22.5
+@set UPDATED 20 August 2026
+@set VERSION 1.22.6
 
 @dircategory Basics
 @direntry
@@ -651,7 +651,10 @@ characters, the longest sequence starting at that point is matched.
 
 An empty regular expression is equivalent to the last regular expression
 processed. Therefore @samp{/@var{re}/s//@var{replacement}/} replaces
-@var{re} with @var{replacement}.
+@var{re} with @var{replacement}. Note that if a regular expression is used
+inside the @var{command-list} of a global command, the "last regular
+expression processed" may differ between the first and subsequent executions
+of the @var{command-list}. @xref{global command}.
 
 As a GNU extension, a regular expression /@var{re}/ may be followed by the
 suffix @samp{I} which makes @command{ed} match @var{re} in a
@@ -880,6 +883,7 @@ printed. Tilde expansion is performed on @var{file}; if @var{file} starts
 with @file{~/}, the @file{~} is expanded to specify your home directory
 @file{$HOME}.
 
+@anchor{global command}
 @item (1,$)g/@var{re}/[I]@var{command-list}
 Global command. The global command makes two passes over the file. On the
 first pass, all the addressed lines matching a regular expression @var{re}
@@ -942,10 +946,10 @@ current address is set to the address of the joined line. Else, the current
 address is unchanged.
 
 @item (.)kx
-Marks a line with a lower case letter @samp{x}. The line can then be
-addressed as @samp{'x} (i.e., a single quote followed by @samp{x}) in
-subsequent commands. The mark is not cleared until the line is deleted
-or otherwise modified. The current address is unchanged.
+Marks the addressed line with a lower case letter @samp{x}. The line can
+then be addressed as @samp{'x} (i.e., a single quote followed by @samp{x})
+in subsequent commands. The mark is not cleared until the line is deleted or
+otherwise modified. The current address is unchanged.
 
 @item (.,.)l
 List command. Prints the addressed lines unambiguously. The end of each
@@ -1051,9 +1055,10 @@ Copies (puts) the contents of the cut buffer to after the addressed
 line. The current address is set to the address of the last line copied.
 
 @item (.,.)y
-Copies (yanks) the addressed lines to the cut buffer. The cut buffer is
-overwritten by subsequent @samp{c}, @samp{d}, @samp{j}, @samp{s}, or
-@samp{y} commands. The current address is unchanged.
+Copies (yanks) the addressed lines to the cut buffer. The current address is
+unchanged. The cut buffer is overwritten by subsequent @samp{c}, @samp{d},
+@samp{j}, @samp{s}, or @samp{y} commands. The cut buffer is deleted when a
+new file is read with @samp{e} or @samp{E}.
 
 @item (.+1)z@var{n}
 Scroll. Prints @var{n} lines at a time starting at addressed line, and sets

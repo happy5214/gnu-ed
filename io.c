@@ -289,9 +289,9 @@ int read_file( const char * const filename, const int addr,
                bool * const read_onlyp )
   {
   FILE * fp;
-  int ret;
+  const bool is_pipe = *filename == '!';
 
-  if( *filename == '!' ) fp = popen( filename + 1, "r" );
+  if( is_pipe ) fp = popen( filename + 1, "r" );
   else if( !( fp = fopen( filename, "r+" ) ) && errno != ENOENT &&
            ( fp = fopen( filename, "r" ) ) && read_onlyp && !modified() )
     *read_onlyp = true;
@@ -299,7 +299,7 @@ int read_file( const char * const filename, const int addr,
     { show_strerror( filename, errno );
       set_error_msg( "Cannot open input file" ); return -1; }
   const long size = read_stream( filename, fp, addr );	/* file size in bytes */
-  if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  const int ret = is_pipe ? pclose( fp ) : fclose( fp );
   if( size < 0 ) return -2;
   if( ret < 0 )
     { show_strerror( filename, errno );
@@ -346,16 +346,13 @@ static long write_stream( const char * const filename, FILE * const fp,
 int write_file( const char * const filename, const char * const mode,
                 const int from, const int to )
   {
-  FILE * fp;
-  int ret;
-
-  if( *filename == '!' ) fp = popen( filename + 1, "w" );
-  else fp = fopen( filename, mode );
+  const bool is_pipe = *filename == '!';
+  FILE * fp = is_pipe ? popen( filename + 1, "w" ) : fopen( filename, mode );
   if( !fp )
     { show_strerror( filename, errno );
       set_error_msg( "Cannot open output file" ); return -1; }
   const long size = write_stream( filename, fp, from, to );	/* bytes written */
-  if( *filename == '!' ) ret = pclose( fp ); else ret = fclose( fp );
+  const int ret = is_pipe ? pclose( fp ) : fclose( fp );
   if( size < 0 ) return -1;
   if( ret < 0 )
     { show_strerror( filename, errno );

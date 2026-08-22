@@ -1,7 +1,7 @@
 Requirements
 ------------
-You will need a C99 compiler and a C library compatible with POSIX.
-(gcc 3.3.6 or newer is recommended).
+You will need a C99 compiler (or a C++98 compiler) and a C library
+compatible with POSIX. (gcc 3.3.6 or newer is recommended).
 I use gcc 6.1.0 and 3.3.6, but the code should compile with any standards
 compliant compiler.
 Gcc is available at http://gcc.gnu.org

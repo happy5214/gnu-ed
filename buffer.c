@@ -84,7 +84,7 @@ static bool too_many_lines( void )
   set_error_msg( "Too many lines in buffer" ); return true;
   }
 
-/* add a line node in the editor buffer after the given line */
+/* add a line node in the editor buffer after the current line */
 static void add_line_node( line_node * const lp )
   {
   line_node * const prev = search_line_node( current_addr_ );
@@ -535,7 +535,7 @@ static int u_last_addr = -1;		/* if < 0, undo disabled */
 static bool u_modified = false;
 
 
-void clear_undo_stack( void )
+void clear_undo_stack( void )	/* free also line nodes of deleted lines */
   {
   while( u_len-- )
     if( ustack[u_len].type == UDEL )
